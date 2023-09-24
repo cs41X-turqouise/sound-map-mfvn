@@ -1,0 +1,137 @@
+<template>
+  <div class="home">
+    <header>
+      <!-- <h1 id="page-title">Sound Map for a Changing Landscape</h1> -->
+      <img 
+        id="user-avatar"
+        src="../assets/default-avatar.png"
+        alt="User Avatar"
+        @click="showUserMenu = !showUserMenu">
+      <button id="dropbtn-search" class="dropbtn" @click="showSearchModal = true">
+        &#9776;
+      </button>
+    </header>
+    <Modal :show="showSearchModal" @close="showSearchModal = false">
+      <h2>Search Media</h2>
+      <form id="search-form" action="" method="post">
+        <!-- TODO - custom error messages and validation -->
+        <label for="title">Title:</label>
+        <input type="text" name="title" id="title"><br>
+
+        <label for="artist">Artist:</label>
+        <input type="text" name="artist" id="artist"><br>
+
+        <label for="description">Description:</label>
+        <input type="text" name="description" id="description"><br>
+
+        <label for="tags">Tags:</label>
+        <input type="text" name="tags" id="tags"><br>
+
+        <label for="fileType">File Type:</label>
+        <input type="text" name="fileType" id="fileType"><br>
+
+        <label for="dateFrom">From:</label>
+        <input type="date" name="dateFrom" id="dateFrom"><br>
+
+        <label for="dateTo">To:</label>
+        <input type="date" name="dateTo" id="dateTo"><br>
+
+        <input type="submit" name="submit" value="Submit">
+      </form>
+    </Modal>
+    <Modal :show="showUploadModal" @close="showUploadModal = false">
+      <h2>Upload Media</h2>
+        <form id="upload-form" action="" method="post" enctype="multipart/form-data">
+          <label for="title">Title:</label>
+          <input type="text" name="title" id="title"><br>
+          
+          <label for="description">Description:</label>
+          <input type="text" name="description" id="description"><br>
+          <!-- TODO - better handling of these as tags are technically an array of strings -->
+          <label for="tags">Tags:</label>
+          <input type="text" name="tags" id="tags"><br>
+
+          <label for="sound">Select a Sound File:</label>
+          <input type="file" name="sound" id="sound" accept="audio/*" required><br>
+
+          <label for="images">Select Image File(s):</label>
+          <input type="file" name="images" id="images" accept="image/*" multiple><br>
+
+          <input type="submit" name="submit" value="Submit">
+        </form>
+    </Modal>
+    <UserMenu :user="user" :show="showUserMenu" />
+    <LeafletMap />
+  </div>
+</template>
+
+<script>
+import LeafletMap from "../components/LeafletMap.vue";
+import Modal from '../components/Modal.vue';
+import UserMenu from '../components/UserMenu.vue';
+
+export default {
+  name: "home",
+  components: {
+    LeafletMap,
+    Modal,
+    UserMenu,
+  },
+  data() {
+    return {
+      user: null,
+      showUserMenu: false,
+      showSearchModal: false,
+      showUploadModal: false,
+      zoom: 2,
+    };
+  },
+};
+</script>
+
+<style scoped>
+/* @import "leaflet/dist/leaflet.css"; */
+header {
+  position: relative;
+  background-color: #333;
+  color: #fff;
+  padding: 15px;
+  text-align: center;
+  height: 1vh;
+}
+
+#user-avatar {
+  position: absolute;
+  bottom: 0;
+  right: 1%;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+}
+
+/* #app {
+  height: 95vh;
+} */
+
+footer {
+  height: 4vh;
+}
+
+.dropbtn {
+  position: absolute;
+  bottom: 1%;
+  left: 0;
+  font-size: x-large;
+  cursor: pointer;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+}
+</style>
