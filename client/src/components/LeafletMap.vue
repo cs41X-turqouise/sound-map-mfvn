@@ -130,7 +130,7 @@ export default {
 <style>
 @import "leaflet/dist/leaflet.css";
 #leaflet-map {
-  height: 95vh;
+  height: 86vh;
   width: 100%;
   overflow: hidden;
 }

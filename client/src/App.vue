@@ -1,6 +1,6 @@
 <template>
   <v-app fullscreen>
-    <v-main style="height: 100vh; overflow-y: hidden;">
+    <v-main style="height: 100vh; width: 100vw; overflow-y: hidden;">
       <v-container fluid style="padding: 0;">
         <router-view></router-view>
       </v-container>
@@ -27,8 +27,6 @@ export default {
   box-sizing: border-box;
 }
 #app {
-  height: 100vh;
-  width: 100vw;
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
