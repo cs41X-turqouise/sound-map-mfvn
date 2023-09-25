@@ -1,8 +1,8 @@
 <template>
-  <v-app>
-    <v-main fullscreen>
-      <v-container fullscreen>
-        <router-view />
+  <v-app fullscreen>
+    <v-main style="height: 100vh; overflow-y: hidden;">
+      <v-container fluid style="padding: 0;">
+        <router-view></router-view>
       </v-container>
     </v-main>
     <Footer></Footer>
@@ -26,13 +26,6 @@ export default {
   padding: 0;
   box-sizing: border-box;
 }
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-}
 #app {
   height: 100vh;
   width: 100vw;
@@ -41,5 +34,8 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+}
+.v-container {
+  background-color: cyan;
 }
 </style>
