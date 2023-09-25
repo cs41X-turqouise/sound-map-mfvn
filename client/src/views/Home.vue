@@ -48,6 +48,12 @@
         <v-btn size="small" @click="showUploadModal = true" dark>
           Upload 
         </v-btn>
+        <!-- Figure out why v-avatar and v-img cause this to break -->
+        <!-- <img id="user-avatar"
+          src="../assets/default-avatar.png"
+          alt="User Avatar"
+          @click="showUserMenu = !showUserMenu"
+        /> -->
       </v-toolbar-items>
     </v-toolbar>
     <Modal :show="showSearchModal" @close="showSearchModal = false">
@@ -100,7 +106,10 @@
         </form>
     </Modal>
     <UserMenu :user="user" :show="showUserMenu" />
-    <LeafletMap />
+    <!-- <LeafletMap /> -->
+    <v-main style="height: 100vh; width: 100vw; overflow-y: auto; margin-bottom: 1vh;">
+      <LeafletMap />
+    </v-main>
   </div>
 </template>
 
@@ -138,15 +147,6 @@ export default {
 </script>
 
 <style scoped>
-header {
-  position: relative;
-  background-color: #333;
-  color: #fff;
-  padding: 15px;
-  text-align: center;
-  height: 1vh;
-}
-
 #user-avatar {
   position: absolute;
   bottom: 0;
@@ -158,14 +158,6 @@ header {
 
 footer {
   height: 4vh;
-}
-
-.dropbtn {
-  position: absolute;
-  bottom: 1%;
-  left: 0;
-  font-size: x-large;
-  cursor: pointer;
 }
 
 .overlay {
