@@ -2,6 +2,8 @@ import { createApp } from 'vue';
 import './style.css';
 import App from './App.vue';
 import router from "./router";
+import store from './store';
+import Panel from './components/Panel.vue';
 
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify';
@@ -14,6 +16,8 @@ const vuetify = createVuetify({
 });
 
 createApp(App)
+  .use(store)
   .use(vuetify)
   .use(router)
+  .component('panel', Panel)
   .mount('#app');

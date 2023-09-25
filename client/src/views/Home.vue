@@ -1,7 +1,6 @@
 <template>
   <div class="home">
-    <header>
-      <!-- <h1 id="page-title">Sound Map for a Changing Landscape</h1> -->
+    <!-- <header>
       <img 
         id="user-avatar"
         src="../assets/default-avatar.png"
@@ -10,7 +9,47 @@
       <button id="dropbtn-search" class="dropbtn" @click="showSearchModal = true">
         &#9776;
       </button>
-    </header>
+    </header> -->
+    <v-toolbar fixed color="cyan" style="height: fit-content;" dark>
+      <v-toolbar-items>
+        <v-btn size="small" @click="showSearchModal = true" dark flat>
+          Search
+        </v-btn>
+      </v-toolbar-items>
+      <v-spacer></v-spacer>
+      <v-toolbar-items>
+        <!-- <v-btn 
+          v-if="!$store.state.isUserLoggedIn"
+          flat 
+          dark
+          :to="{
+            name: 'login'
+          }">
+          Login
+        </v-btn> -->
+        
+        <v-btn 
+          v-if="!$store.state.isUserLoggedIn"
+          flat 
+          dark
+          :to="{
+            name: 'register'
+          }">
+          Sign Up
+        </v-btn>
+        
+        <v-btn 
+          v-if="$store.state.isUserLoggedIn"
+          flat 
+          dark
+          @click="logout">
+          Log Out
+        </v-btn>
+        <v-btn size="small" @click="showUploadModal = true" dark>
+          Upload 
+        </v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
     <Modal :show="showSearchModal" @close="showSearchModal = false">
       <h2>Search Media</h2>
       <form id="search-form" action="" method="post">
@@ -86,11 +125,19 @@ export default {
       zoom: 2,
     };
   },
+  methods: {
+    logout () {
+      this.$store.dispatch('setToken', null)
+      this.$store.dispatch('setUser', null)
+      this.$router.push({
+        name: 'home'
+      })
+    }
+  }
 };
 </script>
 
 <style scoped>
-/* @import "leaflet/dist/leaflet.css"; */
 header {
   position: relative;
   background-color: #333;
@@ -108,10 +155,6 @@ header {
   height: 50px;
   cursor: pointer;
 }
-
-/* #app {
-  height: 95vh;
-} */
 
 footer {
   height: 4vh;

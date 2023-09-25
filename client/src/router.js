@@ -1,12 +1,17 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "./views/Home.vue";
 import Profile from "./views/Profile.vue";
+import Register from "./views/Register.vue";
 
 export default createRouter({
   mode: "history",
   history: createWebHistory(),
-  // base: process.env.BASE_URL,
   routes: [
+    {
+      path: '/register',
+      name: 'register',
+      component: Register
+    },
     {
       path: "/",
       name: "home",
@@ -21,6 +26,10 @@ export default createRouter({
       path: "/profile",
       name: "profile",
       component: Profile,
-    }
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: '/',
+    },
   ],
 });
