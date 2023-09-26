@@ -1,14 +1,36 @@
 {
   "name": "server",
-  "version": "0.0.0",
-  "private": true,
-  "scripts": {
-    "start": "node ./bin/www"
+  "version": "1.0.0",
+  "description": "This project was bootstrapped with Fastify-CLI.",
+  "main": "app.js",
+  "directories": {
+    "test": "test"
   },
+  "scripts": {
+    "test": "tap \"test/**/*.test.js\"",
+    "start": "fastify start -l info app.js",
+    "dev": "fastify start -w -l info -P app.js",
+    "pretest": "standard",
+    "lint": "standard --fix"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "cookie-parser": "~1.4.4",
-    "debug": "~2.6.9",
-    "express": "~4.16.1",
-    "morgan": "~1.9.1"
+    "@fastify/autoload": "^5.0.0",
+    "@fastify/env": "^4.2.0",
+    "@fastify/jwt": "^7.2.1",
+    "@fastify/mongodb": "^8.0.0",
+    "@fastify/oauth2": "^7.4.0",
+    "@fastify/sensible": "^5.0.0",
+    "@fastify/swagger": "^8.10.1",
+    "fastify": "^4.0.0",
+    "fastify-cli": "^5.8.0",
+    "fastify-multer": "^2.0.3",
+    "fastify-plugin": "^4.0.0"
+  },
+  "devDependencies": {
+    "standard": "^17.0.0",
+    "tap": "^16.1.0"
   }
 }
