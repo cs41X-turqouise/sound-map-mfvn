@@ -56,3 +56,6 @@ profile-*
 profile*
 *clinic*
 *flamegraph*
+
+uploads/*
+!uploads/ignoreme.txt
