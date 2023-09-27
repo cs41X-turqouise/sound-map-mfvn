@@ -53,57 +53,57 @@
         /> -->
       </v-toolbar-items>
     </v-toolbar>
+    <div v-if="showSearchModal || showUploadModal" class="overlay"></div>
     <Modal :show="showSearchModal" @close="showSearchModal = false">
       <h2>Search Media</h2>
-      <form id="search-form" action="" method="post">
-        <!-- TODO - custom error messages and validation -->
-        <label for="title">Title:</label>
-        <input type="text" name="title" id="title"><br>
-
-        <label for="artist">Artist:</label>
-        <input type="text" name="artist" id="artist"><br>
-
-        <label for="description">Description:</label>
-        <input type="text" name="description" id="description"><br>
-
-        <label for="tags">Tags:</label>
-        <input type="text" name="tags" id="tags"><br>
-
-        <label for="fileType">File Type:</label>
-        <input type="text" name="fileType" id="fileType"><br>
-
-        <label for="dateFrom">From:</label>
-        <input type="date" name="dateFrom" id="dateFrom"><br>
-
-        <label for="dateTo">To:</label>
-        <input type="date" name="dateTo" id="dateTo"><br>
-
-        <input type="submit" name="submit" value="Submit">
-      </form>
+      <!-- TODO - custom error messages and validation -->
+      <v-form @submit.prevent>
+        <v-text-field name="title" label="Title" id="title"
+        ></v-text-field>
+        <v-text-field name="artist" label="Artist" id="artist"
+        ></v-text-field>
+        <v-text-field name="description" label="Description" id="description"
+        ></v-text-field>
+        <v-text-field name="tags" label="Tags" id="tags"
+        ></v-text-field>
+        <v-text-field name="fileType" label="File Type" id="fileType"
+        ></v-text-field>
+        <v-text-field name="dateFrom" label="From" id="dateFrom" type="date"
+        ></v-text-field>
+        <v-text-field name="dateTo" label="To" id="dateTo" type="date"
+        ></v-text-field>
+        <v-btn type="submit" name="submit" value="Submit">Submit</v-btn>
+      </v-form>
     </Modal>
     <Modal :show="showUploadModal" @close="showUploadModal = false">
       <h2>Upload Media</h2>
-        <form id="upload-form" action="" method="post" enctype="multipart/form-data">
-          <label for="title">Title:</label>
-          <input type="text" name="title" id="title"><br>
-          
-          <label for="description">Description:</label>
-          <input type="text" name="description" id="description"><br>
-          <!-- TODO - better handling of these as tags are technically an array of strings -->
-          <label for="tags">Tags:</label>
-          <input type="text" name="tags" id="tags"><br>
-
-          <label for="sound">Select a Sound File:</label>
-          <input type="file" name="sound" id="sound" accept="audio/*" required><br>
-
-          <label for="images">Select Image File(s):</label>
-          <input type="file" name="images" id="images" accept="image/*" multiple><br>
-
-          <input type="submit" name="submit" value="Submit">
-        </form>
+      <!-- TODO - better handling of these as tags are technically an array of strings -->
+        <v-form @submit.prevent>
+          <v-text-field name="title" label="Title" id="title"
+          ></v-text-field>
+          <v-text-field name="description" label="Description" id="description"
+          ></v-text-field>
+          <v-text-field name="tags" label="Tags" id="tags"
+          ></v-text-field>
+          <v-file-input
+            label="Select a Sound File"
+            id="sound"
+            name="sound"
+            accept="audio/*"
+            required
+          ></v-file-input>
+          <v-file-input
+            label="Select Image File(s)"
+            id="images"
+            name="images"
+            accept="image/*"
+            multiple
+            clearable
+          ></v-file-input>
+          <v-btn type="submit" name="submit" value="Submit">Submit</v-btn>
+        </v-form>
     </Modal>
     <UserMenu :user="user" :show="showUserMenu" />
-    <!-- <LeafletMap /> -->
     <v-main style="height: 100vh; width: 100vw; overflow-y: auto; margin-bottom: 1vh;">
       <LeafletMap />
     </v-main>
@@ -151,10 +151,6 @@ export default {
   width: 50px;
   height: 50px;
   cursor: pointer;
-}
-
-footer {
-  height: 4vh;
 }
 
 .overlay {
