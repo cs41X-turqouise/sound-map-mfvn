@@ -1,20 +1,62 @@
-const express = require('express');
-const path = require('path');
-const cookieParser = require('cookie-parser');
-const logger = require('morgan');
+'use strict'
 
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
+const path = require('path')
+const AutoLoad = require('@fastify/autoload')
 
-const app = express();
+/**
+ * @typedef {import('fastify').FastifyInstance} FastifyInstance
+ */
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+// Pass --options via CLI arguments in command to enable these options.
+module.exports.options = {}
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+/**
+ * @param {FastifyInstance} fastify 
+ * @param {Object} opts 
+ */
+module.exports = async function (fastify, opts) {
+  // Place here your custom code!
+  const envOptions = {
+    confKey: 'config', // optional, default: 'config'
+    schema: {
+      type: 'object',
+      required: ['PORT', 'MONGODB_URL', 'JWT_SECRET'],
+      properties: {
+        PORT: {
+          type: 'number',
+          default: 3000
+        },
+        MONGODB_URL: {
+          type: 'string',
+          default: 'mongodb://127.0.0.1:27017/soundmap'
+        },
+        JWT_SECRET: {
+          type: 'string',
+          default: '155453cr37'
+        }
+      }
+    },
+    // optional, default: process.env
+    data: opts,
+    // will read .env in root folder
+    dotenv: true
+  };
+  await fastify.register(require('@fastify/env'), envOptions);
 
-module.exports = app;
+  // Do not touch the following lines
+
+  // This loads all plugins defined in plugins
+  // those should be support plugins that are reused
+  // through your application
+  fastify.register(AutoLoad, {
+    dir: path.join(__dirname, 'plugins'),
+    options: Object.assign({}, opts)
+  })
+
+  // This loads all plugins defined in routes
+  // define your routes in one of these
+  fastify.register(AutoLoad, {
+    dir: path.join(__dirname, 'routes'),
+    options: Object.assign({}, opts)
+  })
+}
