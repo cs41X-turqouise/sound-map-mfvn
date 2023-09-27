@@ -6,9 +6,6 @@
         src="../assets/default-avatar.png"
         alt="User Avatar"
         @click="showUserMenu = !showUserMenu">
-      <button id="dropbtn-search" class="dropbtn" @click="showSearchModal = true">
-        &#9776;
-      </button>
     </header> -->
     <v-toolbar fixed color="cyan" style="height: fit-content;" dark>
       <v-toolbar-items>
