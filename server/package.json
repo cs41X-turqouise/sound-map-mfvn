@@ -27,7 +27,8 @@
     "fastify": "^4.0.0",
     "fastify-cli": "^5.8.0",
     "fastify-multer": "^2.0.3",
-    "fastify-plugin": "^4.0.0"
+    "fastify-plugin": "^4.0.0",
+    "mongoose": "^7.5.3"
   },
   "devDependencies": {
     "standard": "^17.0.0",
