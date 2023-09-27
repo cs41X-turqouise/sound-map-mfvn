@@ -1,13 +1,11 @@
 'use strict'
-
+// Fastify plugin that handels CRUD (Create, Read, Update, and Delete)
 /**
  * 
  * @param {import("fastify").FastifyInstance} fastify 
  * @param {Object} options plugin options, refer to https://www.fastify.io/docs/latest/Reference/Plugins/#plugin-options
  */
 module.exports = async function (fastify, options) {
-  const fs = require('fs');
-
   /** @type {import("mongoose").Mongoose} */
   const mongoose = fastify.mongoose;
 
@@ -45,23 +43,30 @@ module.exports = async function (fastify, options) {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
+    createdAt: {
+      default: Date.now(),
+      type: Date,
+    },
   });
 
   const User = mongoose.model('User', userSchema);
   const Upload = mongoose.model('Upload', uploadSchema);
 
   fastify.get('/', async function (request, reply) {
-    const users = await User.find({});
+    const users = await User.find({}).populate('uploads');
     return users;
   })
   fastify.get('/:id', async function (request, reply) {
-    const user = await User.findById(request.params.id).populate('uploads');
+    const user = await User.findById(request.params.id);
     return user;
   })
-  fastify.get('/:id/:filename', async function (request, reply) {
+  /**
+   * Gets a file uploaded by a user
+   */
+  fastify.get('/:id/:id', async function (request, reply) {
     const file = await User.findById(request.params.id)
       .populate('uploads')
-      .find({ filename: request.params.filename });
+      .findById(request.params.id)
     // const fileStream = fs.createReadStream(file.path);
     // reply.type(file.mimetype).send(fileStream);
     return file;
@@ -76,6 +81,9 @@ module.exports = async function (fastify, options) {
       reply.code(500).send(err);
     }
   })
+  /**
+   * Allows a user to upload a file
+   */
   fastify.post('/:id/upload', 
     { preHandler: fastify.upload.single('file') },
     async function (request, reply) {
@@ -98,3 +106,4 @@ module.exports = async function (fastify, options) {
     }
   })
 }
+
