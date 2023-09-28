@@ -60,4 +60,4 @@ profile*
 uploads/*
 !uploads/ignoreme.txt
 
-.env
+*.env
