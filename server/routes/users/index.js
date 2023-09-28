@@ -9,48 +9,10 @@ module.exports = async function (fastify, options) {
   /** @type {import("mongoose").Mongoose} */
   const mongoose = fastify.mongoose;
 
-  const userSchema = new mongoose.Schema({
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    email: {
-      type: String, 
-      required: true,
-      unique: true,
-    },
-    uploads: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Upload',
-    }],
-  });
-
-  const uploadSchema = new mongoose.Schema({
-    filename: {
-      type: String,
-      required: true,
-    },
-    path: {
-      type: String,
-      required: true,
-    },
-    mimetype: {
-      type: String,
-      required: true,
-    },
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    },
-    createdAt: {
-      default: Date.now(),
-      type: Date,
-    },
-  });
-
-  const User = mongoose.model('User', userSchema);
-  const Upload = mongoose.model('Upload', uploadSchema);
+  /** @type {import("mongoose").Model} */
+  const User = require('../../models/User');
+  /** @type {import("mongoose").Model} */
+  const Upload = require('../../models/Upload');
 
   fastify.get('/', async function (request, reply) {
     const users = await User.find({}).populate('uploads');
