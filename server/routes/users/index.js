@@ -25,10 +25,10 @@ module.exports = async function (fastify, options) {
   /**
    * Gets a file uploaded by a user
    */
-  fastify.get('/:id/:id', async function (request, reply) {
-    const file = await User.findById(request.params.id)
+  fastify.get('/:userId/:fileId', async function (request, reply) {
+    const file = await User.findById(request.params.userId)
       .populate('uploads')
-      .findById(request.params.id)
+      .findById(request.params.fileId)
     // const fileStream = fs.createReadStream(file.path);
     // reply.type(file.mimetype).send(fileStream);
     return file;
