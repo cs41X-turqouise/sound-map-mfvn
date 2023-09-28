@@ -36,10 +36,11 @@ module.exports = async function (fastify, opts) {
         }
       }
     },
-    // optional, default: process.env
-    data: opts,
     // will read .env in root folder
-    dotenv: true
+    dotenv: {
+      path: path.join(__dirname, (process.env.NODE_ENV === 'production') ? './prod.env' : './local.env'),
+      debug: true
+    }
   };
   await fastify.register(require('@fastify/env'), envOptions);
 
