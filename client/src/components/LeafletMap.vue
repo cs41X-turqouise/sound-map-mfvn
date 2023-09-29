@@ -1,12 +1,16 @@
 <template>
   <div :id="mapId">
-    <!-- <Sidebar :popups="popups" :map="mapInstance"/> -->
+    <Sidebar
+      :popups="popups"
+      :map="mapInstance"
+      :clicked="clicked"
+      @close="clicked = null"/>
   </div>
 </template>
 
 <script>
 import L from 'leaflet';
-// import Sidebar from './Sidebar.vue';
+import Sidebar from './Sidebar.vue';
 
 const CoordinatesControl = L.Control.extend({
   onAdd: function (map) {
@@ -27,7 +31,7 @@ const myIcon = L.icon({
 export default {
   name: 'LeafletMap',
   components: {
-    // Sidebar,
+    Sidebar,
   },
   props: {
     /**
@@ -70,6 +74,7 @@ export default {
       layerControlInstance: null,
       coordinatesControl: null,
       centerMarker: null,
+      clicked: null,
     };
   },
   methods: {
@@ -146,6 +151,11 @@ export default {
           return marker;
         });
       }
+      leafletMap.on('click', (event) => {
+        const lat = event.latlng.lat;
+        const lng = event.latlng.lng;
+        this.clicked = { lat, lng };
+      });
       this.mapInstance = leafletMap;
     },
   },
