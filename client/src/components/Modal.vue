@@ -1,13 +1,14 @@
 <template>
   <div class="modal" v-if="show">
     <div class="modal-content">
-      <span class="close" @click="close">&times;</span>
+      <CloseButton @close="close" />
       <slot></slot>
     </div>
   </div>
 </template>
 
 <script>
+import CloseButton from "./CloseButton.vue";
 export default {
   name: "Modal",
   props: {
@@ -15,6 +16,9 @@ export default {
       type: Boolean,
       required: true,
     },
+  },
+  components: {
+    CloseButton,
   },
   methods: {
     close() {
@@ -47,22 +51,5 @@ export default {
   border: 1px solid #888;
   width: 50vw;
   max-width: 600px;
-}
-
-.close {
-  color: #aaa;
-  position: absolute;
-  top: 0;
-  right: 0;
-  margin: 0 10px;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-  color: black;
-  text-decoration: none;
-  cursor: pointer;
 }
 </style>
