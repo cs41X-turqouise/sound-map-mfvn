@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import Home from "./views/Home.vue";
 import Profile from "./views/Profile.vue";
 import Register from "./views/Register.vue";
+import About from "./views/About.vue";
 
 export default createRouter({
   mode: "history",
@@ -20,7 +21,7 @@ export default createRouter({
     {
       path: "/about",
       name: "about",
-      component: () => import("./views/About.vue"),
+      component: About,
     },
     {
       path: "/profile",

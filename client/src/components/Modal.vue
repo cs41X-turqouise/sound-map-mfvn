@@ -31,8 +31,6 @@ export default {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: fit-content;
-  height: fit-content;
   overflow: auto;
   background-color: #fff;
   display: flex;
@@ -44,16 +42,19 @@ export default {
 
 .modal-content {
   background-color: #fefefe;
-  margin: 15% auto;
+  margin: 1% 1%;
   padding: 20px;
   border: 1px solid #888;
-  width: 80%;
+  width: 50vw;
   max-width: 600px;
 }
 
 .close {
   color: #aaa;
-  float: right;
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0 10px;
   font-size: 28px;
   font-weight: bold;
 }
