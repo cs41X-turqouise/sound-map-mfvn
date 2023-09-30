@@ -1,11 +1,11 @@
 <template>
   <div class="about">
-    <h1>This is an about page</h1>
     <iframe
       src="https://cs41x-turqouise.github.io/team-website/"
       frameborder="1"
       style="width: 100vw; height: 90vh;">
-    </iframe>  <section class="project-description">
+    </iframe>
+    <section class="project-description">
       <h2>Project Overview</h2>
       <p>
         The Sound Map Prototype is an innovative project that combines the beauty of maps with the magic of sound. Our mission is to create an immersive experience that allows users to explore the world through soundscapes.
@@ -43,7 +43,7 @@
       </section>
     </div>
 </template>
-<router-link to="/about">About</router-link>       
+
 <script>
 export default {
   name: "About",

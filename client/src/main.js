@@ -3,10 +3,7 @@ import './style.css';
 import App from './App.vue';
 import router from "./router";
 import store from './store';
-import Panel from './components/Panel.vue';   
-import About from './components/About.vue';
-import VueRouter from 'vue-router';
-
+import Panel from './components/Panel.vue';
 
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify';
@@ -24,24 +21,3 @@ createApp(App)
   .use(router)
   .component('panel', Panel)
   .mount('#app');
-
-  Vue.use(VueRouter)
-
-const routes = [
-  // ... other routes
-  {
-    path: '/about',
-    name: 'About',
-    component: About
-  }
-]
-
-const router = new VueRouter({
-  routes
-})
-
-new Vue({
-  render: h => h(App),
-  router
-}).$mount('#app')
-  
