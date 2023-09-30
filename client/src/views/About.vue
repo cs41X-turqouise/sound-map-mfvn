@@ -43,7 +43,7 @@
       </section>
     </div>
 </template>
-<router-link to="/about">About</router-link>
+<router-link to="/about">About</router-link>       
 <script>
 export default {
   name: "About",
