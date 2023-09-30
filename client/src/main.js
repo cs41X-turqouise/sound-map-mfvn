@@ -3,7 +3,7 @@ import './style.css';
 import App from './App.vue';
 import router from "./router";
 import store from './store';
-import Panel from './components/Panel.vue';
+import Panel from './components/Panel.vue';   
 import About from './components/About.vue';
 import VueRouter from 'vue-router';
 
