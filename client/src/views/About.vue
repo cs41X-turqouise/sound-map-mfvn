@@ -41,11 +41,6 @@
       <p>
         If you have questions, suggestions, or would like to collaborate with us, we'd love to hear from you! Feel free to reach out to us via email or social media.
       </p>
-      <div class="contact-info">
-        <p>Email: contact@soundmapproto.com</p>
-        <p>Twitter: @SoundMapProto</p>
-        <p>Instagram: @soundmapproto</p>
-      </div>
     </section>
   </div>
 </template>
