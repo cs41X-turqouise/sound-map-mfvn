@@ -20,7 +20,7 @@ module.exports = async function (fastify, opts) {
     confKey: 'config', // optional, default: 'config'
     schema: {
       type: 'object',
-      required: ['PORT', 'MONGODB_URL', 'JWT_SECRET'],
+      required: ['PORT', 'MONGODB_URL', 'JWT_SECRET', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'],
       properties: {
         PORT: {
           type: 'number',
@@ -33,7 +33,15 @@ module.exports = async function (fastify, opts) {
         JWT_SECRET: {
           type: 'string',
           default: '155453cr37'
-        }
+        },
+        GOOGLE_CLIENT_ID: {
+          type: 'string',
+          default: '155453cr37'
+        },
+        GOOGLE_CLIENT_SECRET: {
+          type: 'string',
+          default: '155453cr37'
+        },
       }
     },
     // will read .env in root folder
