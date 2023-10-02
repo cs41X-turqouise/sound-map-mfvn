@@ -53,4 +53,13 @@ module.exports = fp(async function (fastify, options) {
     // Pipe the file data to the response
     downloadStream.pipe(reply.res);
   });
+
+  // Define a route for renaming files
+  fastify.get('/upload/:fileID', async(request, reply) => {
+    const fileID = request.params.fileId;
+    const newFileName = request.params.newFileName;
+
+    // Renames the file to new file name
+    bucket.rename(ObjectId(fileId), newFileName);
+  });
 });
