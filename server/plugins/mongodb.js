@@ -2,12 +2,14 @@
 
 const fp = require('fastify-plugin')
 const mongoose = require('mongoose')
+const { GridFSBucket, ObjectId } = require('mongodb');
 
 module.exports = fp(async function (fastify, options) {
   // Log a message when the MongoDB connection is established
   mongoose.connection.on('connected', () => {
     fastify.log.info('MongoDB connection established!');
   });
+
   // Listen for the 'close' event on the Fastify instance and close the Mongoose connection
   fastify.addHook('onClose', async (instance) => {
     await mongoose.connection.close();
@@ -21,4 +23,34 @@ module.exports = fp(async function (fastify, options) {
 
   // Decorate the Fastify instance with the Mongoose client
   fastify.decorate('mongoose', mongoose);
+
+  // Access the GridFSBucket
+  const bucket = new GridFSBucket(mongoose.connection.db);
+
+  // Define a route for uploading files
+  fastify.post('/upload', async (request, reply) => {
+    const file = request.raw.files.file; // Assuming you have a file input named 'file'
+
+    // Create a GridFS write stream
+    const uploadStream = bucket.openUploadStream(file.filename);
+
+    // Pipe the uploaded file data to the GridFS stream
+    file.file.pipe(uploadStream);
+
+    // Listen for the 'finish' event to know when the upload is complete
+    uploadStream.once('finish', () => {
+      reply.send('File uploaded successfully');
+    });
+  });
+
+  // Define a route for downloading files
+  fastify.get('/download/:fileId', async (request, reply) => {
+    const fileId = request.params.fileId;
+
+    // Create a GridFS read stream
+    const downloadStream = bucket.openDownloadStream(ObjectId(fileId));
+
+    // Pipe the file data to the response
+    downloadStream.pipe(reply.res);
+  });
 });
