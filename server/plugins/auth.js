@@ -1,25 +1,28 @@
-'use strict'
+const fastify = require('fastify')({ logger: { level: 'trace' } })
+const oauthPlugin = require('@fastify/oauth2')
 
-const fp = require('fastify-plugin')
-const OAuth2 = require('@fastify/oauth2')
-const Cookie = require('@fastify/cookie')
+fastify.register(oauthPlugin, {
+  name: 'googleOAuth2',
+  credentials: {
+    client: {
+      id: fastify.config.GOOGLE_CLIENT_ID,
+      secret: fastify.config.GOOGLE_CLIENT_SECRET
+    },
+    auth: oauthPlugin.GOOGLE_CONFIGURATIO
+  },
+  // register a fastify url to start the redirect flow
+  startRedirectPath: '/login/google',
+  // google redirect here after the user login
+  callbackUri: 'http://localhost:3000/login/google/callback'
+})
 
-module.exports = fp(async function (fastify, options) {
-  // fastify.register(OAuth2, {
-  //   name: 'googleOAuth2',
-  //   scope: ['email', 'profile'],
-  //   credentials: {
-  //     client: {
-  //       id: fastify.config.GOOGLE_CLIENT_ID,
-  //       secret: fastify.config.GOOGLE_CLIENT_SECRET
-  //     },
-  //     auth: OAuth2.GOOGLE_CONFIGURATION
-  //   },
-  //   startRedirectPath: '/login/google',
-  //   callbackUri: fastify.config.GOOGLE_CALLBACK_URL
-  // })
+fastify.get('/login/google/callback', async function (request, reply) {
+  const { token } = await this.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request)
 
-  // fastify.register(Cookie, {
-  //   secret: fastify.config.COOKIE_SECRET
-  // })
-}, { name: 'auth' });
+  console.log(token.access_token)
+
+  // if later you need to refresh the token you can use
+  // const { token: newToken } = await this.getNewAccessTokenUsingRefreshToken(token)
+
+  reply.send({ access_token: token.access_token })
+})
