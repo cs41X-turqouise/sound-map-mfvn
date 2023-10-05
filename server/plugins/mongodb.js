@@ -60,6 +60,11 @@ module.exports = fp(async function (fastify, options) {
     const newFileName = request.params.newFileName;
 
     // Renames the file to new file name
-    bucket.rename(ObjectId(fileId), newFileName);
+    renameStream = bucket.rename(ObjectId(fileId), newFileName);
+
+    // Listen for the 'finish' event to know when the rename is complete
+    renameStream.once('finish', () => {
+      reply.send("File renamed successfully to: " + newFileName);
+    });
   });
 });
