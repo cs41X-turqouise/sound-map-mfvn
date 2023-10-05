@@ -1,28 +1,22 @@
-const fastify = require('fastify')({ logger: { level: 'trace' } })
-const oauthPlugin = require('@fastify/oauth2')
+'use strict';  // Use JavaScript in "strict" mode to catch common bugs.
 
-fastify.register(oauthPlugin, {
-  name: 'googleOAuth2',
-  credentials: {
-    client: {
-      id: fastify.config.GOOGLE_CLIENT_ID,
-      secret: fastify.config.GOOGLE_CLIENT_SECRET
-    },
-    auth: oauthPlugin.GOOGLE_CONFIGURATIO
-  },
-  // register a fastify url to start the redirect flow
-  startRedirectPath: '/login/google',
-  // google redirect here after the user login
-  callbackUri: 'http://localhost:3000/login/google/callback'
-})
-
-fastify.get('/login/google/callback', async function (request, reply) {
-  const { token } = await this.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request)
-
-  console.log(token.access_token)
-
-  // if later you need to refresh the token you can use
-  // const { token: newToken } = await this.getNewAccessTokenUsingRefreshToken(token)
-
-  reply.send({ access_token: token.access_token })
-})
+// This plugin registers the OAuth2 configuration for Google authentication.
+module.exports = async function (fastify, options) {
+    // Register the Fastify OAuth2 plugin.
+    fastify.register(
+        require('@fastify/oauth2'),  // Require the Fastify OAuth2 plugin.
+        {
+            name: 'googleOAuth2',   // Name of the authentication strategy.
+            scope: ['profile'],     // The scope for the OAuth2 request. 'profile' gives access to basic profile information.
+            credentials: {
+                client: {
+                    id: process.env.GOOGLE_CLIENT_ID,             // Client ID from environment variable.
+                    secret: process.env.GOOGLE_CLIENT_SECRET      // Client Secret from environment variable.
+                },
+                auth: require('@fastify/oauth2').GOOGLE_CONFIGURATION   // Use the predefined Google OAuth2 configuration from Fastify OAuth2 plugin.
+            },
+            startRedirectPath: '/login/google',                      // Path to redirect user for authentication.
+            callbackUri: 'http://localhost:3000/login/google/callback'  // The callback URL Google will redirect to after authentication.
+        }
+    );
+}
