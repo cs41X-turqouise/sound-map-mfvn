@@ -6,9 +6,6 @@
  * @param {Object} options plugin options, refer to https://www.fastify.io/docs/latest/Reference/Plugins/#plugin-options
  */
 module.exports = async function (fastify, options) {
-  /** @type {import("mongoose").Mongoose} */
-  const mongoose = fastify.mongoose;
-
   /** @type {import("mongoose").Model} */
   const User = require('../../models/User');
   /** @type {import("mongoose").Model} */
@@ -42,22 +39,6 @@ module.exports = async function (fastify, options) {
       fastify.log.error(err);
       reply.code(500).send(err);
     }
-  })
-  /**
-   * Allows a user to upload a file
-   */
-  fastify.post('/:id/upload', 
-    { preHandler: fastify.upload.single('file') },
-    async function (request, reply) {
-    const { filename, mimetype, path } = request.file;
-    const upload = new Upload({
-      filename,
-      mimetype,
-      path,
-      user: request.params.id,
-    });
-    await upload.save();
-    return upload;
   })
   fastify.delete('/:id', async function (request, reply) {
     try {
