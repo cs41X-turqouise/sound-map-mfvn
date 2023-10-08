@@ -3,7 +3,7 @@
 // const dir = __dirname.replace('plugins', 'uploads\\');
 const fp = require('fastify-plugin')
 const multer = require('fastify-multer')
-const { GridFsStorage } = require('multer-gridfs-storage')
+const { GridFsStorage } = require('@thebguy/multer-gridfs-storage')
 
 module.exports = fp(async function (fastify, options) {
   fastify.register(multer.contentParser);

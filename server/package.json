@@ -23,12 +23,12 @@
     "@fastify/oauth2": "^7.4.0",
     "@fastify/sensible": "^5.0.0",
     "@fastify/swagger": "^8.10.1",
+    "@thebguy/multer-gridfs-storage": "^5.0.2",
     "fastify": "^4.23.2",
     "fastify-cli": "^5.8.0",
     "fastify-multer": "^2.0.3",
     "fastify-plugin": "^4.0.0",
-    "mongoose": "^7.5.3",
-    "multer-gridfs-storage": "^5.0.2"
+    "mongoose": "^7.5.3"
   },
   "devDependencies": {
     "standard": "^17.0.0",
