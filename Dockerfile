@@ -19,4 +19,4 @@ FROM ubuntu:22.04
 #this command will start the application 
 # CMD soundmap --host 0.0.0.0  --port 8080
 
-
+#This is the woring docker file.  All changes should be made to this file.
