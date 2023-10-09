@@ -16,30 +16,34 @@ module.exports = async function (fastify, options) {
    */
   fastify.post('/',
     {
-      schema: {
-        body: {
-          type: 'object',
-          required: ['file', 'user'],
-          properties: {
-            file: { type: 'object' },
-            user: { type: 'string' },
-          },
-        },
-      },
-      preHandler: fastify.upload.single('file')
+      // schema: {
+      //   body: {
+      //     type: 'object',
+      //     required: ['file', 'user'],
+      //     properties: {
+      //       file: { type: 'object' },
+      //       user: { type: 'string' },
+      //     },
+      //   },
+      // },
+      preHandler: [
+        fastify.upload.single('sound'),
+        fastify.upload.array('images', 12),
+      ]
     },
     async function (request, reply) {
-      fastify.log.info(request.file);
-      const { filename, mimetype, path } = request.file;
-      const userId = fastify.toObjectId(request.body.user);
-      const upload = new Upload({
-        filename,
-        mimetype,
-        path,
-        user: userId,
-      });
-      await upload.save();
-      return upload;
+      fastify.log.info('Route: ', request);
+      fastify.log.info('File: ', Object.keys(request));
+      // const { filename, mimetype, path } = request.file;
+      // const userId = fastify.toObjectId(request.body.user);
+      // const upload = new Upload({
+      //   filename,
+      //   mimetype,
+      //   path,
+      //   user: userId,
+      // });
+      // await upload.save();
+      // return upload;
     }
   )
   /**
@@ -152,4 +156,3 @@ module.exports = async function (fastify, options) {
   //   });
   // });
 }
-
