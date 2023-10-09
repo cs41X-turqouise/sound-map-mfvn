@@ -10,13 +10,16 @@ module.exports = fp(async function (fastify, options) {
   
   const storage = new GridFsStorage({
     url: fastify.config.MONGODB_URL,
-    file: function (req, file) {
-      const filename = `${Date.now()}_${file.originalname}`;
-      const fileInfo = {
-        filename: filename,
-        bucketName: 'uploads'
-      };
-      return fileInfo;
+    file: (req, file) => {
+      return new Promise((resolve, reject) => {
+        const filename = `${Date.now()}_${file.originalname}`;
+        const fileInfo = {
+          filename: filename,
+          originalname: file.originalname,
+          bucketName: 'uploads'
+        };
+        resolve(fileInfo);
+      });
     }
   })
 
