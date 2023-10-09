@@ -29,7 +29,7 @@
     </section>
 
     <section class="team">
-      <h2>Meet the Team</h2>
+      <h2>Meet the Team</h2>      
       <p>
         We are a passionate team of developers, sound enthusiasts, and environmentalists dedicated to bringing this project to life. Our diverse backgrounds and shared commitment to environmental awareness drive our efforts to make the world's sonic tapestry accessible to all.
       </p>
