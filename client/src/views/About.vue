@@ -34,7 +34,7 @@
         We are a passionate team of developers, sound enthusiasts, and environmentalists dedicated to bringing this project to life. Our diverse backgrounds and shared commitment to environmental awareness drive our efforts to make the world's sonic tapestry accessible to all.
       </p>
     </section>
-         
+
     <section class="contact">
       <h2>Contact Us</h2>
       <p>
