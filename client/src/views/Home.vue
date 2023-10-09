@@ -78,7 +78,7 @@
     <Modal :show="showUploadModal" @close="showUploadModal = false">
       <h2>Upload Media</h2>
       <!-- TODO - better handling of these as tags are technically an array of strings -->
-        <v-form @submit.prevent>
+        <v-form @submit.prevent="upload">
           <v-text-field name="title" label="Title" id="title"
           ></v-text-field>
           <v-text-field name="description" label="Description" id="description"
@@ -114,6 +114,7 @@
 import LeafletMap from "../components/LeafletMap.vue";
 import Modal from '../components/Modal.vue';
 import UserMenu from '../components/UserMenu.vue';
+import UploadService from "../services/UploadService";
 
 export default {
   name: "home",
@@ -138,6 +139,17 @@ export default {
       this.$router.push({
         name: 'home'
       })
+    },
+    /**
+     * @async
+     * @param {Event} e 
+     */
+    async upload (e) {
+      const form = e.target
+      const formData = new FormData(form)
+      const response = await UploadService.upload(formData)
+      console.log(response)
+      e.target.reset()
     }
   }
 };
