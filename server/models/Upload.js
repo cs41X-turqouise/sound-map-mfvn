@@ -6,7 +6,7 @@ const uploadSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  path: {
+  originalname: {
     type: String,
     required: true,
   },
@@ -14,13 +14,17 @@ const uploadSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  uploadDate: {
+    default: Date.now(),
+    type: Date,
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   },
-  createdAt: {
-    default: Date.now(),
-    type: Date,
+  size: {
+    type: Number,
+    required: true,
   },
 });
 

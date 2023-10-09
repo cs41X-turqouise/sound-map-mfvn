@@ -32,18 +32,16 @@ module.exports = async function (fastify, options) {
       ]
     },
     async function (request, reply) {
-      fastify.log.info('Route: ', request);
-      fastify.log.info('File: ', Object.keys(request));
-      // const { filename, mimetype, path } = request.file;
-      // const userId = fastify.toObjectId(request.body.user);
-      // const upload = new Upload({
-      //   filename,
-      //   mimetype,
-      //   path,
-      //   user: userId,
-      // });
-      // await upload.save();
-      // return upload;
+      // fastify.log.info(request.file);
+      // fastify.log.info(request.files);
+      // fastify.log.info(request.body);
+      const userId = fastify.toObjectId(request.body.user);
+      const upload = new Upload({
+        ...request.file,
+        user: userId,
+      });
+      await upload.save();
+      return upload;
     }
   )
   /**
