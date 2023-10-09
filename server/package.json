@@ -8,8 +8,8 @@
   },
   "scripts": {
     "test": "tap \"test/**/*.test.js\"",
-    "start": "fastify start -l info app.js",
-    "dev": "fastify start -w -l info -P app.js",
+    "start": "fastify start -l debug app.js",
+    "dev": "fastify start -w -l debug -P app.js",
     "pretest": "standard",
     "lint": "standard --fix"
   },
