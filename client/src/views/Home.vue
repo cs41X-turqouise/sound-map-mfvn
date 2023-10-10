@@ -22,7 +22,6 @@
           @click="loginWithGoogle">
           Sign in with Google
         </v-btn>
-        
      
         <v-btn 
           v-if="$store.state.isUserLoggedIn"
@@ -104,6 +103,7 @@ import LeafletMap from "../components/LeafletMap.vue";
 import Modal from '../components/Modal.vue';
 import UserMenu from '../components/UserMenu.vue';
 import UploadService from "../services/UploadService";
+import AuthService from '../services/AuthService.js'
 
 export default {
   name: "home",
@@ -122,8 +122,9 @@ export default {
     };
   },
   methods: {
-  loginWithGoogle() {
-      window.location.href = "http://localhost:3000/login/google";
+    loginWithGoogle() {
+      // window.location.href = "http://localhost:3000/login/google";
+      AuthService.login();
     },
     logout () {
       this.$store.dispatch('setToken', null)
