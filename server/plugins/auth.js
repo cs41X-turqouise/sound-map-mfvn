@@ -20,7 +20,7 @@ const fp = require('fastify-plugin');
                 auth: require('@fastify/oauth2').GOOGLE_CONFIGURATION   // Use the predefined Google OAuth2 configuration from Fastify OAuth2 plugin.
             },
             startRedirectPath: '/login/google',                      // Path to redirect user for authentication.
-            callbackUri: 'http://localhost:3000/login/google/callback'  // The callback URL Google will redirect to after authentication.
+            callbackUri: 'http://localhost:5173/oauth/callback'  // The callback URL Google will redirect to after authentication.
         }
         
         );
