@@ -14,7 +14,7 @@ module.exports = async function (fastify, options) {
   /**
    * User upload a file
    */
-  fastify.post('/upload',
+  fastify.post('/single',
     {
       // schema: {
       //   body: {
@@ -29,6 +29,13 @@ module.exports = async function (fastify, options) {
       preHandler: [
         fastify.upload.single('sound'),
         fastify.upload.array('images', 12),
+        function (request, reply, done) {
+          if (!request.file) {
+            done(new Error('File is required'));
+          } else {
+            done();
+          }
+        },
       ]
     },
     async function (request, reply) {
@@ -49,29 +56,30 @@ module.exports = async function (fastify, options) {
    */
   fastify.post('/bulk', 
     {
-      schema: {
-        body: {
-          type: 'object',
-          required: ['files', 'user'],
-          properties: {
-            files: { type: 'array' },
-            user: { type: 'string' },
-          },
-        },
-      },
+      // schema: {
+      //   body: {
+      //     type: 'object',
+      //     required: ['user'],
+      //     properties: {
+      //       files: { type: 'array' },
+      //       user: { type: 'string' },
+      //     },
+      //   },
+      // },
       preHandler: fastify.upload.array('files', 12)
     },
     /**
- * Handles the upload of multiple files.
- * @param {Object} request - The request object.
- * @param {Object} reply - The reply object.
- * @returns {Array} An array of uploaded file objects.
- */
+     * Handles the upload of multiple files.
+     * @param {Object} request - The request object.
+     * @param {Object} reply - The reply object.
+     * @returns {Array} An array of uploaded file objects.
+     */
     async function (request, reply) {
       // Extract the user ID from the request body
       const userId = fastify.toObjectId(request.body.user);
 
-       // Process file uploads concurrently using Promise.all and map by using Promise.all in combination with map, the code is able to process multiple file uploads simultaneously
+       // Process file uploads concurrently using Promise.all and map by using Promise.all
+       // in combination with map, the code is able to process multiple file uploads simultaneously
       const uploads = await Promise.all(request.files.map(async (file) => {
 
         // Create a new Upload object with file details and user ID
@@ -94,6 +102,7 @@ module.exports = async function (fastify, options) {
   fastify.get('/', async function (request, reply) {
     // const uploads = await Upload.find({});
     // return uploads;
+    // fastify.gridfs.find().
   })
   /**
    * Get a specific upload
