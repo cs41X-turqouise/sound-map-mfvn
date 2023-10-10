@@ -27,16 +27,6 @@ module.exports = fp(async function (fastify, options) {
     // Db is the database instance
     fastify.log.info('GRIDFS connection established!');
   });
-  
-  // storage.on('connectionFailed', (err) => {
-  //   // err is the error received from MongoDb
-  //   fastify.log.error(err);
-  // });
-
-  // storage.on('file', (file) => {
-  //   // file is the file being uploaded
-  //   fastify.log.info('GridFSFile - ', file);
-  // });
 
   // storage.on('streamError', (err) => {
   //   // err is the error received from the GridFSBucketReadStream
