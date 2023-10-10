@@ -1,14 +1,16 @@
 'use strict'
 /// <reference path="../../global.d.ts" />
-// Fastify plugin that handels CRUD (Create, Read, Update, and Delete)
 /**
+ * Routes for handling CRUD (Create, Read, Update, and Delete) operations on uploads
  * @param {import("fastify").FastifyInstance} fastify 
  * @param {Object} options plugin options, refer to https://www.fastify.io/docs/latest/Reference/Plugins/#plugin-options
  */
 module.exports = async function (fastify, options) {
-  /** @type {import("mongoose").Model} */
+  /**
+   * @typedef {import("fastify").FastifyRequest} Request
+   * @typedef {import("fastify").FastifyReply} Reply
+   */
   const User = require('../../models/User');
-  /** @type {import("mongoose").Model} */
   const Upload = require('../../models/Upload');
 
   /**
@@ -83,8 +85,8 @@ module.exports = async function (fastify, options) {
     },
     /**
      * Handles the upload of multiple files.
-     * @param {Object} request - The request object.
-     * @param {Object} reply - The reply object.
+     * @param {Request} request - The request object.
+     * @param {Reply} reply - The reply object.
      * @returns {Array} An array of uploaded file objects.
      */
     async function (request, reply) {
