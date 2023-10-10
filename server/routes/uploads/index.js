@@ -19,18 +19,19 @@ module.exports = async function (fastify, options) {
       // schema: {
       //   body: {
       //     type: 'object',
-      //     required: ['file', 'user'],
+      //     required: ['user'],
       //     properties: {
-      //       file: { type: 'object' },
       //       user: { type: 'string' },
       //     },
       //   },
       // },
       preHandler: [
-        fastify.upload.single('sound'),
-        fastify.upload.array('images', 12),
+        fastify.upload.fields([
+          { name: 'sound', maxCount: 1 },
+          { name: 'images', maxCount: 12 },
+        ]),
         function (request, reply, done) {
-          if (!request.file) {
+          if (!request.files) {
             done(new Error('File is required'));
           } else {
             done();
@@ -39,12 +40,24 @@ module.exports = async function (fastify, options) {
       ]
     },
     async function (request, reply) {
-      // fastify.log.info(request.file);
-      // fastify.log.info(request.files);
+      fastify.log.info(request.files);
       // fastify.log.info(request.body);
       const userId = fastify.toObjectId(request.body.user);
+      const images = [];
+      if (request.files.images) {
+        for (const image of request.files.images) {
+          const upload = new Upload({
+            ...image,
+            user: userId,
+          });
+          await upload.save();
+          fastify.log.info(upload);
+          images.push(upload._id);
+        }
+      }
       const upload = new Upload({
-        ...request.file,
+        ...request.files.sound[0],
+        // images, // TODO: fix this as this seems hacky, each image would have it's own empty images array
         user: userId,
       });
       await upload.save();
@@ -53,6 +66,7 @@ module.exports = async function (fastify, options) {
   )
   /**
    * Allows users to upload an array of files
+   * @todo We should be able to upload multiple sound files and corresponding images if any
    */
   fastify.post('/bulk', 
     {
@@ -61,7 +75,6 @@ module.exports = async function (fastify, options) {
       //     type: 'object',
       //     required: ['user'],
       //     properties: {
-      //       files: { type: 'array' },
       //       user: { type: 'string' },
       //     },
       //   },
