@@ -14,7 +14,7 @@ module.exports = async function (fastify, options) {
   /**
    * User upload a file
    */
-  fastify.post('/',
+  fastify.post('/upload',
     {
       // schema: {
       //   body: {
@@ -73,14 +73,11 @@ module.exports = async function (fastify, options) {
 
        // Process file uploads concurrently using Promise.all and map by using Promise.all in combination with map, the code is able to process multiple file uploads simultaneously
       const uploads = await Promise.all(request.files.map(async (file) => {
-        const { filename, mimetype, path } = file;
 
         // Create a new Upload object with file details and user ID
         const upload = new Upload({
-          filename, // The name of the uploaded file
-          mimetype,  // The type of the file
-          path, // The file's path on the server
-          user: userId, // The user ID associated with this upload
+          ...request.file,
+          user: userId,
         });
          // Save the Upload object to the database and return the result
         return await upload.save();
