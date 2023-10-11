@@ -145,6 +145,8 @@ module.exports = async function (fastify, options) {
    */
   fastify.delete('/:id', async function (request, reply) {
     try {
+      const _id = fastify.toObjectId(request.params.id);
+      await fastify.gridfs.delete(_id);
       const file = await Upload.findByIdAndDelete(request.params.id);
       const users = await User.find({ uploads: file._id });
 
