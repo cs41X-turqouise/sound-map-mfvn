@@ -51,16 +51,19 @@ module.exports = async function (fastify, options) {
           const upload = new Upload({
             ...image,
             user: userId,
+            _id: fastify.toObjectId(image.id),
           });
           await upload.save();
           fastify.log.info(upload);
           images.push(upload._id);
         }
       }
+      const sound = request.files.sound[0];
       const upload = new Upload({
-        ...request.files.sound[0],
+        ...sound,
         // images, // TODO: fix this as this seems hacky, each image would have it's own empty images array
         user: userId,
+        _id: fastify.toObjectId(sound.id),
       });
       await upload.save();
       return upload;
@@ -124,10 +127,15 @@ module.exports = async function (fastify, options) {
    */
   fastify.get('/:id', async function (request, reply) {
     fastify.log.info(request.params.id);
-    fastify.gridfs.find({ _id: request.params.id }).toArray((err, files) => {
+    const _id = fastify.toObjectId(request.params.id);
+    fastify.gridfs.find({ _id: _id }).toArray((err, files) => {
+      if (err) {
+        return err;
+      }
       if (!files || files.length === 0) {
         return reply.send(new Error('No file found'));
       }
+      const file = files[0];
       fastify.gridfs.openDownloadStream(files[0]._id).pipe(reply.res);
     });
   })
@@ -161,6 +169,32 @@ module.exports = async function (fastify, options) {
     }
   })
 
+  // Define a route for renaming files
+  fastify.patch('/:id',
+    {
+      schema: {
+        body: {
+          type: 'object',
+          required: ['newFileName'],
+          properties: {
+            newFileName: { type: 'string' },
+          },
+        },
+      },
+    },
+    async function (request, reply) {
+      const _id = fastify.toObjectId(request.params.id);
+      const newFileName = request.body.newFileName;
+      await fastify.gridfs.rename(_id, newFileName);
+
+      // Renames the file to new file name
+      await fastify.gridfs.rename(_id, newFileName);
+      const file = await Upload.findByIdAndUpdate(_id, {
+        filename: newFileName
+      }, { new: true });
+      return file;
+    }
+  );
   // // Define a route for uploading files
   // fastify.post('/upload', async (request, reply) => {
   //   const file = request.raw.files.file; // Assuming you have a file input named 'file'
@@ -188,17 +222,4 @@ module.exports = async function (fastify, options) {
   //   downloadStream.pipe(reply.res);
   // });
 
-  // Define a route for renaming files
-  // fastify.get('/upload/:fileID', async(request, reply) => {
-  //   const fileID = request.params.fileId;
-  //   const newFileName = request.params.newFileName;
-
-  //   // Renames the file to new file name
-  //   renameStream = fastify.gridfs.rename(ObjectId(fileId), newFileName);
-
-  //   // Listen for the 'finish' event to know when the rename is complete
-  //   renameStream.once('finish', () => {
-  //     reply.send("File renamed successfully to: " + newFileName);
-  //   });
-  // });
 }

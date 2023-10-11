@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 /**
  * Mongoose schema for file uploads.
  *
- * @typedef {Object} Upload
+ * @typedef {import("mongoose").Model} Upload
  * @property {string} filename - The name of the uploaded file designated by multer.
  * @property {string} originalname - The original name of the uploaded file.
  * @property {string} mimetype - The MIME type of the uploaded file.
@@ -12,6 +12,10 @@ const mongoose = require('mongoose');
  * @property {number} size - The size of the uploaded file in bytes.
  */
 const uploadSchema = new mongoose.Schema({
+  _id: {
+    type: mongoose.Schema.Types.ObjectId,
+    auto: true,
+  },
   filename: {
     type: String,
     required: true,
