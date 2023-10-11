@@ -1,6 +1,5 @@
 'use strict'
 
-// const dir = __dirname.replace('plugins', 'uploads\\');
 const fp = require('fastify-plugin')
 const multer = require('fastify-multer')
 const { GridFsStorage } = require('@thebguy/multer-gridfs-storage')
@@ -10,13 +9,17 @@ module.exports = fp(async function (fastify, options) {
   
   const storage = new GridFsStorage({
     url: fastify.config.MONGODB_URL,
-    file: (req, file) => {
+    /**
+     * @param {Request} req 
+     * @param {import("@thebguy/multer-gridfs-storage").GridFile} file 
+     */
+    file: (_req, file) => {
       return new Promise((resolve, reject) => {
         const filename = `${Date.now()}_${file.originalname}`;
         const fileInfo = {
           filename: filename,
           originalname: file.originalname,
-          bucketName: 'uploads'
+          bucketName: (file.mimetype.match(/^audio\//) ? 'sounds' : 'photos')
         };
         resolve(fileInfo);
       });
