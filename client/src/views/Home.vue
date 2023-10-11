@@ -1,3 +1,4 @@
+<!-- client/src/views/Home.vue -->
 <template>
   <div class="home">
     <!-- <header>
@@ -123,8 +124,8 @@ export default {
   },
   methods: {
     loginWithGoogle() {
-      // window.location.href = "http://localhost:3000/login/google";
-      AuthService.login();
+      window.location.href = "http://localhost:3000/login/google";
+      // AuthService.login();
     },
     logout () {
       this.$store.dispatch('setToken', null)
