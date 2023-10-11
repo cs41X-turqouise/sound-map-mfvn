@@ -128,16 +128,12 @@ module.exports = async function (fastify, options) {
   fastify.get('/:id', async function (request, reply) {
     fastify.log.info(request.params.id);
     const _id = fastify.toObjectId(request.params.id);
-    fastify.gridfs.find({ _id: _id }).toArray((err, files) => {
-      if (err) {
-        return err;
-      }
-      if (!files || files.length === 0) {
-        return reply.send(new Error('No file found'));
-      }
-      const file = files[0];
-      fastify.gridfs.openDownloadStream(files[0]._id).pipe(reply.res);
-    });
+    const files = await fastify.gridfs.find({ _id: _id }).toArray();
+    fastify.log.info(files);
+    /** @type {import('mongodb').GridFSFile} */
+    const file = files[0];
+    const fileStream = await fastify.gridfs.openDownloadStream(file._id);
+    reply.type(file.contentType).send(fileStream);
   })
   /**
    * Find user who uploaded a file
