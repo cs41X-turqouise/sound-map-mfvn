@@ -73,6 +73,10 @@
         <v-text-field name="dateTo" label="To" id="dateTo" type="date"
         ></v-text-field>
         <v-btn type="submit" name="submit" value="Submit">Submit</v-btn>
+        <v-text-field latitude="latitude" label="Latitude" id="latitude"
+        ></v-text-field>
+        <v-text-field longitude="longitude" label="Longitude" id="Longitude"
+        ></v-text-field>
       </v-form>
     </Modal>
     <Modal :show="showUploadModal" @close="showUploadModal = false">
@@ -100,7 +104,20 @@
             multiple
             clearable
           ></v-file-input>
+          <v-file-input
+          label="Enter Latitude Coordinates"
+          id="latitude"
+          name="latitude"
+          accept="latitude"
+          ></v-file-input>
+          <v-file-input
+          label="Enter Longitude Coordinates"
+          id="longitude"
+          name="longitude"
+          accept="longitude"
+          ></v-file-input>
           <v-btn type="submit" name="submit" value="Submit">Submit</v-btn>
+
         </v-form>
     </Modal>
     <UserMenu :user="user" :show="showUserMenu" />
@@ -139,6 +156,17 @@ export default {
       this.$router.push({
         name: 'home'
       })
+    },
+    BoundaryValidation()
+    {
+    if(this.latitude < -90 || this.latitude > 90 || this.longitude < 0 || this.longitude > 180)
+      {
+        return false;
+      }
+      else
+      {
+        return true
+      }
     },
     /**
      * @async
