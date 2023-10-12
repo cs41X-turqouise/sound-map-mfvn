@@ -107,6 +107,7 @@
           type="number"
           min="-90"
           max="90"
+          :rules="[v=> (!!v && v < 90 && v > -90) || 'Not within bounds']"
           ></v-text-field>
           <v-text-field
           label="Enter Longitude Coordinates"
@@ -115,6 +116,7 @@
           type="number"
           min="0"
           max="180"
+          :rules="[v=> (!!v && v >= 0 && v <= 180) || 'Not within bounds']" 
           ></v-text-field>
           <v-btn type="submit" name="submit" value="Submit">Submit</v-btn>
 
@@ -157,27 +159,11 @@ export default {
         name: 'home'
       })
     },
-    BoundaryValidation()
-    {
-    if(this.latitude < -90 || this.latitude > 90 || this.longitude < 0 || this.longitude > 180)
-      {
-        return false;
-      }
-      else
-      {
-        return true
-      }
-    },
     /**
      * @async
      * @param {Event} e 
      */
     async upload (e) {
-      if(!this.BoundaryValidation)
-      {
-        alert('Please enter a valid Latitude and Longitude value');
-        return;
-      }
       const form = e.target
       const formData = new FormData(form)
       const response = await UploadService.upload(formData)
