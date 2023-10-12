@@ -119,7 +119,6 @@
           :rules="[v=> (!!v && v >= 0 && v <= 180) || 'Not within bounds']" 
           ></v-text-field>
           <v-btn type="submit" name="submit" value="Submit">Submit</v-btn>
-
         </v-form>
     </Modal>
     <UserMenu :user="user" :show="showUserMenu" />
