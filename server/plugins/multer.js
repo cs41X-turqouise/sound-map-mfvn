@@ -13,14 +13,20 @@ module.exports = fp(async function (fastify, options) {
      * @param {Request} req 
      * @param {import("@thebguy/multer-gridfs-storage").GridFile} file 
      */
-    file: (_req, file) => {
+    file: (req, file) => {
       return new Promise((resolve, reject) => {
         const filename = `${Date.now()}_${file.originalname}`;
+        const isAudio = file.mimetype.match(/^audio\//);
         const fileInfo = {
           filename: filename,
           originalname: file.originalname,
-          bucketName: (file.mimetype.match(/^audio\//) ? 'sounds' : 'images')
+          bucketName: (isAudio ? 'sounds' : 'images')
         };
+        if (isAudio) {
+          fileInfo.metadata = {
+            ...req.body,
+          };
+        }
         resolve(fileInfo);
       });
     }
