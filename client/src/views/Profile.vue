@@ -56,17 +56,13 @@ export default {
     getSound () {
       fetch(`http://localhost:3000/uploads/${this.soundFile}`)
         .then((response) => {
-          console.log(response);
           this.audioType = response.headers.get("Content-Type");
           return response.blob();
         })
         .then((blob) => {
-          console.log(blob);
           const objectUrl = URL.createObjectURL(blob);
-          console.log(objectUrl);
           this.audioSrc = objectUrl;
-          // this.audioType = "audio/wav";
-          this.$refs.audio.play();
+          this.$refs.audio.innerHTML = `<source src="${objectUrl}" type="${this.audioType}">`;
         });
     },
   },

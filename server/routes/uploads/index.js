@@ -111,13 +111,8 @@ module.exports = async function (fastify, options) {
     const _id = fastify.toObjectId(request.params.id);
     const fileDoc = await Sound.findById(_id).exec();
     const { file, fileStream } = await fileDoc.getFileStream(fastify);
-    reply.header('Content-Type', 'application/octet-stream');
-    // reply.header('Content-Type', file.contentType);
+    reply.header('Content-Type', file.contentType);
     return reply.send(fileStream);
-    // reply.type(file.contentType);
-    // reply.header('Content-Disposition', `attachment; filename="${file.filename}"`);
-    // fileStream.pipe(reply.res);
-    // reply.type(file.contentType).send(fileStream);
   })
   /**
    * Find user who uploaded a file
@@ -197,21 +192,6 @@ module.exports = async function (fastify, options) {
       return file;
     }
   );
-  // // Define a route for uploading files
-  // fastify.post('/upload', async (request, reply) => {
-  //   const file = request.raw.files.file; // Assuming you have a file input named 'file'
-
-  //   // Create a GridFS write stream
-  //   const uploadStream = fastify.gridfs.openUploadStream(file.filename);
-
-  //   // Pipe the uploaded file data to the GridFS stream
-  //   file.file.pipe(uploadStream);
-
-  //   // Listen for the 'finish' event to know when the upload is complete
-  //   uploadStream.once('finish', () => {
-  //     reply.send('File uploaded successfully');
-  //   });
-  // });
 
   // // Define a route for downloading files
   // fastify.get('/download/:fileId', async (request, reply) => {
