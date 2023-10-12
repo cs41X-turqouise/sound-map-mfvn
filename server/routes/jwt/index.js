@@ -2,10 +2,19 @@
 
 module.exports = async function (fastify, options) {
     fastify.get('/generateToken', (req, reply) => {
-      const user = {
-        name:req.params.name,
-        id:req.params.id,
-        picture:req.params.picture
+      user = {
+        name: {
+          type: 'string',
+          default: "John Doe"
+        },
+        id: {
+          type: 'string',
+          default: '123456'
+        },
+        picture: {
+          type: 'file',
+          default: '../client/src/assets/default-avatar.png'
+        }
       };  
 
       const token = fastify.jwt.sign({ user })
