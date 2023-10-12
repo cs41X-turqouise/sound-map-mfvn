@@ -100,6 +100,24 @@
             multiple
             clearable
           ></v-file-input>
+          <v-text-field
+          label="Enter Latitude Coordinates"
+          id="latitude"
+          name="latitude"
+          type="number"
+          min="-90"
+          max="90"
+          :rules="[v=> (!!v && v < 90 && v > -90) || 'Not within bounds']"
+          ></v-text-field>
+          <v-text-field
+          label="Enter Longitude Coordinates"
+          id="longitude"
+          name="longitude"
+          type="number"
+          min="0"
+          max="180"
+          :rules="[v=> (!!v && v >= 0 && v <= 180) || 'Not within bounds']" 
+          ></v-text-field>
           <v-btn type="submit" name="submit" value="Submit">Submit</v-btn>
         </v-form>
     </Modal>
