@@ -58,19 +58,19 @@
       <h2>Search Media</h2>
       <!-- TODO - custom error messages and validation -->
       <v-form @submit.prevent>
-        <v-text-field name="title" label="Title" id="title"
+        <v-text-field name="title" label="Title" id="title" clearable
         ></v-text-field>
-        <v-text-field name="artist" label="Artist" id="artist"
+        <v-text-field name="artist" label="Artist" id="artist" clearable
         ></v-text-field>
-        <v-text-field name="description" label="Description" id="description"
+        <v-text-field name="description" label="Description" id="description" clearable
         ></v-text-field>
-        <v-text-field name="tags" label="Tags" id="tags"
+        <v-text-field name="tags" label="Tags" id="tags" clearable
         ></v-text-field>
-        <v-text-field name="fileType" label="File Type" id="fileType"
+        <v-text-field name="fileType" label="File Type" id="fileType" clearable
         ></v-text-field>
-        <v-text-field name="dateFrom" label="From" id="dateFrom" type="date"
+        <v-text-field name="dateFrom" label="From" id="dateFrom" type="date" clearable
         ></v-text-field>
-        <v-text-field name="dateTo" label="To" id="dateTo" type="date"
+        <v-text-field name="dateTo" label="To" id="dateTo" type="date" clearable
         ></v-text-field>
         <v-btn type="submit" name="submit" value="Submit">Submit</v-btn>
       </v-form>
@@ -79,12 +79,44 @@
       <h2>Upload Media</h2>
       <!-- TODO - better handling of these as tags are technically an array of strings -->
         <v-form @submit.prevent="upload">
-          <v-text-field name="title" label="Title" id="title"
+          <v-text-field name="title" label="Title" id="title" clearable
           ></v-text-field>
-          <v-text-field name="description" label="Description" id="description"
+          <v-text-field name="description" label="Description" id="description" clearable
           ></v-text-field>
-          <v-text-field name="tags" label="Tags" id="tags"
+          <v-text-field name="tags" label="Tags" id="tags" clearable
           ></v-text-field>
+          <div>
+            <v-row>
+              <v-col cols="6">
+                <v-text-field
+                  label="Enter Latitude Coordinates"
+                  hint="Must be between -90 and 90"
+                  id="latitude"
+                  name="latitude"
+                  type="number"
+                  min="-90"
+                  max="90"
+                  class="no-spinner"
+                  clearable
+                  :rules="[v=> (!!v && v >= -90 && v <= 90) || 'Must be between -90 and 90']"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="6">
+                <v-text-field
+                  label="Enter Longitude Coordinates"
+                  hint="Must be between -180 and 180"
+                  id="longitude"
+                  name="longitude"
+                  type="number"
+                  min="-180"
+                  max="180"
+                  class="no-spinner"
+                  clearable
+                  :rules="[v=> (!!v && v >= -180 && v <= 180) || 'Must be between -180 and 180']" 
+                ></v-text-field>
+              </v-col>
+            </v-row>
+          </div>
           <v-file-input
             label="Select a Sound File"
             id="sound"
@@ -100,24 +132,6 @@
             multiple
             clearable
           ></v-file-input>
-          <v-text-field
-          label="Enter Latitude Coordinates"
-          id="latitude"
-          name="latitude"
-          type="number"
-          min="-90"
-          max="90"
-          :rules="[v=> (!!v && v < 90 && v > -90) || 'Not within bounds']"
-          ></v-text-field>
-          <v-text-field
-          label="Enter Longitude Coordinates"
-          id="longitude"
-          name="longitude"
-          type="number"
-          min="0"
-          max="180"
-          :rules="[v=> (!!v && v >= 0 && v <= 180) || 'Not within bounds']" 
-          ></v-text-field>
           <v-btn type="submit" name="submit" value="Submit">Submit</v-btn>
         </v-form>
     </Modal>
@@ -173,7 +187,20 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
+/* Chrome, Safari, Edge, Opera */
+.no-spinner input::-webkit-outer-spin-button,
+.no-spinner input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+.no-spinner input[type=number] {
+  -moz-appearance: textfield;
+  appearance: none;
+}
+
 #user-avatar {
   position: absolute;
   bottom: 0;
