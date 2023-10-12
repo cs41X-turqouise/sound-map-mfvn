@@ -34,6 +34,7 @@ module.exports = async function (fastify, options) {
       ]
     },
     async function (request, reply) {
+      fastify.log.info(request.files);
       const userId = fastify.toObjectId(request.body.user);
       const sound = request.files.sound[0];
       const images = [];
@@ -110,7 +111,13 @@ module.exports = async function (fastify, options) {
     const _id = fastify.toObjectId(request.params.id);
     const fileDoc = await Sound.findById(_id).exec();
     const { file, fileStream } = await fileDoc.getFileStream(fastify);
-    reply.type(file.contentType).send(fileStream);
+    reply.header('Content-Type', 'application/octet-stream');
+    // reply.header('Content-Type', file.contentType);
+    return reply.send(fileStream);
+    // reply.type(file.contentType);
+    // reply.header('Content-Disposition', `attachment; filename="${file.filename}"`);
+    // fileStream.pipe(reply.res);
+    // reply.type(file.contentType).send(fileStream);
   })
   /**
    * Find user who uploaded a file
