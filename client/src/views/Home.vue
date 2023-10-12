@@ -104,18 +104,18 @@
             multiple
             clearable
           ></v-file-input>
-          <v-file-input
+          <v-text-field
           label="Enter Latitude Coordinates"
           id="latitude"
           name="latitude"
           accept="latitude"
-          ></v-file-input>
-          <v-file-input
+          ></v-text-field>
+          <v-text-field
           label="Enter Longitude Coordinates"
           id="longitude"
           name="longitude"
           accept="longitude"
-          ></v-file-input>
+          ></v-text-field>
           <v-btn type="submit" name="submit" value="Submit">Submit</v-btn>
 
         </v-form>
@@ -173,6 +173,11 @@ export default {
      * @param {Event} e 
      */
     async upload (e) {
+      if(!this.BoundaryValidation)
+      {
+        alert('Please enter a valid Latitude and Longitude value');
+        return;
+      }
       const form = e.target
       const formData = new FormData(form)
       const response = await UploadService.upload(formData)
