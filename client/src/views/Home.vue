@@ -73,10 +73,6 @@
         <v-text-field name="dateTo" label="To" id="dateTo" type="date"
         ></v-text-field>
         <v-btn type="submit" name="submit" value="Submit">Submit</v-btn>
-        <v-text-field latitude="latitude" label="Latitude" id="latitude"
-        ></v-text-field>
-        <v-text-field longitude="longitude" label="Longitude" id="Longitude"
-        ></v-text-field>
       </v-form>
     </Modal>
     <Modal :show="showUploadModal" @close="showUploadModal = false">
@@ -108,13 +104,17 @@
           label="Enter Latitude Coordinates"
           id="latitude"
           name="latitude"
-          accept="latitude"
+          type="number"
+          min="-90"
+          max="90"
           ></v-text-field>
           <v-text-field
           label="Enter Longitude Coordinates"
           id="longitude"
           name="longitude"
-          accept="longitude"
+          type="number"
+          min="0"
+          max="180"
           ></v-text-field>
           <v-btn type="submit" name="submit" value="Submit">Submit</v-btn>
 
