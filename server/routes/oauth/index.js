@@ -3,6 +3,7 @@
 'use strict';  // Use JavaScript in "strict" mode to catch common bugs.
 
 const sget = require('simple-get');  // Require 'simple-get' for making HTTP requests.
+const jwt = require('../jwt/index.js')
 /**
  * Route handlers for the Google OAuth2 callback.
  * @param {import("fastify").FastifyInstance} fastify 
@@ -33,9 +34,10 @@ module.exports = async function (fastify, options) {
           reply.send(err);  // Send the error as a response if there's any.
           return;
         }
+        token = fastify.jwt.sign(data);
         // const redirectUrl = `http://localhost:5173/oauth/callback?name=${data.name}&id=${data.id}&picture=${data.picture}`;
         // reply.redirect(redirectUrl); // Send the user data as a response.
-        reply.send(data);
+        reply.send(token);
       });
     });
   });
