@@ -22,12 +22,12 @@ const userSchema = new mongoose.Schema({
   },
   uploads: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Uploads',
+    ref: 'sounds',
   }],
   bookmarks: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Uploads',
+    ref: 'sounds',
   }],
 });
 
-module.exports = mongoose.model('Users', userSchema);
+module.exports = mongoose.model('users', userSchema);

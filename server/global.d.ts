@@ -7,7 +7,8 @@ declare module 'fastify' {
   interface FastifyInstance {
     mongoose: Mongoose;
     toObjectId: (id: string) => Mongoose.Types.ObjectId;
-    gridfs: GridFSBucket;
+    gridfsSounds: GridFSBucket;
+    gridfsImages: GridFSBucket;
     upload: any;
   }
 }

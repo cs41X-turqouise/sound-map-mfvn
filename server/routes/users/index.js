@@ -1,15 +1,11 @@
 'use strict'
-// Fastify plugin that handels CRUD (Create, Read, Update, and Delete)
 /**
- * 
+ * Routes for handling CRUD (Create, Read, Update, and Delete) operations on users
  * @param {import("fastify").FastifyInstance} fastify 
  * @param {Object} options plugin options, refer to https://www.fastify.io/docs/latest/Reference/Plugins/#plugin-options
  */
 module.exports = async function (fastify, options) {
-  /** @type {import("mongoose").Model} */
   const User = require('../../models/User');
-  /** @type {import("mongoose").Model} */
-  const Upload = require('../../models/Upload');
 
   fastify.get('/', async function (request, reply) {
     const users = await User.find({}).populate('uploads');

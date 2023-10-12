@@ -19,7 +19,7 @@ module.exports = fp(async function (fastify, options) {
         const fileInfo = {
           filename: filename,
           originalname: file.originalname,
-          bucketName: (file.mimetype.match(/^audio\//) ? 'sounds' : 'photos')
+          bucketName: (file.mimetype.match(/^audio\//) ? 'sounds' : 'images')
         };
         resolve(fileInfo);
       });

@@ -11,22 +11,14 @@ module.exports = async function (fastify, options) {
    * @typedef {import("fastify").FastifyReply} Reply
    */
   const User = require('../../models/User');
-  const Upload = require('../../models/Upload');
+  const Sound = require('../../models/Sound');
+  const Image = require('../../models/Image');
 
   /**
    * User upload a file
    */
   fastify.post('/single',
     {
-      // schema: {
-      //   body: {
-      //     type: 'object',
-      //     required: ['user'],
-      //     properties: {
-      //       user: { type: 'string' },
-      //     },
-      //   },
-      // },
       preHandler: [
         fastify.upload.fields([
           { name: 'sound', maxCount: 1 },
@@ -42,26 +34,22 @@ module.exports = async function (fastify, options) {
       ]
     },
     async function (request, reply) {
-      fastify.log.info(request.files);
-      // fastify.log.info(request.body);
       const userId = fastify.toObjectId(request.body.user);
+      const sound = request.files.sound[0];
       const images = [];
       if (request.files.images) {
         for (const image of request.files.images) {
-          const upload = new Upload({
-            ...image,
-            user: userId,
+          const upload = new Image({
             _id: fastify.toObjectId(image.id),
+            soundFile: fastify.toObjectId(sound.id),
+            user: userId,
           });
           await upload.save();
-          fastify.log.info(upload);
           images.push(upload._id);
         }
       }
-      const sound = request.files.sound[0];
-      const upload = new Upload({
-        ...sound,
-        // images, // TODO: fix this as this seems hacky, each image would have it's own empty images array
+      const upload = new Sound({
+        images,
         user: userId,
         _id: fastify.toObjectId(sound.id),
       });
@@ -75,15 +63,6 @@ module.exports = async function (fastify, options) {
    */
   fastify.post('/bulk', 
     {
-      // schema: {
-      //   body: {
-      //     type: 'object',
-      //     required: ['user'],
-      //     properties: {
-      //       user: { type: 'string' },
-      //     },
-      //   },
-      // },
       preHandler: fastify.upload.array('files', 12)
     },
     /**
@@ -101,9 +80,11 @@ module.exports = async function (fastify, options) {
       const uploads = await Promise.all(request.files.map(async (file) => {
 
         // Create a new Upload object with file details and user ID
-        const upload = new Upload({
+        const sound = request.files.sound[0];
+        const upload = new Sound({
           ...request.file,
           user: userId,
+          _id: fastify.toObjectId(sound.id),
         });
          // Save the Upload object to the database and return the result
         return await upload.save();
@@ -126,32 +107,35 @@ module.exports = async function (fastify, options) {
    * Get a specific upload
    */
   fastify.get('/:id', async function (request, reply) {
-    fastify.log.info(request.params.id);
     const _id = fastify.toObjectId(request.params.id);
-    const files = await fastify.gridfs.find({ _id: _id }).toArray();
-    fastify.log.info(files);
-    /** @type {import('mongodb').GridFSFile} */
-    const file = files[0];
-    const fileStream = await fastify.gridfs.openDownloadStream(file._id);
+    const fileDoc = await Sound.findById(_id).exec();
+    const { file, fileStream } = await fileDoc.getFileStream(fastify);
     reply.type(file.contentType).send(fileStream);
   })
   /**
    * Find user who uploaded a file
    */
   fastify.get('/:fileId/:userId', async function (request, reply) {
-    const user = await Upload.findById(request.params.fileId)
+    const user = await Sound.findById(request.params.fileId)
       .populate('users')
       .findById(request.params.userId)
     return user;
   })
   /**
-   * Delete a file
+   * Delete a sound file
    */
-  fastify.delete('/:id', async function (request, reply) {
+  fastify.delete('/sound/:id', async function (request, reply) {
     try {
       const _id = fastify.toObjectId(request.params.id);
-      await fastify.gridfs.delete(_id);
-      const file = await Upload.findByIdAndDelete(request.params.id);
+      await fastify.gridfsSounds.delete(_id);
+      const file = await Sound.findByIdAndDelete(_id);
+      if (file.images) {
+        // delete all associated images
+        for (const image of file.images) {
+          await fastify.gridfsImages.delete(_id);
+          await Image.findByIdAndDelete(image);
+        }
+      }
       const users = await User.find({ uploads: file._id });
 
       // Remove the file ID from every user's uploads array
@@ -159,6 +143,22 @@ module.exports = async function (fastify, options) {
         user.uploads.pull(file._id);
         await user.save();
       }
+      return file;
+    } catch (err) {
+      fastify.log.error(err);
+    }
+  })
+  /**
+   * Delete a image file
+   */
+  fastify.delete('/image/:id', async function (request, reply) {
+    try {
+      const _id = fastify.toObjectId(request.params.id);
+      await fastify.gridfsImages.delete(_id);
+      const file = await Image.findByIdAndDelete(_id);
+      const sound = await Sound.findById(file.soundFile);
+      sound.images.pull(file._id);
+      await sound.save();
       return file;
     } catch (err) {
       fastify.log.error(err);
@@ -181,13 +181,12 @@ module.exports = async function (fastify, options) {
     async function (request, reply) {
       const _id = fastify.toObjectId(request.params.id);
       const newFileName = request.body.newFileName;
-      await fastify.gridfs.rename(_id, newFileName);
 
       // Renames the file to new file name
-      await fastify.gridfs.rename(_id, newFileName);
-      const file = await Upload.findByIdAndUpdate(_id, {
-        filename: newFileName
-      }, { new: true });
+      const file = await fastify.gridfsSounds.rename(_id, newFileName);
+      // const file = await Upload.findByIdAndUpdate(_id, {
+      //   filename: newFileName
+      // }, { new: true });
       return file;
     }
   );
@@ -217,5 +216,4 @@ module.exports = async function (fastify, options) {
   //   // Pipe the file data to the response
   //   downloadStream.pipe(reply.res);
   // });
-
 }
