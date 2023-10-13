@@ -55,7 +55,7 @@ module.exports = async function (fastify, options) {
         _id: fastify.toObjectId(sound.id),
       });
       await upload.save();
-      return upload;
+      return sound;
     }
   )
   /**

@@ -30,6 +30,28 @@ export default {
   components: {
     // Sidebar,
   },
+  props: {
+    /**
+     * @typedef {Object} FileData
+     * @property {string} _id
+     * @property {string} filename
+     * @property {string} contentType
+     * @property {Date} uploadDate
+     * @property {number} length
+     * @property {number} chunkSize
+     * @property {Object} metadata
+     * @property {string} metadata.title
+     * @property {string} metadata.description
+     * @property {string} metadata.latitude
+     * @property {string} metadata.longitude
+     * @property {string} metadata.tags
+     */
+    /** @type {FileData[]} */
+    files: {
+      type: Array,
+      default: () => [],
+    },
+  },
   data() {
     return {
       mapId: 'leaflet-map',
@@ -112,38 +134,19 @@ export default {
         this.centerMarker.setLatLng(center);
         this.coordinatesControl.getContainer().innerHTML = 'Center: ' + center.lat.toFixed(4) + ', ' + center.lng.toFixed(4);
       });
-
-      /**
-       * @typedef {Object} FileData
-       * @property {string} _id
-       * @property {string} filename
-       * @property {string} contentType
-       * @property {Date} uploadDate
-       * @property {number} length
-       * @property {number} chunkSize
-       * @property {Object} metadata
-       * @property {string} metadata.title
-       * @property {string} metadata.description
-       * @property {string} metadata.latitude
-       * @property {string} metadata.longitude
-       * @property {string} metadata.tags
-       */
-
-      Api().get('uploads/filedata/all')
-        .then((response) => {
-          /** @type {FileData[]} */
-          const data = response.data;
-          this.markers = data.map((item) => {
-            const { latitude, longitude, title, description } = item.metadata;
-            const marker = L.marker([Number(latitude), Number(longitude)]).addTo(leafletMap);
-            marker.bindPopup(`
-              <h2>Upload Info</h2><br>
-              <span>Title: ${title}</span><br>
-              <span>Description: ${description}</span><br>
-            `);
-            return marker;
-          });
+      if (this.files.length) {
+        this.markers = this.files.map((file) => {
+          const { latitude, longitude, title, description } = file.metadata;
+          const marker = L.marker([Number(latitude), Number(longitude)]).addTo(leafletMap);
+          marker.bindPopup(`
+            <h2>Upload Info</h2><br>
+            <span>Title: ${title}</span><br>
+            <span>Description: ${description}</span><br>
+          `);
+          marker.fileId = file._id;
+          return marker;
         });
+      }
       this.mapInstance = leafletMap;
     },
   },
@@ -156,6 +159,22 @@ export default {
     }
   },
   watch: {
+    files: {
+      handler(newFiles) {
+        newFiles.forEach((file) => {
+          const { latitude, longitude, title, description } = file.metadata;
+          const marker = L.marker([latitude, longitude]).addTo(this.mapInstance);
+          marker.bindPopup(`
+            <h2>Upload Info</h2><br>
+            <span>Title: ${title}</span><br>
+            <span>Description: ${description}</span><br>
+          `);
+          marker.fileId = file._id;
+          this.markers.push(marker);
+        });
+      },
+      deep: true,
+    },
   },
 };
 </script>

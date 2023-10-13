@@ -137,7 +137,7 @@
     </Modal>
     <UserMenu :user="user" :show="showUserMenu" />
     <v-main style="height: 100vh; width: 100vw; overflow-y: auto; margin-bottom: 1vh;">
-      <LeafletMap />
+      <LeafletMap :files="files"/>
     </v-main>
   </div>
 </template>
@@ -147,6 +147,7 @@ import LeafletMap from "../components/LeafletMap.vue";
 import Modal from '../components/Modal.vue';
 import UserMenu from '../components/UserMenu.vue';
 import UploadService from "../services/UploadService";
+import Api from '../services/Api';
 
 export default {
   name: "home",
@@ -162,7 +163,13 @@ export default {
       showSearchModal: false,
       showUploadModal: false,
       zoom: 2,
+      files: [],
     };
+  },
+  beforeCreate() {
+    Api().get('uploads/filedata/all').then((response) => {
+      this.files = response.data;
+    });
   },
   methods: {
     logout () {
@@ -180,7 +187,7 @@ export default {
       const form = e.target
       const formData = new FormData(form)
       const response = await UploadService.upload(formData)
-      console.log(response)
+      this.files.push(response.data)
       e.target.reset()
     }
   }
