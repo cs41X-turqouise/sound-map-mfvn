@@ -11,7 +11,8 @@
     "start": "fastify start -l info app.js",
     "dev": "fastify start -w -l info -P app.js",
     "pretest": "standard",
-    "lint": "standard --fix"
+    "lint": "standard --fix",
+    "clean-db": "node ./scripts/clean-db.js"
   },
   "keywords": [],
   "author": "",
