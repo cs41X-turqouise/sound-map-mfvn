@@ -128,6 +128,15 @@ module.exports = async function (fastify, options) {
     reply.header('Content-Type', file.contentType);
     return reply.send(fileStream);
   })
+  fastify.get('/filedata/all', async function (request, reply) {
+    const data = [];
+    const uploads = await Sound.find({});
+    for (const upload of uploads) {
+      const file = await upload.getFile(fastify);
+      data.push(file);
+    }
+    return reply.send(data);
+  })
   /**
    * Find user who uploaded a file
    */
@@ -184,7 +193,7 @@ module.exports = async function (fastify, options) {
   /**
    * Rename a file
    */
-  fastify.patch('/:id',
+  fastify.patch('/filename/:id',
     {
       schema: {
         body: {
@@ -211,7 +220,7 @@ module.exports = async function (fastify, options) {
   /**
    * Update metadata of a file
    */
-  fastify.patch('/meta/:id',
+  fastify.patch('/metadata/:id',
     {
       schema: {
         body: {
