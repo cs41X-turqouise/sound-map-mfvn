@@ -6,6 +6,7 @@
 
 <script>
 import L from 'leaflet';
+import Api from '../services/Api';
 // import Sidebar from './Sidebar.vue';
 
 const CoordinatesControl = L.Control.extend({
@@ -42,7 +43,7 @@ export default {
         ),
         layers: [],
       },
-      popups: [],
+      markers: [],
       geojsonData: null,
       mapInstance: null,
       layerControlInstance: null,
@@ -111,6 +112,38 @@ export default {
         this.centerMarker.setLatLng(center);
         this.coordinatesControl.getContainer().innerHTML = 'Center: ' + center.lat.toFixed(4) + ', ' + center.lng.toFixed(4);
       });
+
+      /**
+       * @typedef {Object} FileData
+       * @property {string} _id
+       * @property {string} filename
+       * @property {string} contentType
+       * @property {Date} uploadDate
+       * @property {number} length
+       * @property {number} chunkSize
+       * @property {Object} metadata
+       * @property {string} metadata.title
+       * @property {string} metadata.description
+       * @property {string} metadata.latitude
+       * @property {string} metadata.longitude
+       * @property {string} metadata.tags
+       */
+
+      Api().get('uploads/filedata/all')
+        .then((response) => {
+          /** @type {FileData[]} */
+          const data = response.data;
+          this.markers = data.map((item) => {
+            const { latitude, longitude, title, description } = item.metadata;
+            const marker = L.marker([Number(latitude), Number(longitude)]).addTo(leafletMap);
+            marker.bindPopup(`
+              <h2>Upload Info</h2><br>
+              <span>Title: ${title}</span><br>
+              <span>Description: ${description}</span><br>
+            `);
+            return marker;
+          });
+        });
       this.mapInstance = leafletMap;
     },
   },
