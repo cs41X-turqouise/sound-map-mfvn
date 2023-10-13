@@ -1,0 +1,18 @@
+services:
+  client:
+    build: 
+      context: ./client
+    ports:
+      - "8080:8080"
+    depends_on: 
+      - server
+
+  server:
+    build: 
+      context: ./server
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: local
+    volumes:
+      - /home/pmeag001/fall2023/sound-map-mfvn/server/local.env:/usr/src/app/local.env
