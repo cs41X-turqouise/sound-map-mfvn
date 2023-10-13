@@ -180,8 +180,10 @@ module.exports = async function (fastify, options) {
       fastify.log.error(err);
     }
   })
-
-  // Define a route for renaming files
+  
+  /**
+   * Rename a file
+   */
   fastify.patch('/:id',
     {
       schema: {
@@ -203,6 +205,37 @@ module.exports = async function (fastify, options) {
       // const file = await Upload.findByIdAndUpdate(_id, {
       //   filename: newFileName
       // }, { new: true });
+      return file;
+    }
+  );
+  /**
+   * Update metadata of a file
+   */
+  fastify.patch('/meta/:id',
+    {
+      schema: {
+        body: {
+          type: 'object',
+          properties: {
+            title: { type: 'string' },
+            description: { type: 'string' },
+            tags: { type: 'array' },
+            latitude: { type: 'number' },
+            longitude: { type: 'number' },
+          },
+        },
+      },
+    },
+    async function (request, reply) {
+      const _id = fastify.toObjectId(request.params.id);
+      if (!Object.keys(request.body).length) {
+        throw new Error('No metadata provided');
+      }
+      const file = await fastify.mongoose.connection.db.collection('sounds.files').findOneAndUpdate(
+        { _id },
+        { $set: { metadata: request.body } }, // this needs to be fixed, currently replaces rather than updates
+        { returnOriginal: false }
+      );
       return file;
     }
   );
