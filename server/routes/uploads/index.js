@@ -97,12 +97,26 @@ module.exports = async function (fastify, options) {
   )
   /**
    * Get all uploads
-   * @todo Implement this route
+   * 10/13/23 - Works but it's slow
+   * @todo Speed this up
    */
   fastify.get('/', async function (request, reply) {
-    // const uploads = await Upload.find({});
-    // return uploads;
-    // fastify.gridfs.find().
+    const data = [];
+    const uploads = await Sound.find({});
+    for (const upload of uploads) {
+      const { file, fileStream } = await upload.getFileStream(fastify);
+      const buffer = await new Promise((resolve, reject) => {
+        const chunks = []
+        fileStream.on('data', chunk => chunks.push(chunk))
+        fileStream.on('error', reject)
+        fileStream.on('end', () => resolve(Buffer.concat(chunks)))
+      })
+      data.push({
+        file,
+        buffer,
+      });
+    }
+    return reply.send(data);
   })
   /**
    * Get a specific upload
@@ -192,15 +206,4 @@ module.exports = async function (fastify, options) {
       return file;
     }
   );
-
-  // // Define a route for downloading files
-  // fastify.get('/download/:fileId', async (request, reply) => {
-  //   const fileId = request.params.fileId;
-
-  //   // Create a GridFS read stream
-  //   const downloadStream = fastify.gridfs.openDownloadStream(ObjectId(fileId));
-
-  //   // Pipe the file data to the response
-  //   downloadStream.pipe(reply.res);
-  // });
 }

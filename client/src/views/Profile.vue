@@ -36,6 +36,10 @@
             </audio>
           </div>
         </div>
+        <div>
+          <v-btn @click="getSounds">Get Sounds</v-btn>
+          <div ref="sounddiv"></div>
+        </div>
       </div>
     </main>
   </div>
@@ -60,9 +64,33 @@ export default {
           return response.blob();
         })
         .then((blob) => {
+          console.log(blob);
           const objectUrl = URL.createObjectURL(blob);
           this.audioSrc = objectUrl;
           this.$refs.audio.innerHTML = `<source src="${objectUrl}" type="${this.audioType}">`;
+        });
+    },
+    getSounds () {
+      fetch(`http://localhost:3000/uploads/`)
+        .then((response) => {
+          return response.json();
+        })
+        .then((data) => {
+          console.log(data);
+          for (const item of data) {
+            const { buffer, file } = item;
+            const blob = new Blob([buffer.data], { type: file.contentType });
+            console.log(blob);
+            const objectUrl = URL.createObjectURL(blob);
+            const audio = document.createElement('audio');
+            audio.controls = true;
+            audio.preload = 'auto';
+            audio.innerHTML = `<source src="${objectUrl}" type="${file.contentType}">`;
+            audio.addEventListener('ended', () => {
+              URL.revokeObjectURL(objectUrl);
+            });
+            this.$refs.sounddiv.appendChild(audio);
+          }
         });
     },
   },
