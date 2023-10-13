@@ -34,12 +34,10 @@ module.exports = async function (fastify, options) {
           reply.send(err);  // Send the error as a response if there's any.
           return;
         }
-        // Sign the jwt token with the data from OAuth
-        token = fastify.jwt.sign({data}, JWT_SECRET);
-
-        // const redirectUrl = `http://localhost:5173/oauth/callback?name=${data.name}&id=${data.id}&picture=${data.picture}`;
+        token = generateToken(data);
+        const redirectUrl = `http://localhost:5173/oauth/callback?token=${token}`;
         // reply.redirect(redirectUrl); // Send the user data as a response.
-        reply.send(token);
+        res.redirect(redirectUrl);
       });
     });
   });
