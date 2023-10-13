@@ -1,5 +1,4 @@
 'use strict'
-/// <reference path="../../global.d.ts" />
 /**
  * Routes for handling CRUD (Create, Read, Update, and Delete) operations on uploads
  * @param {import("fastify").FastifyInstance} fastify 
@@ -7,6 +6,7 @@
  */
 module.exports = async function (fastify, options) {
   /**
+   * @typedef {import("../../global")}
    * @typedef {import("fastify").FastifyRequest} Request
    * @typedef {import("fastify").FastifyReply} Reply
    */
@@ -180,7 +180,7 @@ module.exports = async function (fastify, options) {
       fastify.log.error(err);
     }
   })
-  
+
   /**
    * Rename a file
    */
@@ -231,9 +231,16 @@ module.exports = async function (fastify, options) {
       if (!Object.keys(request.body).length) {
         throw new Error('No metadata provided');
       }
+      const oldFile = await fastify.mongoose.connection.db.collection('sounds.files').findOne({ _id: _id });
+      const metadata = {...oldFile.metadata, ...request.body };
+      oldFile.metadata = metadata;
       const file = await fastify.mongoose.connection.db.collection('sounds.files').findOneAndUpdate(
         { _id },
-        { $set: { metadata: request.body } }, // this needs to be fixed, currently replaces rather than updates
+        {
+          $set: {
+            metadata: metadata
+          }
+        },
         { returnOriginal: false }
       );
       return file;
