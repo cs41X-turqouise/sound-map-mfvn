@@ -179,8 +179,8 @@ export default {
       ],
       latitudeRules: [
         (v) => {
-            if (v) return true
-            return 'Latitude is required.'
+          if (v) return true
+          return 'Latitude is required.'
         },
         (v) => {
           if (v >= -90 && v <= 90) return true
@@ -220,12 +220,12 @@ export default {
       const { valid } = await this.$refs.form.validate();
       if (!valid) return;
 
-      const form = e.target
+      const form = e.target;
       const formData = new FormData(form);
-      const response = await UploadService.upload(formData)
+      const response = await UploadService.upload(formData);
 
-      this.files.push(response.data)
-      e.target.reset()
+      this.files.push(response.data);
+      e.target.reset();
       this.showUploadModal = false;
     },
   }
