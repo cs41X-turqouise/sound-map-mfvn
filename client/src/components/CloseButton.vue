@@ -6,7 +6,7 @@
 export default {
   name: 'CloseButton',
   methods: {
-    close() {
+    close () {
       this.$emit('close');
     },
   },

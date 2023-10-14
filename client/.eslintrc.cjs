@@ -29,6 +29,7 @@ module.exports = {
     }],
     'operator-linebreak': ['error', 'before'],
     'valid-jsdoc': 0,
-    'indent': ['error', 2, { 'MemberExpression': 1 }]
+    'indent': ['error', 2, { 'MemberExpression': 1 }],
+    'new-cap': 0,
   },
 };

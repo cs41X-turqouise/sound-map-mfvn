@@ -10,11 +10,11 @@
 
 <script>
 export default {
-  name: "Footer",
+  name: 'PageFooter',
   methods: {
     nav: function () {
       const currentRouteName = this.$route.name;
-      const page = currentRouteName === 'home' ? 'about' : 'home';
+      const page = currentRouteName === 'HomePage' ? 'AboutPage' : 'HomePage';
       this.$router.push({
         name: page,
       });

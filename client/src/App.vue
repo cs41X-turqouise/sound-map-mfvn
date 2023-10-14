@@ -5,16 +5,16 @@
         <router-view></router-view>
       </v-container>
     </v-main>
-    <Footer></Footer>
+    <PageFooter></PageFooter>
   </v-app>
 </template>
 
 <script>
-import Footer from './components/Footer.vue';
+import PageFooter from './components/Footer.vue';
 export default {
   name: 'App',
   components: {
-    Footer,
+    PageFooter,
   },
 };
 </script>

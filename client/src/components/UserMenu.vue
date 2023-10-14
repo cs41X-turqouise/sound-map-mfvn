@@ -18,11 +18,11 @@
 
 <script>
 export default {
-  name: "UserMenu",
+  name: 'UserMenu',
   props: {
     user: {
       type: String,
-      default: "Guest",
+      default: 'Guest',
     },
     show: {
       type: Boolean,

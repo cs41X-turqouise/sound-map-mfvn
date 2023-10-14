@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <!-- <header>
-      <img 
+      <img
         id="user-avatar"
         src="../assets/default-avatar.png"
         alt="User Avatar"
@@ -15,35 +15,25 @@
       </v-toolbar-items>
       <v-spacer></v-spacer>
       <v-toolbar-items>
-        <!-- <v-btn 
+        <!-- <v-btn
           v-if="!$store.state.isUserLoggedIn"
-          flat 
+          flat
           dark
           :to="{
             name: 'login'
           }">
           Login
         </v-btn> -->
-        
-        <v-btn 
-          v-if="!$store.state.isUserLoggedIn"
-          flat 
-          dark
-          :to="{
-            name: 'register'
-          }">
-          Sign Up
-        </v-btn>
-        
-        <v-btn 
+
+        <v-btn
           v-if="$store.state.isUserLoggedIn"
-          flat 
+          flat
           dark
           @click="logout">
           Log Out
         </v-btn>
         <v-btn size="small" @click="showUploadModal = true" dark>
-          Upload 
+          Upload
         </v-btn>
         <!-- Figure out why v-avatar and v-img cause this to break -->
         <!-- <img id="user-avatar"
@@ -54,7 +44,7 @@
       </v-toolbar-items>
     </v-toolbar>
     <div v-if="showSearchModal || showUploadModal" class="overlay"></div>
-    <Modal :show="showSearchModal" @close="showSearchModal = false">
+    <CenterModal :show="showSearchModal" @close="showSearchModal = false">
       <h2>Search Media</h2>
       <!-- TODO - custom error messages and validation -->
       <v-form @submit.prevent>
@@ -74,8 +64,8 @@
         ></v-text-field>
         <v-btn type="submit" name="submit" value="Submit">Submit</v-btn>
       </v-form>
-    </Modal>
-    <Modal :show="showUploadModal" @close="showUploadModal = false">
+    </CenterModal>
+    <CenterModal :show="showUploadModal" @close="showUploadModal = false">
       <h2>Upload Media</h2>
       <!-- TODO - better handling of these as tags are technically an array of strings -->
         <v-form @submit.prevent="upload" ref="form">
@@ -135,7 +125,7 @@
           ></v-file-input>
           <v-btn type="submit" name="submit" value="Submit">Submit</v-btn>
         </v-form>
-    </Modal>
+    </CenterModal>
     <UserMenu :user="user" :show="showUserMenu" />
     <v-main style="height: 100vh; width: 100vw; overflow-y: auto; margin-bottom: 1vh;">
       <LeafletMap :files="files"/>
@@ -144,20 +134,20 @@
 </template>
 
 <script>
-import LeafletMap from "../components/LeafletMap.vue";
-import Modal from '../components/Modal.vue';
+import LeafletMap from '../components/LeafletMap.vue';
+import CenterModal from '../components/Modal.vue';
 import UserMenu from '../components/UserMenu.vue';
-import UploadService from "../services/UploadService";
+import UploadService from '../services/UploadService';
 import Api from '../services/Api';
 
 export default {
-  name: "home",
+  name: 'HomePage',
   components: {
     LeafletMap,
-    Modal,
+    CenterModal,
     UserMenu,
   },
-  data() {
+  data () {
     return {
       user: null,
       showUserMenu: false,
@@ -172,49 +162,49 @@ export default {
       soundRules: [
         (v) => {
           if (v?.length) {
-            return true
+            return true;
           }
-          return "Choose a file";
+          return 'Choose a file';
         }
       ],
       latitudeRules: [
         (v) => {
-          if (v) return true
-          return 'Latitude is required.'
+          if (v) return true;
+          return 'Latitude is required.';
         },
         (v) => {
-          if (v >= -90 && v <= 90) return true
-          return 'Must be between -90 and 90.'
+          if (v >= -90 && v <= 90) return true;
+          return 'Must be between -90 and 90.';
         },
       ],
       longitudeRules: [
         (v) => {
-          if (v) return true
-          return 'Longitude is required.'
+          if (v) return true;
+          return 'Longitude is required.';
         },
         (v) => {
-          if (v >= -180 && v <= 180) return true
-          return 'Must be between -180 and 180.'
+          if (v >= -180 && v <= 180) return true;
+          return 'Must be between -180 and 180.';
         },
       ],
     };
   },
-  beforeCreate() {
+  beforeCreate () {
     Api().get('uploads/filedata/all').then((response) => {
       this.files = response.data;
     });
   },
   methods: {
     logout () {
-      this.$store.dispatch('setToken', null)
-      this.$store.dispatch('setUser', null)
+      this.$store.dispatch('setToken', null);
+      this.$store.dispatch('setUser', null);
       this.$router.push({
         name: 'home'
-      })
+      });
     },
     /**
      * @async
-     * @param {Event} e 
+     * @param {Event} e
      */
     async upload (e) {
       const { valid } = await this.$refs.form.validate();
