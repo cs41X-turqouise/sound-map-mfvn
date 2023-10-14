@@ -11,7 +11,7 @@
     "start": "fastify start -l info app.js",
     "dev": "fastify start -w -l info -P app.js",
     "pretest": "standard",
-    "lint": "standard --fix",
+    "lint": "eslint --fix",
     "clean-db": "node ./scripts/clean-db.js"
   },
   "keywords": [],
@@ -33,7 +33,8 @@
     "mongoose": "^7.5.3"
   },
   "devDependencies": {
-    "standard": "^17.0.0",
+    "eslint": "^8.51.0",
+    "eslint-config-google": "^0.14.0",
     "tap": "^16.1.0"
   }
 }
