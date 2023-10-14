@@ -1,0 +1,23 @@
+services:
+  client:
+    build: 
+      context: ./client
+      target: dev
+    ports:
+      - "8080:8080"
+    depends_on: 
+      - server
+    volumes:
+      - ./client:/usr/src/app/client
+
+  server:
+    build: 
+      context: ./server
+      target: dev
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: local
+    volumes:
+      - ./server/local.env:/usr/src/app/local.env
+      - ./server:/usr/src/app/server
