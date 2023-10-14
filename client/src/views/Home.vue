@@ -78,7 +78,7 @@
     <Modal :show="showUploadModal" @close="showUploadModal = false">
       <h2>Upload Media</h2>
       <!-- TODO - better handling of these as tags are technically an array of strings -->
-        <v-form @submit.prevent="upload">
+        <v-form @submit.prevent="upload" ref="form">
           <v-text-field name="title" label="Title" id="title" clearable
           ></v-text-field>
           <v-text-field name="description" label="Description" id="description" clearable
@@ -98,7 +98,7 @@
                   max="90"
                   class="no-spinner"
                   clearable
-                  :rules="[v=> (!!v && v >= -90 && v <= 90) || 'Must be between -90 and 90']"
+                  :rules="latitudeRules"
                 ></v-text-field>
               </v-col>
               <v-col cols="6">
@@ -112,7 +112,7 @@
                   max="180"
                   class="no-spinner"
                   clearable
-                  :rules="[v=> (!!v && v >= -180 && v <= 180) || 'Must be between -180 and 180']" 
+                  :rules="longitudeRules"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -123,6 +123,7 @@
             name="sound"
             accept="audio/*"
             required
+            :rules="soundRules"
           ></v-file-input>
           <v-file-input
             label="Select Image File(s)"
@@ -162,8 +163,44 @@ export default {
       showUserMenu: false,
       showSearchModal: false,
       showUploadModal: false,
+      uploadForm: {
+        valid: false
+      },
+      valid: false,
       zoom: 2,
       files: [],
+      soundRules: [
+        v =>  {
+          if (v.length) {
+            return true
+          }
+          return "Choose a file";
+        }
+      ],
+      latitudeRules:[
+        v => {
+            if (v) return true
+
+            return 'Latitude is required.'
+          },
+          v => {
+            if (v=> (!!v && v >= -90 && v <= 90)) return true
+
+            return 'Must be between -90 and 90.'
+          },
+      ],
+      longitudeRules:[
+        v => {
+            if (v) return true
+
+            return 'Longitude is required.'
+          },
+          v => {
+            if (v=> (!!v && v >= -180 && v <= 180)) return true
+
+            return 'Must be between -180 and 180.'
+          },
+      ],
     };
   },
   beforeCreate() {
@@ -185,10 +222,56 @@ export default {
      */
     async upload (e) {
       const form = e.target
-      const formData = new FormData(form)
+      const valid = await this.validate();
+      console.log(`valid ${valid}`)
+      if(!valid){
+        e.preventDefault()
+        return false;
+      }
+
+      //console.log(this)
+
+      // this.errors = [];
+
+      // if(!form.sound.files.length){
+      //   this.errors.push('Sound File required.');
+      //   console.log(`no sounds`)
+      // }
+
+      // console.log(`longitude ${longitude}`)
+      // if(!form.latitude.value || !form.longitude.value){
+      //   this.errors.push(`Longitude and latitude required.`)
+      // }
+
+      // if (this.errors.length){
+      //   console.log(this.errors)
+      //   e.preventDefault();
+      //   return;
+      // }
+
+      const formData = new FormData(form);
       const response = await UploadService.upload(formData)
+
+
       this.files.push(response.data)
       e.target.reset()
+    },
+    async validate(){
+      const { valid } = await this.$refs.form.validate()
+
+      return valid;
+    },
+    checkUploadForm (e) {
+      console.log(this)
+      if (this.sounds) {
+        return true;
+      }
+      this.errors = [];
+
+      if(!this.sounds){
+        this.errors.push('Sound File required.');
+      }
+      e.preventDefault();
     }
   }
 };
