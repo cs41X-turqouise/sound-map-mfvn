@@ -15,4 +15,4 @@ services:
     environment:
       NODE_ENV: local
     volumes:
-      - ../local.env:/usr/src/app/local.env
+      - /home/pmeag001/fall2023/sound-map-mfvn/server/local.env:/usr/src/app/local.env
