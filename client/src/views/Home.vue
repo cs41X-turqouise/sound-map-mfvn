@@ -193,6 +193,7 @@ export default {
       const response = await UploadService.upload(formData)
       this.files.push(response.data)
       e.target.reset()
+      this.showUploadModal = false;
     }
   }
 };
