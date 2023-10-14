@@ -170,34 +170,30 @@ export default {
       zoom: 2,
       files: [],
       soundRules: [
-        v =>  {
+        (v) => {
           if (v?.length) {
             return true
           }
           return "Choose a file";
         }
       ],
-      latitudeRules:[
-        v => {
+      latitudeRules: [
+        (v) => {
             if (v) return true
-
             return 'Latitude is required.'
         },
-        v => {
+        (v) => {
           if (v >= -90 && v <= 90) return true
-
           return 'Must be between -90 and 90.'
         },
       ],
-      longitudeRules:[
-        v => {
-            if (v) return true
-
-            return 'Longitude is required.'
-          },
-        v => {
+      longitudeRules: [
+        (v) => {
+          if (v) return true
+          return 'Longitude is required.'
+        },
+        (v) => {
           if (v >= -180 && v <= 180) return true
-
           return 'Must be between -180 and 180.'
         },
       ],
@@ -221,25 +217,17 @@ export default {
      * @param {Event} e 
      */
     async upload (e) {
+      const { valid } = await this.$refs.form.validate();
+      if (!valid) return;
+
       const form = e.target
-      const valid = await this.validate();
-      console.log(`valid ${valid}`)
-      if(!valid){
-        e.preventDefault()
-        return false;
-      }
       const formData = new FormData(form);
       const response = await UploadService.upload(formData)
 
-
       this.files.push(response.data)
       e.target.reset()
+      this.showUploadModal = false;
     },
-    async validate(){
-      const { valid } = await this.$refs.form.validate()
-
-      return valid;
-    }
   }
 };
 </script>
