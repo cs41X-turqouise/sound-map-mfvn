@@ -31,7 +31,7 @@ const soundSchema = new mongoose.Schema(
        * @typedef {import('mongodb').GridFSFile} GridFSFile
        */
       /**
-       * @param {FastifyInstance} fastify 
+       * @param {FastifyInstance} fastify
        * @returns {GridFSFile}
        */
       async getFile (fastify) {
@@ -40,7 +40,7 @@ const soundSchema = new mongoose.Schema(
         return files[0];
       },
       /**
-       * @param {FastifyInstance} fastify 
+       * @param {FastifyInstance} fastify
        * @returns {Promise<{fileStream: GridFSBucketReadStream, file: GridFSFile}>}
        */
       async getFileStream (fastify) {

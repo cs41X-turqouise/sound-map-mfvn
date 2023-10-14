@@ -1,7 +1,7 @@
-'use strict'
+'use strict';
 /**
  * Routes for handling CRUD (Create, Read, Update, and Delete) operations on uploads
- * @param {import("fastify").FastifyInstance} fastify 
+ * @param {import("fastify").FastifyInstance} fastify
  * @param {Object} options plugin options, refer to https://www.fastify.io/docs/latest/Reference/Plugins/#plugin-options
  */
 module.exports = async function (fastify, options) {
@@ -57,12 +57,12 @@ module.exports = async function (fastify, options) {
       await upload.save();
       return sound;
     }
-  )
+  );
   /**
    * Allows users to upload an array of files
    * @todo We should be able to upload multiple sound files and corresponding images if any
    */
-  fastify.post('/bulk', 
+  fastify.post('/bulk',
     {
       preHandler: fastify.upload.array('files', 12)
     },
@@ -76,10 +76,9 @@ module.exports = async function (fastify, options) {
       // Extract the user ID from the request body
       const userId = fastify.toObjectId(request.body.user);
 
-       // Process file uploads concurrently using Promise.all and map by using Promise.all
-       // in combination with map, the code is able to process multiple file uploads simultaneously
+      // Process file uploads concurrently using Promise.all and map by using Promise.all
+      // in combination with map, the code is able to process multiple file uploads simultaneously
       const uploads = await Promise.all(request.files.map(async (file) => {
-
         // Create a new Upload object with file details and user ID
         const sound = request.files.sound[0];
         const upload = new Sound({
@@ -87,14 +86,14 @@ module.exports = async function (fastify, options) {
           user: userId,
           _id: fastify.toObjectId(sound.id),
         });
-         // Save the Upload object to the database and return the result
+        // Save the Upload object to the database and return the result
         return await upload.save();
       }));
 
       // Return an array of uploaded file objects
       return uploads;
     }
-  )
+  );
   /**
    * Get all uploads
    * 10/13/23 - Works but it's slow
@@ -106,18 +105,18 @@ module.exports = async function (fastify, options) {
     for (const upload of uploads) {
       const { file, fileStream } = await upload.getFileStream(fastify);
       const buffer = await new Promise((resolve, reject) => {
-        const chunks = []
-        fileStream.on('data', chunk => chunks.push(chunk))
-        fileStream.on('error', reject)
-        fileStream.on('end', () => resolve(Buffer.concat(chunks)))
-      })
+        const chunks = [];
+        fileStream.on('data', (chunk) => chunks.push(chunk));
+        fileStream.on('error', reject);
+        fileStream.on('end', () => resolve(Buffer.concat(chunks)));
+      });
       data.push({
         file,
         buffer,
       });
     }
     return reply.send(data);
-  })
+  });
   /**
    * Get a specific upload
    */
@@ -127,7 +126,7 @@ module.exports = async function (fastify, options) {
     const { file, fileStream } = await fileDoc.getFileStream(fastify);
     reply.header('Content-Type', file.contentType);
     return reply.send(fileStream);
-  })
+  });
   fastify.get('/filedata/all', async function (request, reply) {
     const data = [];
     const uploads = await Sound.find({});
@@ -136,16 +135,16 @@ module.exports = async function (fastify, options) {
       data.push(file);
     }
     return reply.send(data);
-  })
+  });
   /**
    * Find user who uploaded a file
    */
   fastify.get('/:fileId/:userId', async function (request, reply) {
     const user = await Sound.findById(request.params.fileId)
       .populate('users')
-      .findById(request.params.userId)
+      .findById(request.params.userId);
     return user;
-  })
+  });
   /**
    * Delete a sound file
    */
@@ -172,7 +171,7 @@ module.exports = async function (fastify, options) {
     } catch (err) {
       fastify.log.error(err);
     }
-  })
+  });
   /**
    * Delete a image file
    */
@@ -188,7 +187,7 @@ module.exports = async function (fastify, options) {
     } catch (err) {
       fastify.log.error(err);
     }
-  })
+  });
 
   /**
    * Rename a file
@@ -241,7 +240,7 @@ module.exports = async function (fastify, options) {
         throw new Error('No metadata provided');
       }
       const oldFile = await fastify.mongoose.connection.db.collection('sounds.files').findOne({ _id: _id });
-      const metadata = {...oldFile.metadata, ...request.body };
+      const metadata = { ...oldFile.metadata, ...request.body };
       oldFile.metadata = metadata;
       const file = await fastify.mongoose.connection.db.collection('sounds.files').findOneAndUpdate(
         { _id },
@@ -255,4 +254,4 @@ module.exports = async function (fastify, options) {
       return file;
     }
   );
-}
+};

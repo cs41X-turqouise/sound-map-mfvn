@@ -1,17 +1,17 @@
-'use strict'
+'use strict';
 
-const fp = require('fastify-plugin')
-const multer = require('fastify-multer')
-const { GridFsStorage } = require('@thebguy/multer-gridfs-storage')
+const fp = require('fastify-plugin');
+const multer = require('fastify-multer');
+const { GridFsStorage } = require('@thebguy/multer-gridfs-storage');
 
 module.exports = fp(async function (fastify, options) {
   fastify.register(multer.contentParser);
-  
+
   const storage = new GridFsStorage({
     url: fastify.config.MONGODB_URL,
     /**
-     * @param {Request} req 
-     * @param {import("@thebguy/multer-gridfs-storage").GridFile} file 
+     * @param {Request} req
+     * @param {import("@thebguy/multer-gridfs-storage").GridFile} file
      */
     file: (req, file) => {
       return new Promise((resolve, reject) => {
@@ -30,7 +30,7 @@ module.exports = fp(async function (fastify, options) {
         resolve(fileInfo);
       });
     }
-  })
+  });
 
   storage.on('connection', (db) => {
     // Db is the database instance
