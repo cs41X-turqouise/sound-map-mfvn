@@ -78,7 +78,7 @@
     <Modal :show="showUploadModal" @close="showUploadModal = false">
       <h2>Upload Media</h2>
       <!-- TODO - better handling of these as tags are technically an array of strings -->
-        <v-form @submit.prevent="upload">
+        <v-form @submit.prevent="upload" ref="uploadForm">
           <v-text-field name="title" label="Title" id="title" clearable
           ></v-text-field>
           <v-text-field name="description" label="Description" id="description" clearable
@@ -98,6 +98,7 @@
                   max="90"
                   class="no-spinner"
                   clearable
+                  required
                   :rules="[v=> (!!v && v >= -90 && v <= 90) || 'Must be between -90 and 90']"
                 ></v-text-field>
               </v-col>
@@ -112,6 +113,7 @@
                   max="180"
                   class="no-spinner"
                   clearable
+                  required
                   :rules="[v=> (!!v && v >= -180 && v <= 180) || 'Must be between -180 and 180']" 
                 ></v-text-field>
               </v-col>
@@ -184,6 +186,8 @@ export default {
      * @param {Event} e 
      */
     async upload (e) {
+      const { valid } = await this.$refs.uploadForm.validate();
+      if (!valid) return;
       const form = e.target
       const formData = new FormData(form)
       const response = await UploadService.upload(formData)
