@@ -135,7 +135,7 @@
 
 <script>
 import LeafletMap from '../components/LeafletMap.vue';
-import CenterModal from '../components/Modal.vue';
+import CenterModal from '../components/CenterModal.vue';
 import UserMenu from '../components/UserMenu.vue';
 import UploadService from '../services/UploadService';
 import Api from '../services/Api';

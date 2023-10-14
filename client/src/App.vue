@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import PageFooter from './components/Footer.vue';
+import PageFooter from './components/PageFooter.vue';
 export default {
   name: 'App',
   components: {
