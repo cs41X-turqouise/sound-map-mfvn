@@ -25,18 +25,23 @@
             <li v-for="(item, index) in bookmarkedContent" :key="index">{{ item }}</li>
           </ul>
         </div>
-        <form @submit.prevent="uploadSound">
-          <input type="text" name="sound-file" placeholder="Sound File" v-model="soundFile">
-          <input type="submit" value="Upload">
-        </form>
-        <audio controls ref="audio">
-          <source :src="audioSrc" type="audio/mpeg">
-        </audio>
+        <div style="border: 2px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.25);">
+          <v-form @submit.prevent="getSound">
+            <v-text-field name="fileid" label="FileId" id="fileid" v-model="soundFile"></v-text-field>
+            <v-btn type="submit" name="submit" value="Submit">Submit</v-btn>
+          </v-form>
+          <div style="padding: 20px;">
+            <audio controls ref="audio">
+              <source :src="audioSrc" :type="audioType">
+            </audio>
+          </div>
+        </div>
+        <div>
+          <v-btn @click="getSounds">Get Sounds</v-btn>
+          <div ref="sounddiv"></div>
+        </div>
       </div>
     </main>
-    <footer>
-      <p>&copy; 2023 Sound Map for a Changing Landscape</p>
-    </footer>
   </div>
 </template>
 
@@ -48,16 +53,44 @@ export default {
       bookmarkedContent: ["Item 1", "Item 2", "Item 3"],
       soundFile: "",
       audioSrc: "",
+      audioType: "",
     };
   },
   methods: {
-    uploadSound() {
-      fetch(`/api/file/${this.soundFile}`)
-        .then((response) => response.blob())
+    getSound () {
+      fetch(`http://localhost:3000/uploads/${this.soundFile}`)
+        .then((response) => {
+          this.audioType = response.headers.get("Content-Type");
+          return response.blob();
+        })
         .then((blob) => {
+          console.log(blob);
           const objectUrl = URL.createObjectURL(blob);
           this.audioSrc = objectUrl;
-          this.$refs.audio.play();
+          this.$refs.audio.innerHTML = `<source src="${objectUrl}" type="${this.audioType}">`;
+        });
+    },
+    getSounds () {
+      fetch(`http://localhost:3000/uploads/`)
+        .then((response) => {
+          return response.json();
+        })
+        .then((data) => {
+          console.log(data);
+          for (const item of data) {
+            const { buffer, file } = item;
+            const blob = new Blob([buffer.data], { type: file.contentType });
+            console.log(blob);
+            const objectUrl = URL.createObjectURL(blob);
+            const audio = document.createElement('audio');
+            audio.controls = true;
+            audio.preload = 'auto';
+            audio.innerHTML = `<source src="${objectUrl}" type="${file.contentType}">`;
+            audio.addEventListener('ended', () => {
+              URL.revokeObjectURL(objectUrl);
+            });
+            this.$refs.sounddiv.appendChild(audio);
+          }
         });
     },
   },
