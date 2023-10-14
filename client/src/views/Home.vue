@@ -78,11 +78,7 @@
     <Modal :show="showUploadModal" @close="showUploadModal = false">
       <h2>Upload Media</h2>
       <!-- TODO - better handling of these as tags are technically an array of strings -->
-<<<<<<< HEAD
         <v-form @submit.prevent="upload" ref="form">
-=======
-        <v-form @submit.prevent="upload" ref="uploadForm">
->>>>>>> 86d0849ad9627f00d43a805c8e162ee0a5af4757
           <v-text-field name="title" label="Title" id="title" clearable
           ></v-text-field>
           <v-text-field name="description" label="Description" id="description" clearable
@@ -102,12 +98,7 @@
                   max="90"
                   class="no-spinner"
                   clearable
-<<<<<<< HEAD
                   :rules="latitudeRules"
-=======
-                  required
-                  :rules="[v=> (!!v && v >= -90 && v <= 90) || 'Must be between -90 and 90']"
->>>>>>> 86d0849ad9627f00d43a805c8e162ee0a5af4757
                 ></v-text-field>
               </v-col>
               <v-col cols="6">
@@ -121,12 +112,7 @@
                   max="180"
                   class="no-spinner"
                   clearable
-<<<<<<< HEAD
                   :rules="longitudeRules"
-=======
-                  required
-                  :rules="[v=> (!!v && v >= -180 && v <= 180) || 'Must be between -180 and 180']" 
->>>>>>> 86d0849ad9627f00d43a805c8e162ee0a5af4757
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -185,7 +171,7 @@ export default {
       files: [],
       soundRules: [
         v =>  {
-          if (v.length) {
+          if (v?.length) {
             return true
           }
           return "Choose a file";
@@ -196,12 +182,12 @@ export default {
             if (v) return true
 
             return 'Latitude is required.'
-          },
-          v => {
-            if (v=> (!!v && v >= -90 && v <= 90)) return true
+        },
+        v => {
+          if (v >= -90 && v <= 90) return true
 
-            return 'Must be between -90 and 90.'
-          },
+          return 'Must be between -90 and 90.'
+        },
       ],
       longitudeRules:[
         v => {
@@ -209,11 +195,11 @@ export default {
 
             return 'Longitude is required.'
           },
-          v => {
-            if (v=> (!!v && v >= -180 && v <= 180)) return true
+        v => {
+          if (v >= -180 && v <= 180) return true
 
-            return 'Must be between -180 and 180.'
-          },
+          return 'Must be between -180 and 180.'
+        },
       ],
     };
   },
@@ -235,8 +221,6 @@ export default {
      * @param {Event} e 
      */
     async upload (e) {
-      const { valid } = await this.$refs.uploadForm.validate();
-      if (!valid) return;
       const form = e.target
       const valid = await this.validate();
       console.log(`valid ${valid}`)
@@ -244,54 +228,17 @@ export default {
         e.preventDefault()
         return false;
       }
-
-      //console.log(this)
-
-      // this.errors = [];
-
-      // if(!form.sound.files.length){
-      //   this.errors.push('Sound File required.');
-      //   console.log(`no sounds`)
-      // }
-
-      // console.log(`longitude ${longitude}`)
-      // if(!form.latitude.value || !form.longitude.value){
-      //   this.errors.push(`Longitude and latitude required.`)
-      // }
-
-      // if (this.errors.length){
-      //   console.log(this.errors)
-      //   e.preventDefault();
-      //   return;
-      // }
-
       const formData = new FormData(form);
       const response = await UploadService.upload(formData)
 
 
       this.files.push(response.data)
       e.target.reset()
-<<<<<<< HEAD
     },
     async validate(){
       const { valid } = await this.$refs.form.validate()
 
       return valid;
-    },
-    checkUploadForm (e) {
-      console.log(this)
-      if (this.sounds) {
-        return true;
-      }
-      this.errors = [];
-
-      if(!this.sounds){
-        this.errors.push('Sound File required.');
-      }
-      e.preventDefault();
-=======
-      this.showUploadModal = false;
->>>>>>> 86d0849ad9627f00d43a805c8e162ee0a5af4757
     }
   }
 };
