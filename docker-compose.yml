@@ -8,6 +8,7 @@ services:
     depends_on: 
       - server
     volumes:
+      - /usr/src/app/client/node_modules
       - ./client:/usr/src/app/client
 
   server:

@@ -32,7 +32,7 @@
           :to="{
             name: 'register'
           }">
-          Sign Up
+          Sign dfgsdfgsd
         </v-btn>
         
         <v-btn 

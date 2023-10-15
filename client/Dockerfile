@@ -5,7 +5,7 @@ FROM node:18 as base
 WORKDIR /usr/src/app/client
 # Expose the port the app runs on
 EXPOSE 8080
-
+FROM base as dev
 COPY package*.json ./
 
 RUN npm ci --include=dev
