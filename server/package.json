@@ -9,7 +9,7 @@
   "scripts": {
     "test": "tap \"test/**/*.test.js\"",
     "start": "fastify start -l info app.js",
-    "dev": "fastify start -w -l info -P app.js",
+    "dev": "fastify start -w --ignore-watch uploads -l info -P app.js",
     "pretest": "standard",
     "lint": "eslint --fix",
     "clean-db": "node ./scripts/clean-db.js"
@@ -30,6 +30,8 @@
     "fastify-cli": "^5.8.0",
     "fastify-multer": "^2.0.3",
     "fastify-plugin": "^4.0.0",
+    "ffmpeg-static": "^5.2.0",
+    "fluent-ffmpeg": "^2.1.2",
     "mongoose": "^7.5.3"
   },
   "devDependencies": {
