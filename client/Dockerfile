@@ -5,14 +5,17 @@ FROM node:18 as base
 WORKDIR /usr/src/app/client
 # Expose the port the app runs on
 EXPOSE 8080
-FROM base as dev
-RUN --mount=type=bind,source=package.json,target=package.json \
-    --mount=type=bind,source=package-lock.json,target=package-lock.json \
-    --mount=type=cache,target=/root/.npm \
-    npm ci --include=dev
+
+COPY package*.json ./
+
+RUN npm ci --include=dev
+
 USER node
+
 COPY . .
-CMD npm run dev
+
+CMD ["npm", "run", "dev"]
+
 
 FROM base as prod
 ENV NODE_ENV production
