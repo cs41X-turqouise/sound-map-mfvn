@@ -8,9 +8,9 @@
 </template>
 
 <script>
-import CloseButton from "./CloseButton.vue";
+import CloseButton from './CloseButton.vue';
 export default {
-  name: "Modal",
+  name: 'CenterModal',
   props: {
     show: {
       type: Boolean,
@@ -21,8 +21,8 @@ export default {
     CloseButton,
   },
   methods: {
-    close() {
-      this.$emit("close");
+    close () {
+      this.$emit('close');
     },
   },
 };

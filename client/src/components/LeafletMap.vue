@@ -6,7 +6,6 @@
 
 <script>
 import L from 'leaflet';
-import Api from '../services/Api';
 // import Sidebar from './Sidebar.vue';
 
 const CoordinatesControl = L.Control.extend({
@@ -52,7 +51,7 @@ export default {
       default: () => [],
     },
   },
-  data() {
+  data () {
     return {
       mapId: 'leaflet-map',
       mapOptions: {
@@ -75,7 +74,7 @@ export default {
   },
   methods: {
     // Initialize map function:
-    initMap() {
+    initMap () {
       // Create the leaflet map
       const leafletMap = L.map(this.mapId, this.mapOptions);
       leafletMap.zoomControl.setPosition('bottomright');
@@ -127,8 +126,8 @@ export default {
       this.centerMarker = new L.Marker(
         leafletMap.getCenter(),
         { icon: myIcon }
-        ).addTo(leafletMap);
-        // Add event listeners to the map:
+      ).addTo(leafletMap);
+      // Add event listeners to the map:
       leafletMap.on('move', () => {
         const center = leafletMap.getCenter();
         this.centerMarker.setLatLng(center);
@@ -150,17 +149,17 @@ export default {
       this.mapInstance = leafletMap;
     },
   },
-  mounted() {
+  mounted () {
     this.initMap();
   },
-  destroyed() {
+  unmounted () {
     if (this.mapInstance) {
       this.mapInstance.remove();
     }
   },
   watch: {
     files: {
-      handler(newFiles) {
+      handler (newFiles) {
         newFiles.forEach((file) => {
           const { latitude, longitude, title, description } = file.metadata;
           const marker = L.marker([latitude, longitude]).addTo(this.mapInstance);

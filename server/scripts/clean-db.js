@@ -1,7 +1,11 @@
 require('dotenv').config({ path: './local.env' });
 const mongoose = require('mongoose');
 
-async function cleanDatabase() {
+/**
+ * Cleans the MongoDB database.
+ * @async
+ */
+async function cleanDatabase () {
   try {
     await mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true });
     console.log('Connected to MongoDB');

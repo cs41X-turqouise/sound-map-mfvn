@@ -47,20 +47,21 @@
 
 <script>
 export default {
-  data() {
+  name: 'ProfilePage',
+  data () {
     return {
-      uploadedContent: ["Item 1", "Item 2", "Item 3"],
-      bookmarkedContent: ["Item 1", "Item 2", "Item 3"],
-      soundFile: "",
-      audioSrc: "",
-      audioType: "",
+      uploadedContent: ['Item 1', 'Item 2', 'Item 3'],
+      bookmarkedContent: ['Item 1', 'Item 2', 'Item 3'],
+      soundFile: '',
+      audioSrc: '',
+      audioType: '',
     };
   },
   methods: {
     getSound () {
       fetch(`http://localhost:3000/uploads/${this.soundFile}`)
         .then((response) => {
-          this.audioType = response.headers.get("Content-Type");
+          this.audioType = response.headers.get('Content-Type');
           return response.blob();
         })
         .then((blob) => {

@@ -1,5 +1,5 @@
-import axios from 'axios'
-import store from '../store'
+import axios from 'axios';
+import store from '../store';
 
 export default () => {
   return axios.create({
@@ -7,5 +7,5 @@ export default () => {
     headers: {
       Authorization: `Bearer ${store.state.token}`
     }
-  })
-}
+  });
+};

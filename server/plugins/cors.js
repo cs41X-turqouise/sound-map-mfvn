@@ -1,6 +1,6 @@
-'use strict'
+'use strict';
 
-const fp = require('fastify-plugin')
+const fp = require('fastify-plugin');
 
 /**
  * enables the use of CORS in a Fastify application.
@@ -10,5 +10,5 @@ const fp = require('fastify-plugin')
 module.exports = fp(async function (fastify, opts) {
   fastify.register(require('@fastify/cors'), {
     // origin: true
-  })
-})
+  });
+});
