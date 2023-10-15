@@ -127,11 +127,32 @@ module.exports = async function (fastify, options) {
     reply.header('Content-Type', file.contentType);
     return reply.send(fileStream);
   });
+  /**
+   * Get a specific upload
+   */
+  fastify.get('/image/:id', async function (request, reply) {
+    const _id = fastify.toObjectId(request.params.id);
+    const fileDoc = await Image.findById(_id).exec();
+    const { file, fileStream } = await fileDoc.getFileStream(fastify);
+    reply.header('Content-Type', file.contentType);
+    return reply.send(fileStream);
+  });
   fastify.get('/filedata/all', async function (request, reply) {
     const data = [];
     const uploads = await Sound.find({});
     for (const upload of uploads) {
       const file = await upload.getFile(fastify);
+      // if (upload.images.length) {
+      //   file.images = await Promise.all(upload.images.map(async (id) => {
+      //     return await Image.getBuffer(fastify, id);
+      //   }));
+      //   file.images = [];
+      //   for (const id of upload.images) {
+      //     fastify.log.info(typeof id);
+      //     file.images.push(await Image.getBuffer(fastify, id));
+      //   }
+      // }
+      file.images = upload.images || [];
       data.push(file);
     }
     return reply.send(data);
