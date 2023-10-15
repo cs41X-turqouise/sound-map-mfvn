@@ -13,7 +13,7 @@
         Date: <span class="date">{{ marker.data.uploadDate }}</span><br>
         <span class="description">{{ marker.data.metadata.description }}</span>
         <div class="sound-bar">
-          <audio v-if="urls.has(marker.data._id)" class="audio" controls>
+          <audio v-if="urls.has(marker.data._id)" class="audio" :ref="`audio-${marker.data._id}`" controls>
             <source :src="urls.get(marker.data._id)" :type="`${marker.data.contentType}`">
           </audio>
           <v-btn v-else @click="fetchAudio(marker.data)">Play</v-btn>
@@ -60,6 +60,9 @@ export default {
         .then((blob) => {
           const objectUrl = URL.createObjectURL(blob);
           this.urls.set(marker._id, objectUrl);
+          this.$nextTick(() => {
+            this.$refs[`audio-${marker._id}`][0].play();
+          });
         });
     },
   },
