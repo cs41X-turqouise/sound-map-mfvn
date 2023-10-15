@@ -10,7 +10,7 @@
       <li v-for="marker in markers" :key="marker.data._id">
         <b class="name">{{ marker.data.metadata.title }}</b>
         (<span class="distance">{{ clicked.latlng.distanceTo(marker._latlng).toFixed(2) }}</span> m)<br>
-        Date: <span class="date">{{ marker.data.uploadDate }}</span><br>
+        Date: <span class="date">{{ new Date(marker.data.uploadDate).toLocaleDateString() }}</span><br>
         <span class="description">{{ marker.data.metadata.description }}</span>
         <div class="sound-bar">
           <audio v-if="urls.has(marker.data._id)" class="audio" :ref="`audio-${marker.data._id}`" controls>
