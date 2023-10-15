@@ -10,19 +10,20 @@ module.exports = async function (fastify, options) {
       };  
       const token = fastify.jwt.sign(user);
       reply.send({ token })
-      })
+      }),
 
+      fastify.get('/protectedRoute', async (req, reply) => {
+        try {
+          await req.jwtVerify();
 
-      // Not sure if I'll need this or not
-    /*fastify.post('/verify-token', async(req, reply) => {
-      const { token } = request.body;
+          const userId = req.user.id;
+          const userName = req.user.name;
+          const userPicture = req.user.picture;
 
-      try {
-         const decoded = jwt.verify(token, secret);
-         reply.send({ valid: true }, decoded);
+          reply.send('User ID: ${userId}, Name: ${userName}, Picture: ${userPicture}');
         }
-      catch(error) {
-          reply.send({ valid:false });
+        catch(err) {
+          reply.code(401).send({ error: 'Unauthorized: Unable to verify JWT token' });
         }
-    })*/
+      });
 }
