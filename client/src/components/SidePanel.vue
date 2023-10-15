@@ -1,0 +1,107 @@
+<template>
+  <div v-if="clicked" id="sidebar" class="sidebar" @click.stop>
+    <section id="heading">
+      <CloseButton @close="close" />
+      <h3>
+        Clicked ({{ clicked.lat.toFixed(2) }}, {{ clicked.lng.toFixed(2) }})
+      </h3>
+    </section>
+    <ul id="popup-list" class="popup-list">
+      <li v-for="marker in markers" :key="marker.data._id">
+        <b class="name">{{ marker.data.metadata.title }}</b>
+        (<span class="distance">{{ clicked.latlng.distanceTo(marker._latlng).toFixed(2) }}</span> m)<br>
+        Date: <span class="date">{{ marker.data.uploadDate }}</span><br>
+        <span class="description">{{ marker.data.metadata.description }}</span>
+        <div class="sound-bar">
+          <audio class="audio" controls>
+            <!-- <source
+              :src="popup.file instanceof File ? URL.createObjectURL(popup.file) : popup.file"
+              :type="`audio/${popup.fileType}`"
+            > -->
+            <source :src="marker.file" :type="`audio/${marker.data.contentType}`">
+          </audio>
+        </div>
+      </li>
+    </ul>
+  </div>
+</template>
+
+<script>
+import CloseButton from './CloseButton.vue';
+
+export default {
+  name: 'SidePanel',
+  components: {
+    CloseButton,
+  },
+  props: {
+    markers: {
+      type: Array,
+      default: () => [],
+    },
+    map: {
+      type: Object,
+      default: null,
+    },
+    /** @type {{ lat: number, lng: number }} */
+    clicked: null,
+  },
+  methods: {
+    close () {
+      this.$emit('close');
+    },
+  },
+};
+</script>
+
+<style scoped>
+.sidebar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 9999;
+  background-color: #f9f9f9;
+  width: auto;
+  min-width: 200px;
+  height: auto;
+  overflow: hidden;
+  overflow-y: auto;
+  transition: height 0.5s ease;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.25);
+}
+
+#heading {
+  border-bottom: 1px solid #ddd;
+  height: 40px;
+}
+
+h3 {
+  /* TODO: Change this font */
+  position: absolute;
+  margin: 0;
+  padding: 10px 10px;
+  left: 0;
+}
+
+.popup-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.popup-list li {
+  padding: 8px 16px;
+  text-decoration: none;
+  display: block;
+  border-bottom: 1px solid #ddd;
+}
+
+.popup-list li:hover {
+  background-color: aliceblue;
+}
+
+.sound-bar {
+  margin-top: 10px;
+}
+</style>

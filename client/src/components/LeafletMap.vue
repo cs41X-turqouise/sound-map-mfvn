@@ -1,7 +1,7 @@
 <template>
   <div :id="mapId">
-    <Sidebar
-      :popups="popups"
+    <SidePanel
+      :markers="markers"
       :map="mapInstance"
       :clicked="clicked"
       @close="clicked = null"/>
@@ -10,7 +10,7 @@
 
 <script>
 import L from 'leaflet';
-import Sidebar from './Sidebar.vue';
+import SidePanel from './SidePanel.vue';
 
 const CoordinatesControl = L.Control.extend({
   onAdd: function (map) {
@@ -31,7 +31,7 @@ const myIcon = L.icon({
 export default {
   name: 'LeafletMap',
   components: {
-    Sidebar,
+    SidePanel,
   },
   props: {
     /**
@@ -147,14 +147,14 @@ export default {
             <span>Title: ${title}</span><br>
             <span>Description: ${description}</span><br>
           `);
-          marker.fileId = file._id;
+          marker.data = file;
           return marker;
         });
       }
       leafletMap.on('click', (event) => {
         const lat = event.latlng.lat;
         const lng = event.latlng.lng;
-        this.clicked = { lat, lng };
+        this.clicked = { lat, lng, latlng: event.latlng };
       });
       this.mapInstance = leafletMap;
     },
@@ -178,7 +178,7 @@ export default {
             <span>Title: ${title}</span><br>
             <span>Description: ${description}</span><br>
           `);
-          marker.fileId = file._id;
+          marker.data = file;
           this.markers.push(marker);
         });
       },
