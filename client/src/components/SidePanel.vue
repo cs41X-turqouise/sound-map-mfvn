@@ -13,13 +13,10 @@
         Date: <span class="date">{{ marker.data.uploadDate }}</span><br>
         <span class="description">{{ marker.data.metadata.description }}</span>
         <div class="sound-bar">
-          <audio class="audio" controls>
-            <!-- <source
-              :src="popup.file instanceof File ? URL.createObjectURL(popup.file) : popup.file"
-              :type="`audio/${popup.fileType}`"
-            > -->
-            <source :src="marker.file" :type="`audio/${marker.data.contentType}`">
+          <audio v-if="urls.has(marker.data._id)" class="audio" controls>
+            <source :src="urls.get(marker.data._id)" :type="`${marker.data.contentType}`">
           </audio>
+          <v-btn v-else @click="fetchAudio(marker.data)">Play</v-btn>
         </div>
       </li>
     </ul>
@@ -46,9 +43,24 @@ export default {
     /** @type {{ lat: number, lng: number }} */
     clicked: null,
   },
+  data () {
+    return {
+      urls: new Map(),
+    };
+  },
   methods: {
     close () {
       this.$emit('close');
+    },
+    async fetchAudio (marker) {
+      fetch(`http://localhost:3000/uploads/${marker._id}`)
+        .then((response) => {
+          return response.blob();
+        })
+        .then((blob) => {
+          const objectUrl = URL.createObjectURL(blob);
+          this.urls.set(marker._id, objectUrl);
+        });
     },
   },
 };
