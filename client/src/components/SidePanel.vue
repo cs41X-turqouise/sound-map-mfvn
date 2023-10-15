@@ -12,6 +12,14 @@
         (<span class="distance">{{ clicked.latlng.distanceTo(marker._latlng).toFixed(2) }}</span> m)<br>
         Date: <span class="date">{{ new Date(marker.data.uploadDate).toLocaleDateString() }}</span><br>
         <span class="description">{{ marker.data.metadata.description }}</span>
+        <v-carousel v-if="marker.data.images.length" :style="{ width: '400px', height: '200px' }">
+          <v-carousel-item
+            v-for="(image, index) in marker.data.images"
+            :key="index"
+            :src="urls.get(image) || fetchImage(image)"
+            cover>
+          </v-carousel-item>
+        </v-carousel>
         <div class="sound-bar">
           <audio v-if="urls.has(marker.data._id)" class="audio" :ref="`audio-${marker.data._id}`" controls>
             <source :src="urls.get(marker.data._id)" :type="`${marker.data.contentType}`">
@@ -65,6 +73,17 @@ export default {
           });
         });
     },
+    async fetchImage (id) {
+      fetch(`http://localhost:3000/uploads/image/${id}`)
+        .then((response) => {
+          return response.blob();
+        })
+        .then((blob) => {
+          const objectUrl = URL.createObjectURL(blob);
+          this.urls.set(id, objectUrl);
+          return objectUrl;
+        });
+    }
   },
 };
 </script>
