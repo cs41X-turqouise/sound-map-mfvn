@@ -7,7 +7,7 @@
       </h3>
     </section>
     <ul id="popup-list" class="popup-list">
-      <li v-for="marker in markers" :key="marker.data._id">
+      <li v-for="marker in sortedMarkers" :key="marker.data._id">
         <b class="name">{{ marker.data.metadata.title }}</b>
         (<span class="distance">{{ clicked.latlng.distanceTo(marker._latlng).toFixed(2) }}</span> m)<br>
         Date: <span class="date">{{ new Date(marker.data.uploadDate).toLocaleDateString() }}</span><br>
@@ -84,6 +84,15 @@ export default {
           return objectUrl;
         });
     }
+  },
+  computed: {
+    sortedMarkers() {
+      return this.markers.slice().sort((a, b) => {
+        const distanceA = this.clicked.latlng.distanceTo(a._latlng);
+        const distanceB = this.clicked.latlng.distanceTo(b._latlng);
+        return distanceA - distanceB;
+      });
+    },
   },
 };
 </script>
