@@ -19,5 +19,4 @@ module.exports = fp(async function (fastify, options) {
     startRedirectPath: '/auth/google', // Path to redirect user for authentication.
     callbackUri: 'http://localhost:3000/auth/google/callback' // The callback URL Google will redirect to after authentication.
   });
-  fastify.decorateRequest('user', null);
 }, { name: 'oauth' });

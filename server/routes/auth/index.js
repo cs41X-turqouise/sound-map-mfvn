@@ -41,8 +41,7 @@ module.exports = async function (fastify, options) {
   fastify.get('/google/callback', async function (request, reply) {
     const token = await fastify.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
     const userInfo = await getUserInfo(token.token.access_token);
-    fastify.log.info(userInfo);
-    let user = await User.findOneAndUpdate({ gid: userInfo.id });
+    let user = await User.findOne({ gid: userInfo.id });
     if (!user) {
       user = new User({
         gid: userInfo.id,
@@ -55,6 +54,11 @@ module.exports = async function (fastify, options) {
     request.session.user = user;
     fastify.log.info(request.session.user);
     reply.redirect('http://localhost:5173/');
+  });
+
+  fastify.post('/logout', async function (request, reply) {
+    request.session.destroy();
+    reply.send('Logged out');
   });
   fastify.log.info('Oauth Route registered.');
 };

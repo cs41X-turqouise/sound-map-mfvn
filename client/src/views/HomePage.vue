@@ -209,8 +209,13 @@ export default {
     logout () {
       this.$store.dispatch('setToken', null);
       this.$store.dispatch('setUser', null);
-      this.$router.push({
-        name: 'home'
+      Api().post('auth/logout').then((response) => {
+        console.log(response);
+      }).catch((error) => {
+        if (error.message == 'User not logged in') {
+          return;
+        }
+        console.log(error);
       });
     },
     /**
