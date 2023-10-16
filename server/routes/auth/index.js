@@ -46,6 +46,7 @@ module.exports = async function (fastify, options) {
       user = new User({
         gid: userInfo.id,
         username: userInfo.name,
+        fullname: userInfo.name,
         email: userInfo.email,
         picture: userInfo.picture,
       });
