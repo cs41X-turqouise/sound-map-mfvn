@@ -21,19 +21,18 @@
         <v-btn
           v-if="!$store.state.user"
           flat
-          dark
           @click="loginWithGoogle">
           Sign in with Google
         </v-btn>
-
         <v-btn
           v-if="$store.state.user"
           flat
-          dark
           @click="logout">
           Log Out
         </v-btn>
-        <v-btn size="small" @click="showUploadModal = true" dark>
+        <v-btn
+          v-if="$store.state.user"
+          size="small" @click="showUploadModal = true">
           Upload
         </v-btn>
         <!-- Figure out why v-avatar and v-img cause this to break -->

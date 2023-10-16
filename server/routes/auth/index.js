@@ -52,7 +52,6 @@ module.exports = async function (fastify, options) {
       await user.save();
     }
     request.session.user = user;
-    fastify.log.info(request.session.user);
     reply.redirect('http://localhost:5173/');
   });
 
