@@ -9,7 +9,7 @@
     </header> -->
     <v-toolbar fixed color="cyan" style="height: fit-content;" dark>
       <v-toolbar-items>
-        <v-btn size="small" @click="showSearchModal = true" dark flat>
+        <v-btn @click="showSearchModal = true" flat>
           Search
         </v-btn>
       </v-toolbar-items>
@@ -17,7 +17,7 @@
       <v-toolbar-title v-if="$store.state.user">
         Welcome {{ $store.state.user.username }}
       </v-toolbar-title>
-      <v-toolbar-items>
+      <v-toolbar-items style="padding: 0 10px;">
         <v-btn
           v-if="!$store.state.user"
           flat
@@ -32,7 +32,8 @@
         </v-btn>
         <v-btn
           v-if="$store.state.user"
-          size="small" @click="showUploadModal = true">
+          flat
+          @click="showUploadModal = true">
           Upload
         </v-btn>
         <!-- Figure out why v-avatar and v-img cause this to break -->
