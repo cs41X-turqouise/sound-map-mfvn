@@ -20,6 +20,15 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  gid: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  profilePhoto: {
+    type: String,
+    unique: true,
+  },
   uploads: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'sounds',

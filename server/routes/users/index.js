@@ -15,6 +15,12 @@ module.exports = async function (fastify, options) {
     const user = await User.findById(request.params.id);
     return user;
   });
+  fastify.get('/self', async function (request, reply) {
+    if (!request.user) {
+      return reply.send(new Error('User not logged in'));
+    }
+    return request.user;
+  });
   /**
    * Gets a file uploaded by a user
    */

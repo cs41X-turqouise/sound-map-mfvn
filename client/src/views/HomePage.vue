@@ -14,19 +14,20 @@
         </v-btn>
       </v-toolbar-items>
       <v-spacer></v-spacer>
+      <v-toolbar-title v-if="$store.state.user">
+        Welcome {{ $store.state.user.username }}
+      </v-toolbar-title>
       <v-toolbar-items>
-        <!-- <v-btn
-          v-if="!$store.state.isUserLoggedIn"
+        <v-btn
+          v-if="!$store.state.user"
           flat
           dark
-          :to="{
-            name: 'login'
-          }">
-          Login
-        </v-btn> -->
+          @click="loginWithGoogle">
+          Sign in with Google
+        </v-btn>
 
         <v-btn
-          v-if="$store.state.isUserLoggedIn"
+          v-if="$store.state.user"
           flat
           dark
           @click="logout">
@@ -193,8 +194,18 @@ export default {
     Api().get('uploads/filedata/all').then((response) => {
       this.files = response.data;
     });
+    if (!this.$store.state.user) {
+      Api().get('users/self').then((response) => {
+        this.$store.dispatch('setUser', response.data);
+      }).catch((error) => {
+        console.log(error);
+      });
+    }
   },
   methods: {
+    loginWithGoogle () {
+      window.location.href = 'http://localhost:3000/auth/google';
+    },
     logout () {
       this.$store.dispatch('setToken', null);
       this.$store.dispatch('setUser', null);
