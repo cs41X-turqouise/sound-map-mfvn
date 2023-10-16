@@ -1,4 +1,7 @@
 'use strict';
+
+const session = require("../../plugins/session");
+
 /**
  * Routes for handling CRUD (Create, Read, Update, and Delete) operations on users
  * @param {import("fastify").FastifyInstance} fastify
@@ -16,10 +19,11 @@ module.exports = async function (fastify, options) {
     return user;
   });
   fastify.get('/self', async function (request, reply) {
-    if (!request.user) {
+    if (!request.session.user) {
       return reply.send(new Error('User not logged in'));
     }
-    return request.user;
+    fastify.log.info(request.session.user)
+    return request.session.user;
   });
   /**
    * Gets a file uploaded by a user

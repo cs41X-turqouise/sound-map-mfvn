@@ -42,7 +42,7 @@ module.exports = async function (fastify, options) {
     const token = await fastify.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
     const userInfo = await getUserInfo(token.token.access_token);
     fastify.log.info(userInfo);
-    let user = await User.findOne({ gid: userInfo.id });
+    let user = await User.findOneAndUpdate({ gid: userInfo.id });
     if (!user) {
       user = new User({
         gid: userInfo.id,
@@ -52,10 +52,8 @@ module.exports = async function (fastify, options) {
       });
       await user.save();
     }
-    // const jwt = fastify.jwt.sign({ id: user._id });
-    // fastify.decorateRequest('user', user);
-    request.user = user;
-    fastify.log.info(request.user);
+    request.session.user = user;
+    fastify.log.info(request.session.user);
     reply.redirect('http://localhost:5173/');
   });
   fastify.log.info('Oauth Route registered.');
