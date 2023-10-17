@@ -21,6 +21,7 @@
             {{ showPanel ? 'Hide' : 'Show'}} Panel
           </v-btn>
           <v-btn
+            v-if="$store.state.user"
             color="info"
             size="small"
             density="comfortable"
