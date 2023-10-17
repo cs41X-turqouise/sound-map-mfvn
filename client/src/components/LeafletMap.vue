@@ -169,6 +169,12 @@ export default {
         this.centerMarker.setLatLng(center);
         this.coordinatesControl.getContainer().innerHTML = 'Center: ' + center.lat.toFixed(4) + ', ' + center.lng.toFixed(4);
       });
+      leafletMap.on('dblclick', () => {
+        if (this.currentPopup) {
+          this.currentPopup.remove();
+        }
+        this.currentPopup = null;
+      });
       if (this.files.length) {
         this.markers = this.files.map((file) => {
           const { latitude, longitude, title, description } = file.metadata;
