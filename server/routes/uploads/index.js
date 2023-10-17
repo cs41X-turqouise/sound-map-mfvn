@@ -20,6 +20,13 @@ module.exports = async function (fastify, options) {
   fastify.post('/single',
     {
       preHandler: [
+        function (request, reply, done) {
+          if (!request.session.user) {
+            done(new Error('User not logged in'));
+          } else {
+            done();
+          }
+        },
         fastify.upload.fields([
           { name: 'sound', maxCount: 1 },
           { name: 'images', maxCount: 12 },
@@ -35,7 +42,7 @@ module.exports = async function (fastify, options) {
     },
     async function (request, reply) {
       fastify.log.info(request.files);
-      const userId = fastify.toObjectId(request.body.user);
+      const userId = fastify.toObjectId(request.session.user._id);
       const sound = request.files.sound[0];
       const images = [];
       if (request.files.images) {
@@ -54,11 +61,15 @@ module.exports = async function (fastify, options) {
         user: userId,
         _id: fastify.toObjectId(sound.id),
       });
+      request.session.user.uploads.push(upload._id);
+      await request.session.user.save();
       await upload.save();
       return sound;
     }
   );
+  
   /**
+   * Does not work
    * Allows users to upload an array of files
    * @todo We should be able to upload multiple sound files and corresponding images if any
    */
@@ -94,6 +105,7 @@ module.exports = async function (fastify, options) {
       return uploads;
     }
   );
+
   /**
    * Get all uploads
    * 10/13/23 - Works but it's slow
@@ -127,6 +139,10 @@ module.exports = async function (fastify, options) {
     reply.header('Content-Type', file.contentType);
     return reply.send(fileStream);
   });
+
+  /**
+   * Get all the file data from the sounds bucket
+   */
   fastify.get('/filedata/all', async function (request, reply) {
     const data = [];
     const uploads = await Sound.find({});
@@ -136,6 +152,7 @@ module.exports = async function (fastify, options) {
     }
     return reply.send(data);
   });
+
   /**
    * Find user who uploaded a file
    */
@@ -145,8 +162,9 @@ module.exports = async function (fastify, options) {
       .findById(request.params.userId);
     return user;
   });
+
   /**
-   * Delete a sound file
+   * Delete a sound file - should be Admin only or limited to the user themselves
    */
   fastify.delete('/sound/:id', async function (request, reply) {
     try {
@@ -172,8 +190,9 @@ module.exports = async function (fastify, options) {
       fastify.log.error(err);
     }
   });
+
   /**
-   * Delete a image file
+   * Delete a image file - should be Admin only or limited to the user themselves
    */
   fastify.delete('/image/:id', async function (request, reply) {
     try {
@@ -190,7 +209,7 @@ module.exports = async function (fastify, options) {
   });
 
   /**
-   * Rename a file
+   * Rename a file - should be Admin only or limited to the user themselves
    */
   fastify.patch('/filename/:id',
     {
@@ -216,8 +235,9 @@ module.exports = async function (fastify, options) {
       return file;
     }
   );
+
   /**
-   * Update metadata of a file
+   * Update metadata of a file - should be Admin only or limited to the user themselves
    */
   fastify.patch('/metadata/:id',
     {
