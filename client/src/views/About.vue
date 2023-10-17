@@ -1,64 +1,102 @@
 <template>
-  <div class="about-page">
-    <v-toolbar><router-link to="/home" tag="div" class="v-toolbar__title">Home</router-link></v-toolbar>
-      <body>
-      <i><h1>About Sound Map For Changing Landscape</h1></i>
-      <h2>Welcome and Introduction: </h2>
-      <p>Welcome to Sound Map For Changing Landscape about page, where we are happy to present our creative solution aimed
-        at focus on the critical issue of climate change in the Tidewater Region.</p>
-      <h2>Description of the Interactive Sound Map: </h2>
-      <p>The Interactive Sound Map is a critical tool for tackling global sea-level rise, with a particular emphasis on
-        the
-        Chesapeake Bay region. It provides a dynamic awareness of the shifting aural landscapes as sea levels rise. Users
-        can listen to and upload sound recordings, enabling community involvement among people affected and worried by
-        environmental changes.
-      </p>
-      <h2>Problem Background</h2>
-      <p>In the Chesapeake Bay region, rising sea levels present a range of critical issues, including erosion, flooding,
-        saltwater contamination, and habitat destruction. These interconnected challenges demand a coordinated and timely
-        response to protect both the environment and local communities.</p>
-        <hr>
-      <h2>Problem Characteristics: </h2>
-      <p>Our Interactive Sound Map project combines historical records with present user contributions to create a
-        complete
-        perspective of the aural landscapes of the Chesapeake Bay. Historical records provide insights into the past,
-        recording the region's rich history and providing as a crucial point of reference for change. </p>
-        <hr>
-      <h2>Solution Statement & Characteristics: </h2>
-      <p>We have a solution: a special map with sounds that shows how the weather is changing in the Tidewater Region.
-        our map combines old and new audio and video from people like you to help us understand things better.</p>
-
-      </body>
-    </div>
+  <div class="about-us">
+    <v-container>
+      <v-row>
+        <v-col cols="12">
+          <h1 class="page-title">About Us</h1>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12">
+          <v-card class="section-card" v-for="(section, index) in sections" :key="index">
+            <v-card-title class="section-title">{{ section.title }}</v-card-title>
+            <v-card-text class="section-content">{{ section.content }}</v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+  </div>
 </template>
 
-<style scoped>
-.about-page {
-
-  margin: 0 auto;
-  padding: 1,000px;
-  font-family: Arial, sans-serif;
-}
-
-h2 {
-  font-size: 20px;
-  margin-top: 10px;
-}
-
-p {
-  font-size: 20px;
-  line-height: 1.5;
-  margin: 10px 0;
-}
-.v-toolbar {
-  height: 40px; /* Adjust the height to make the toolbar smaller */
-  /* Add other styles as needed */
-}
-</style>
-
-<!-- 
 <script>
 export default {
-  name: "about",
+  data() {
+    return {
+      sections: [
+        {
+          title: "Welcome and Introduction",
+          content: "Welcome to Sound Map For Changing Landscape about page, where we are happy to present our creative solution aimed at focus on the critical issue of climate change in the Tidewater Region."
+        },
+        {
+          title: "Our Goals",
+          content: "Team Turquoise's primary goal is to combat climate change by creating a sound map to raise awareness about rising sea levels and related challenges in the Chesapeake Bay region, engaging affected communities and policymakers in the fight against climate change"
+        },
+        {
+          title: "Description of the Interactive Sound Map",
+          content: "The Interactive Sound Map is a crucial tool for addressing global sea-level rise, especially in the Chesapeake Bay region. It raises awareness of changing soundscapes due to rising sea levels and encourages community involvement by allowing users to listen to and share sound recordings."
+        },
+        {
+          title: "Problem Background",
+          content: "In the Chesapeake Bay region, rising sea levels present a range of critical issues, including erosion, flooding,saltwater contamination, and habitat destruction. These interconnected challenges demand a coordinated and timely response to protect both the environment and local communities."
+        }
+      ]
+    };
+  }
 };
-</script> -->
+</script>
+
+<style scoped>
+.about-us {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: lightblue;
+}
+
+.page-title {
+  font-size: 36px;
+  color: #007BFF;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+  position: relative;
+  /* Add the underline here */
+  border-bottom: 2px solid black;
+  /* Adjust the color and thickness as needed */
+}
+
+.section-card {
+  margin-bottom: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
+}
+
+.section-card:hover {
+  transform: scale(1.02);
+}
+
+.section-title {
+  font-size: 24px;
+  color: #007BFF;
+  font-weight: bold;
+  padding: 15px 20px;
+  background-color: #fff;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.section-content {
+  font-size: 20px;
+  line-height: 1.5;
+  padding: 20px;
+  /* background-color: #007BFF; */
+}
+
+.v-container {
+  max-width: 1200px;
+  background-color: lightblue;
+}
+</style>
