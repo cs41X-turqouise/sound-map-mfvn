@@ -3,12 +3,12 @@ import { createStore, createLogger } from 'vuex';
 
 export default createStore({
   strict: true,
-  plugins: [createLogger()
-  ],
+  plugins: [createLogger()],
   state: {
     token: null,
     user: null,
-    isUserLoggedIn: false
+    isUserLoggedIn: false,
+    clicked: null,
   },
   mutations: {
     setToken (state, token) {
@@ -17,7 +17,10 @@ export default createStore({
     },
     setUser (state, user) {
       state.user = user;
-    }
+    },
+    setClicked (state, clicked) {
+      state.clicked = clicked;
+    },
   },
   actions: {
     setToken ({ commit }, token) {
@@ -25,6 +28,9 @@ export default createStore({
     },
     setUser ({ commit }, user) {
       commit('setUser', user);
-    }
+    },
+    setClicked ({ commit }, clicked) {
+      commit('setClicked', clicked);
+    },
   }
 });
