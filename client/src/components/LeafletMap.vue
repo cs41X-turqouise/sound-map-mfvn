@@ -1,16 +1,42 @@
 <template>
   <div :id="mapId">
     <SidePanel
+      v-if="showPanel"
       :markers="markers"
       :map="mapInstance"
       :clicked="clicked"
-      @close="clicked = null"/>
+      @close="showPanel = false">
+    </SidePanel>
+    <div v-if="showModal" class="click-modal" @click.stop>
+      <CloseButton @close="showModal = false"/>
+      <span>Latitude: {{ clicked.lat.toFixed(4) }}</span><br>
+      <span>Longitude: {{ clicked.lng.toFixed(4) }}</span><br>
+      <v-row style="justify-content: space-evenly; align-items: center;">
+        <v-col cols="auto">
+          <v-btn
+            color="info"
+            size="small"
+            density="comfortable"
+            @click="togglePinPanel">
+            {{ showPanel ? 'Hide' : 'Show'}} Panel
+          </v-btn>
+          <v-btn
+            color="info"
+            size="small"
+            density="comfortable"
+            @click="openUploadModal">
+            Upload
+          </v-btn>
+        </v-col>
+      </v-row>
+    </div>
   </div>
 </template>
 
 <script>
 import L from 'leaflet';
 import SidePanel from './SidePanel.vue';
+import CloseButton from './CloseButton.vue';
 
 const CoordinatesControl = L.Control.extend({
   onAdd: function (map) {
@@ -18,7 +44,8 @@ const CoordinatesControl = L.Control.extend({
     container.style.backgroundColor = 'white';
     container.style.padding = '5px';
     container.style.marginRight = '10px';
-    container.innerHTML = 'Center: ' + map.getCenter().lat.toFixed(4) + ', ' + map.getCenter().lng.toFixed(4);
+    const center = map.getCenter();
+    container.innerHTML = 'Center: ' + center.lat.toFixed(4) + ', ' + center.lng.toFixed(4);
     return container;
   }
 });
@@ -32,6 +59,7 @@ export default {
   name: 'LeafletMap',
   components: {
     SidePanel,
+    CloseButton,
   },
   props: {
     /**
@@ -69,12 +97,14 @@ export default {
         layers: [],
       },
       markers: [],
-      geojsonData: null,
       mapInstance: null,
       layerControlInstance: null,
       coordinatesControl: null,
       centerMarker: null,
+      currentPopup: null,
       clicked: null,
+      showPanel: false,
+      showModal: false,
     };
   },
   methods: {
@@ -147,6 +177,12 @@ export default {
             <span>Title: ${title}</span><br>
             <span>Description: ${description}</span><br>
           `);
+          marker.on('click', () => {
+            if (this.currentPopup) {
+              this.currentPopup.remove();
+            }
+            this.currentPopup = marker.getPopup();
+          });
           marker.data = file;
           return marker;
         });
@@ -155,9 +191,21 @@ export default {
         const lat = event.latlng.lat;
         const lng = event.latlng.lng;
         this.clicked = { lat, lng, latlng: event.latlng };
+        this.$store.dispatch('setClicked', { lat, lng });
+        this.showModal = true;
       });
       this.mapInstance = leafletMap;
     },
+    openUploadModal () {
+      this.showPanel = false;
+      this.$emit('openUploadModal');
+    },
+    togglePinPanel () {
+      this.showPanel = !this.showPanel;
+      if (this.showPanel) {
+        this.$emit('closeUploadModal');
+      }
+    }
   },
   mounted () {
     this.initMap();
@@ -197,5 +245,17 @@ export default {
 }
 .leaflet-control-layers-list {
   text-align: left;
+}
+.click-modal {
+  position: absolute;
+  top: 1em;
+  right: 1em;
+  min-width: 150px;
+  padding: 0.5em;
+  text-align: left;
+  z-index: 9999;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.4);
 }
 </style>
