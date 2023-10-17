@@ -9,30 +9,31 @@
     </header> -->
     <v-toolbar fixed color="cyan" style="height: fit-content;" dark>
       <v-toolbar-items>
-        <v-btn size="small" @click="showSearchModal = true" dark flat>
+        <v-btn @click="showSearchModal = true" flat>
           Search
         </v-btn>
       </v-toolbar-items>
       <v-spacer></v-spacer>
-      <v-toolbar-items>
-        <!-- <v-btn
-          v-if="!$store.state.isUserLoggedIn"
-          flat
-          dark
-          :to="{
-            name: 'login'
-          }">
-          Login
-        </v-btn> -->
-
+      <v-toolbar-title v-if="$store.state.user">
+        Welcome {{ $store.state.user.username }}
+      </v-toolbar-title>
+      <v-toolbar-items style="padding: 0 10px;">
         <v-btn
-          v-if="$store.state.isUserLoggedIn"
+          v-if="!$store.state.user"
           flat
-          dark
+          @click="loginWithGoogle">
+          Sign in with Google
+        </v-btn>
+        <v-btn
+          v-if="$store.state.user"
+          flat
           @click="logout">
           Log Out
         </v-btn>
-        <v-btn size="small" @click="showUploadModal = true" dark>
+        <v-btn
+          v-if="$store.state.user"
+          flat
+          @click="showUploadModal = true">
           Upload
         </v-btn>
         <!-- Figure out why v-avatar and v-img cause this to break -->
@@ -193,13 +194,26 @@ export default {
     Api().get('uploads/filedata/all').then((response) => {
       this.files = response.data;
     });
+    if (!this.$store.state.user) {
+      Api().get('users/self').then((response) => {
+        this.$store.dispatch('setUser', response.data);
+      }).catch((error) => {
+        console.log(error);
+      });
+    }
   },
   methods: {
+    loginWithGoogle () {
+      window.location.href = 'http://localhost:3000/auth/google';
+    },
     logout () {
       this.$store.dispatch('setToken', null);
       this.$store.dispatch('setUser', null);
-      this.$router.push({
-        name: 'home'
+      Api().post('auth/logout').catch((error) => {
+        if (error.message == 'User not logged in') {
+          return;
+        }
+        console.log(error);
       });
     },
     /**
