@@ -7,17 +7,17 @@
       :clicked="clicked"
       @close="showPanel = false">
     </SidePanel>
-    <div v-if="showModal" class="click-modal" @click.stop>
+    <div v-if="showModal" class="click-modal" @click.stop @dblclick.stop>
       <CloseButton @close="showModal = false"/>
       <span>Latitude: {{ clicked.lat.toFixed(4) }}</span><br>
       <span>Longitude: {{ clicked.lng.toFixed(4) }}</span><br>
       <v-row style="justify-content: space-evenly; align-items: center;">
-        <v-col cols="auto">
+        <v-col cols="auto" @click.stop>
           <v-btn
             color="info"
             size="small"
             density="comfortable"
-            @click="togglePinPanel">
+            @click.stop="togglePinPanel">
             {{ showPanel ? 'Hide' : 'Show'}} Panel
           </v-btn>
           <v-btn
@@ -25,7 +25,7 @@
             color="info"
             size="small"
             density="comfortable"
-            @click="openUploadModal">
+            @click.stop="openUploadModal">
             Upload
           </v-btn>
         </v-col>
