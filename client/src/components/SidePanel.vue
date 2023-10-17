@@ -2,9 +2,9 @@
   <div v-if="clicked" id="sidebar" class="sidebar" @click.stop>
     <section id="heading">
       <CloseButton @close="close" />
-      <h3>
+      <!-- <h3>
         Clicked ({{ clicked.lat.toFixed(2) }}, {{ clicked.lng.toFixed(2) }})
-      </h3>
+      </h3> -->
     </section>
     <ul id="popup-list" class="popup-list">
       <li v-for="marker in sortedMarkers" :key="marker.data._id">
@@ -86,7 +86,7 @@ export default {
     }
   },
   computed: {
-    sortedMarkers() {
+    sortedMarkers () {
       return this.markers.slice().sort((a, b) => {
         const distanceA = this.clicked.latlng.distanceTo(a._latlng);
         const distanceB = this.clicked.latlng.distanceTo(b._latlng);
