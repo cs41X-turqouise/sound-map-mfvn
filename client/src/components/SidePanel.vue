@@ -20,8 +20,13 @@
             cover>
           </v-carousel-item>
         </v-carousel>
-        <div class="sound-bar">
-          <audio v-if="urls.has(marker.data._id)" class="audio" :ref="`audio-${marker.data._id}`" controls>
+        <div class="sound-bar" :style="{ backgroundColor: marker.color }">
+          <audio
+            v-if="urls.has(marker.data._id)"
+            class="audio"
+            :ref="`audio-${marker.data._id}`"
+            @playing="playing(marker)"
+            controls>
             <source :src="urls.get(marker.data._id)" :type="`${marker.data.contentType}`">
           </audio>
           <v-btn v-else @click="fetchAudio(marker.data)">Play</v-btn>
@@ -32,6 +37,8 @@
 </template>
 
 <script>
+// import { divIcon } from 'leaflet';
+import { circle } from 'leaflet';
 import CloseButton from './CloseButton.vue';
 
 export default {
@@ -54,6 +61,9 @@ export default {
   data () {
     return {
       urls: new Map(),
+      circles: new WeakMap(),
+      /** @type {HTMLAudioElement} */
+      currentAudio: null,
     };
   },
   methods: {
@@ -83,15 +93,48 @@ export default {
           this.urls.set(id, objectUrl);
           return objectUrl;
         });
-    }
+    },
+    playing (marker) {
+      if (this.currentAudio) {
+        this.currentAudio.pause();
+      }
+      this.currentAudio = this.$refs[`audio-${marker.data._id}`][0];
+      this.$emit('focusMarker', marker);
+    },
   },
   computed: {
     sortedMarkers () {
-      return this.markers.slice().sort((a, b) => {
+      const colors = ['#FF0000', '#008000', '#0000FF', '#FFA500', '#800080'];
+      const sorted = this.markers.slice().sort((a, b) => {
         const distanceA = this.clicked.latlng.distanceTo(a._latlng);
         const distanceB = this.clicked.latlng.distanceTo(b._latlng);
         return distanceA - distanceB;
       });
+      let index = 0;
+      for (const marker of sorted) {
+        // marker.icon = divIcon({
+        //   html: `<div class="marker-number">${index++}</div>`,
+        //   className: 'icon-numbered',
+        //   iconSize: [30, 30],
+        // });
+        if (this.circles.has(marker)) {
+          this.circles.get(marker).remove();
+          delete marker.color;
+        }
+        if (index < 5) {
+          const color = colors[index];
+          const circleMarker = circle(marker._latlng, {
+            radius: 250,
+            color,
+            fillColor: color,
+            fillOpacity: 0.2,
+          }).addTo(this.map);
+          marker.color = color;
+          this.circles.set(marker, circleMarker);
+        }
+        index++;
+      }
+      return sorted;
     },
   },
 };
