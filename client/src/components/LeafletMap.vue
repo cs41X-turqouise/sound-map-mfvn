@@ -1,10 +1,12 @@
 <template>
-  <div :id="mapId">
+  <!-- dblclick event was buggy and uneeded for this map, stop it from passing this point -->
+  <div :id="mapId" @dblclick="($event) => $event.stopImmediatePropagation()">
     <SidePanel
       v-if="showPanel"
       :markers="markers"
       :map="mapInstance"
       :clicked="clicked"
+      @focusMarker="focusMarker"
       @close="showPanel = false">
     </SidePanel>
     <div v-if="showModal" class="click-modal" @click.stop @dblclick.stop>
@@ -109,9 +111,7 @@ export default {
     };
   },
   methods: {
-    // Initialize map function:
     initMap () {
-      // Create the leaflet map
       const leafletMap = L.map(this.mapId, this.mapOptions);
       leafletMap.zoomControl.setPosition('bottomright');
       // L.control.locate({ position: 'bottomright' }).addTo(leafletMap);
@@ -150,9 +150,7 @@ export default {
           subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
         })),
       };
-      // set inital view
       views.OpenStreetMap.addTo(leafletMap);
-      // Create the layer control and add it to the map:
       this.layerControlInstance = L.control
         .layers(views, null, { position: 'bottomleft' })
         .addTo(leafletMap);
@@ -163,13 +161,12 @@ export default {
         leafletMap.getCenter(),
         { icon: myIcon }
       ).addTo(leafletMap);
-      // Add event listeners to the map:
       leafletMap.on('move', () => {
         const center = leafletMap.getCenter();
         this.centerMarker.setLatLng(center);
         this.coordinatesControl.getContainer().innerHTML = 'Center: ' + center.lat.toFixed(4) + ', ' + center.lng.toFixed(4);
       });
-      leafletMap.on('dblclick', () => {
+      leafletMap.on('zoomstart', () => {
         if (this.currentPopup) {
           this.currentPopup.remove();
         }
@@ -212,7 +209,11 @@ export default {
       if (this.showPanel) {
         this.$emit('closeUploadModal');
       }
-    }
+    },
+    focusMarker (marker) {
+      this.mapInstance.flyTo(marker.getLatLng(), 15);
+      marker.openPopup();
+    },
   },
   mounted () {
     this.initMap();
@@ -256,7 +257,7 @@ export default {
 .click-modal {
   position: absolute;
   top: 1em;
-  right: 1em;
+  right: 2em;
   min-width: 150px;
   padding: 0.5em;
   text-align: left;
