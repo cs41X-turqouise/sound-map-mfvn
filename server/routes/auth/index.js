@@ -1,5 +1,5 @@
 'use strict';
-
+const csrf = require('@fastify/csrf')
 /**
  * Route handlers for the Google OAuth2 callback.
  * @param {import("fastify").FastifyInstance} fastify
@@ -39,6 +39,10 @@ module.exports = async function (fastify, options) {
     });
   };
   fastify.get('/google/callback', async function (request, reply) {
+    const csrfTokens = await new Tokens()
+    const secret = await csrfTokens.secretSync()
+    const csrfToken = await csrfTokens.create(secret)
+
     const token = await fastify.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
     const userInfo = await getUserInfo(token.token.access_token);
     let user = await User.findOne({ gid: userInfo.id });
@@ -58,6 +62,7 @@ module.exports = async function (fastify, options) {
 
   fastify.post('/logout', async function (request, reply) {
     request.session.destroy();
+    csrfToken.destroy();
     reply.send('Logged out');
   });
   fastify.log.info('Oauth Route registered.');
