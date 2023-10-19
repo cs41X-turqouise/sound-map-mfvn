@@ -2,12 +2,9 @@
   <div v-if="clicked" id="sidebar" class="sidebar" @click.stop>
     <section id="heading">
       <CloseButton @close="close" />
-      <!-- <h3>
-        Clicked ({{ clicked.lat.toFixed(2) }}, {{ clicked.lng.toFixed(2) }})
-      </h3> -->
     </section>
     <ul id="popup-list" class="popup-list">
-      <li v-for="marker in sortedMarkers" :key="marker.data._id">
+      <li v-for="(marker, index) in paginatedMarkers" :key="marker.data._id">
         <b class="name">{{ marker.data.metadata.title }}</b>
         (<span class="distance">{{ clicked.latlng.distanceTo(marker._latlng).toFixed(2) }}</span> m)<br>
         Date: <span class="date">{{ new Date(marker.data.uploadDate).toLocaleDateString() }}</span><br>
@@ -20,7 +17,7 @@
             cover>
           </v-carousel-item>
         </v-carousel>
-        <div class="sound-bar" :style="{ backgroundColor: marker.color }">
+        <div class="sound-bar" :style="{ backgroundColor: colors[index] }">
           <audio
             v-if="urls.has(marker.data._id)"
             class="audio"
@@ -32,6 +29,7 @@
           <v-btn v-else @click="fetchAudio(marker.data)">Play</v-btn>
         </div>
       </li>
+      <v-pagination v-model="currentPage" :length="maxPage"></v-pagination>
     </ul>
   </div>
 </template>
@@ -64,6 +62,9 @@ export default {
       circles: new WeakMap(),
       /** @type {HTMLAudioElement} */
       currentAudio: null,
+      currentPage: 1,
+      perPage: 5,
+      colors: ['#FF0000', '#008000', '#0000FF', '#FFA500', '#800080'],
     };
   },
   methods: {
@@ -103,39 +104,66 @@ export default {
     },
   },
   computed: {
-    sortedMarkers () {
-      const colors = ['#FF0000', '#008000', '#0000FF', '#FFA500', '#800080'];
-      const sorted = this.markers.slice().sort((a, b) => {
+    paginatedMarkers () {
+      const start = (this.currentPage - 1) * this.perPage;
+      const end = start + this.perPage;
+      return this.markers.toSorted((a, b) => {
         const distanceA = this.clicked.latlng.distanceTo(a._latlng);
         const distanceB = this.clicked.latlng.distanceTo(b._latlng);
         return distanceA - distanceB;
-      });
-      let index = 0;
-      for (const marker of sorted) {
-        // marker.icon = divIcon({
-        //   html: `<div class="marker-number">${index++}</div>`,
-        //   className: 'icon-numbered',
-        //   iconSize: [30, 30],
-        // });
+      }).slice(start, end);
+    },
+    /**
+     * @todo Figure out why when the `+ 1` is removed we get a recursion error
+     * @returns {number}
+     */
+    maxPage () {
+      return Math.ceil(this.markers.length / this.perPage) + 1;
+    }
+  },
+  watch: {
+    clicked () {
+      this.currentPage = 1;
+    },
+    paginatedMarkers (newMarkers, oldMarkers) {
+      oldMarkers.forEach((marker) => {
         if (this.circles.has(marker)) {
           this.circles.get(marker).remove();
-          delete marker.color;
+          this.circles.delete(marker);
         }
-        if (index < 5) {
-          const color = colors[index];
-          const circleMarker = circle(marker._latlng, {
-            radius: 250,
-            color,
-            fillColor: color,
-            fillOpacity: 0.2,
-          }).addTo(this.map);
-          marker.color = color;
-          this.circles.set(marker, circleMarker);
-        }
-        index++;
-      }
-      return sorted;
+      });
+      newMarkers.forEach((marker, index) => {
+        const color = this.colors[index];
+        const circleMarker = circle(marker._latlng, {
+          radius: 250,
+          color,
+          fillColor: color,
+          fillOpacity: 0.2,
+        }).addTo(this.map);
+        this.circles.set(marker, circleMarker);
+      });
     },
+  },
+  mounted () {
+    this.paginatedMarkers.forEach((marker, index) => {
+      const color = this.colors[index];
+      const circleMarker = circle(marker._latlng, {
+        radius: 250,
+        color,
+        fillColor: color,
+        fillOpacity: 0.2,
+      }).addTo(this.map);
+      this.circles.set(marker, circleMarker);
+    });
+  },
+  beforeUnmount () {
+    this.paginatedMarkers.forEach((marker) => {
+      if (this.circles.has(marker)) {
+        this.circles.get(marker).remove();
+        this.circles.delete(marker);
+      }
+    });
+    this.circles = new WeakMap();
   },
 };
 </script>
