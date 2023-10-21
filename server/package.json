@@ -7,12 +7,16 @@
     "test": "test"
   },
   "scripts": {
-    "test": "tap \"test/**/*.test.js\"",
+    "test": "eslint . && jest",
+    "test:watch": "jest --watch",
     "start": "fastify start -l info app.js",
     "dev": "fastify start -w -l info -P app.js",
-    "pretest": "standard",
+    "pretest": "eslint .",
     "lint": "eslint --fix",
     "clean-db": "node ./scripts/clean-db.js"
+  },
+  "jest": {
+    "testEnvironment": "node"
   },
   "keywords": [],
   "author": "",
@@ -34,8 +38,9 @@
     "mongoose": "^7.5.3"
   },
   "devDependencies": {
-    "eslint": "^8.51.0",
+    "eslint": "^8.52.0",
     "eslint-config-google": "^0.14.0",
-    "tap": "^16.1.0"
+    "jest": "^29.7.0",
+    "jest-environment-node": "^29.7.0"
   }
 }
