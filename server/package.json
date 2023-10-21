@@ -16,7 +16,8 @@
     "clean-db": "node ./scripts/clean-db.js"
   },
   "jest": {
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"]
   },
   "keywords": [],
   "author": "",

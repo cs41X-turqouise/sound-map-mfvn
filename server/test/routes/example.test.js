@@ -1,19 +1,11 @@
 'use strict';
 
-const { build, close } = require('../helper');
+const { getTestApp } = require('../helper');
 
 
 describe('GET /example', () => {
-  let testServer;
-
-  beforeAll(async () => {
-    testServer = await build();
-  });
-  afterAll(async () => {
-    await close();
-  });
-    
-  test('should return the correct message', async () => {
+   test('should return the correct message', async () => {
+    const testServer = getTestApp();
     const response = await testServer.inject({
       method: 'GET',
       url: '/example'

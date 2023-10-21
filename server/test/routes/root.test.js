@@ -1,19 +1,10 @@
 'use strict';
-const { build, close } = require('../helper');
-
-let server;
-
-beforeAll(async () => {
-  server = await build();
-});
-
-afterAll(async () => {
-  await close();
-});
+const { getTestApp } = require('../helper');
 
 describe('Root route', () => {
   test('should return Hello World', async () => {
-    const response = await server.inject({
+    const testServer = getTestApp();
+    const response = await testServer.inject({
       method: 'GET',
       url: '/'
     });

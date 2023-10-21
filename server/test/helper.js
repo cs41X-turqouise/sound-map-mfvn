@@ -6,7 +6,6 @@
 const { build: buildApplication } = require('fastify-cli/helper');
 const path = require('path');
 const AppPath = path.join(__dirname, '..', 'app.js');
-const mongoose = require('mongoose');
 
 /**
  * Fill in this config with all the configurations
@@ -52,19 +51,22 @@ async function build () {
  * @returns {any}
  */
 async function close () {
-  await mongoose.connection.close();
   return new Promise((resolve, reject) => {
     testApp.close((err) => {
       if (err) reject(err);
-      console.log('Server closed');
-      resolve();
+       resolve();
     });
   });
+  
 }
 
+function getTestApp() {
+  return testApp;
+}
 
 module.exports = {
   config,
   build,
-  close
+  close,
+  getTestApp
 };
