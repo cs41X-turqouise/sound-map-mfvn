@@ -53,7 +53,6 @@ module.exports = async function (fastify, opts) {
   await fastify.register(require('@fastify/env'), envOptions);
 
   // Do not touch the following lines
-
   // This loads all plugins defined in plugins
   // those should be support plugins that are reused
   // through your application
