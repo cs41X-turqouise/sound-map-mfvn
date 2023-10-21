@@ -54,13 +54,16 @@ async function close () {
   return new Promise((resolve, reject) => {
     testApp.close((err) => {
       if (err) reject(err);
-       resolve();
+      resolve();
     });
   });
-  
 }
 
-function getTestApp() {
+/**
+ * Description
+ * @returns {any}
+ */
+function getTestApp () {
   return testApp;
 }
 

@@ -4,7 +4,7 @@ const { getTestApp } = require('../helper');
 
 
 describe('GET /example', () => {
-   test('should return the correct message', async () => {
+  test('should return the correct message', async () => {
     const testServer = getTestApp();
     const response = await testServer.inject({
       method: 'GET',
