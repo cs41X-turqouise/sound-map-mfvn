@@ -6,6 +6,7 @@
 const { build: buildApplication } = require('fastify-cli/helper');
 const path = require('path');
 const AppPath = path.join(__dirname, '..', 'app.js');
+const mongoose = require('mongoose');
 
 /**
  * Fill in this config with all the configurations
@@ -16,27 +17,54 @@ function config () {
   return {};
 }
 
+let testApp;
+
 /**
- * automatically build and tear down our instance
- * @param {*} t
+ * Automatically build and tear down our instance
  * @returns {*}
  */
-async function build (t) {
-  // you can set all the options supported by the fastify CLI command
+async function build () {
+  // You can set all the options supported by the fastify CLI command
   const argv = [AppPath];
 
-  // fastify-plugin ensures that all decorators
+  // Fastify-plugin ensures that all decorators
   // are exposed for testing purposes, this is
   // different from the production setup
-  const app = await buildApplication(argv, config());
+  testApp = await buildApplication(argv, config());
+  // testApp.getRegisteredPlugin = function (pluginName) {
+  //   // NOTE: This method assumes that each plugin has a unique name.
+  //   // If the plugins are anonymous, this won't work as expected.
 
-  // tear down our app after we are done
-  t.teardown(app.close.bind(app));
-
-  return app;
+  //   // Access the registered plugins
+  //   console.log('here');
+  //   const registeredPlugins = this[Symbol.for('registered-plugin')].includes(pluginName);
+  //   console.log(registeredPlugins.find((p) => p.name === 'oauth'));
+  //   // Return the plugin based on its name
+  //   return registeredPlugins && registeredPlugins.find((p) => p.name === pluginName);
+  // };
+  console.log('Server built');
+  // console.log(testApp.someSupport())
+  return testApp;
 }
+
+/**
+ * Description
+ * @returns {any}
+ */
+async function close () {
+  await mongoose.connection.close();
+  return new Promise((resolve, reject) => {
+    testApp.close((err) => {
+      if (err) reject(err);
+      console.log('Server closed');
+      resolve();
+    });
+  });
+}
+
 
 module.exports = {
   config,
-  build
+  build,
+  close
 };
