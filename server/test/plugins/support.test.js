@@ -1,26 +1,47 @@
-'use strict';
+// 'use strict';
 
-const { test } = require('tap');
-const Fastify = require('fastify');
-const Support = require('../../plugins/support');
+// const { build, close } = require('../../test/helper.js');
+// const {someSupport} = require ('../../plugins/support.js')
+// describe('GET /support', () => {
+// let testServer;
+// beforeAll(async () => {
+//   testServer = await build();
+//   console.log("After build (support):")
+//   console.log(testServer.someSupport());
+  
+//   console.log(testServer.someSupport)
+//   });
 
-test('support works standalone', async (t) => {
-  const fastify = Fastify();
-  fastify.register(Support);
 
-  await fastify.ready();
-  t.equal(fastify.someSupport(), 'hugs');
+// describe('Support Plugin', () => {
+  
+//   test('support works standalone', async () => {console.log("Inside test:");
+//   console.log(testServer.someSupport());
+
+//     await expect(testServer.someSupport()).toBe('hugs');
+//   });
+// });
+// });
+
+const fastify = require('fastify');
+const supportPlugin = require('../../plugins/support');
+
+describe('Support Plugin Direct Test', () => {
+  let testServer;
+
+  beforeAll(async () => {
+    testServer = fastify();
+    await testServer.register(supportPlugin);
+    await testServer.ready();
+    console.log("inside support.test line 36: ")
+    console.log(testServer.someSupport());
+  });
+
+  afterAll(() => {
+    testServer.close();
+  });
+
+  test('support works standalone', async () => {
+    expect(testServer.someSupport()).toBe('hugs');
+  });
 });
-
-// You can also use plugin with opts in fastify v2
-//
-// test('support works standalone', (t) => {
-//   t.plan(2)
-//   const fastify = Fastify()
-//   fastify.register(Support)
-//
-//   fastify.ready((err) => {
-//     t.error(err)
-//     t.equal(fastify.someSupport(), 'hugs')
-//   })
-// })
