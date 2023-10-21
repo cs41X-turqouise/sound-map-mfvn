@@ -1,27 +1,24 @@
 'use strict';
+const { build, close } = require('../helper');
 
-const { test } = require('tap');
-const { build } = require('../helper');
+let server;
 
-test('default root route', async (t) => {
-  const app = await build(t);
-
-  const res = await app.inject({
-    url: '/'
-  });
-  t.same(JSON.parse(res.payload), { root: true });
+beforeAll(async () => {
+  server = await build();
 });
 
-// inject callback style:
-//
-// test('default root route', (t) => {
-//   t.plan(2)
-//   const app = await build(t)
-//
-//   app.inject({
-//     url: '/'
-//   }, (err, res) => {
-//     t.error(err)
-//     t.same(JSON.parse(res.payload), { root: true })
-//   })
-// })
+afterAll(async () => {
+  await close();
+});
+
+describe('Root route', () => {
+  test('should return Hello World', async () => {
+    const response = await server.inject({
+      method: 'GET',
+      url: '/'
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(JSON.parse(response.payload)).toEqual({ root: 'Hello World' });
+  });
+});
