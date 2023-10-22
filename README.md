@@ -27,6 +27,22 @@ Our Trello can be found at: https://trello.com/invite/b/bXzt2xv8/ATTIfc97f97eda6
 
 Our Prototype Demo can be found at: https://docs.google.com/presentation/d/17nR4V9THk1xTVjOZWyIZTBRl1qa11qDYRpAd24uuBhE/edit?usp=sharing
 
+# Table of Contents
+
+Sound Map Board
+
+The Sound Map Board is a web application that allows users to create and share sound maps. Explore the local area of the Hampton Roads and listen to the sounds they offer and the sights users uploaded. This project is built using JavaScript, HTML, and integrates Docker for containerization. Google OAuth is used for secure user authentication, and MongoDB is used as the database for storing sound markers.
+
+What can be found below are:
+Getting Started
+Features
+Requirements
+Node.js
+Google OAuth
+MongoDB
+How-To
+Licenses
+
 # Getting started 
 
 First, clone the repository. For example: git clone https://github.com/your-username/sound-map-mfvn.git
@@ -45,11 +61,13 @@ Interactive Map: Explore different locations on the map.
 Sound Markers: Add sound markers to specific locations on the map.
 Audio Playback: Listen to the sounds recorded in different locations.
 Google OAuth: Secure login and authentication using Google accounts.
+MongoDB: Store sound markers and related data in a MongoDB database
 ### Requirements
 
 Node.js installed on your local machine
 Docker installed (if you want to use Docker for containerization)
 Google OAuth 2.0 credentials for authentication setup
+MongoDB 
 ### Node.js
 This project features using node.js, which is a popular high-level project building ability on top of javascript. 
 
@@ -61,7 +79,15 @@ GOOGLE_CLIENT_ID=your-client-id
 GOOGLE_CLIENT_SECRET=your-client-secret
 GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
 
-#### How to use
+### MongoDB
+
+MongoDB is used for applications to store sound markers on a map and other related data (such as images)
+
+To ensure you have MongoDB running, make sure you have this type of url in your '.env' file
+
+This is an example: MONGODB_URI=mongodb://localhost:27017/sound-map-board
+
+#### How-To
 
 How would one use a sound map? Its as easy as:
 
