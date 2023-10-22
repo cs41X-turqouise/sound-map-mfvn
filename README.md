@@ -21,14 +21,14 @@ We are a team of 8 in ODU's CS411W class, our names are:
 # What are we working on? 
     The effects of global climate change are well known, one being rising sea levels. This project for a sound map is to create a site where sounds and sights are to be recorded by users to show the effects over time of the rising water levels of the Virginia Beach-Norfolk-Chesapeake region (or basically the 757 area code)
 
-## Our intructor(s):
+## Our intructors:
 
 - Professor Thomas Kennedy
 
 - Professor Brenden Baylor
 
 ## Designer:
-Timothy Delrosario
+- Timothy Delrosario
 
 
 ## Table of Contents

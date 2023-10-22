@@ -12,20 +12,14 @@
         <div>
           <v-row>
             <v-col cols="6">
-              <v-text-field
-                label="Your Latitude Coordinates: " setClicked
-                :setClicked="Latitude"
-                clearable
-                :rules="latitudeRules"
-              ></v-text-field>
+              <v-text-field disabled>
+                Selected Lattitude: {{ this.$store.state.clicked.lat.toFixed(4) }}
+              </v-text-field>
             </v-col>
             <v-col cols="6">
-              <v-text-field
-                label="Your Longitude Coordinates: " setclicked
-                :setClicked="Longitude"
-                clearable
-                :rules="longitudeRules"
-              ></v-text-field>
+              <v-text-field disabled>
+                Selected Longitude: {{ this.$store.state.clicked.lng.toFixed(4) }}
+              </v-text-field>
             </v-col>
           </v-row>
         </div>
@@ -96,6 +90,26 @@ export default {
       ],
     };
   },
+
+  /*
+  click() {
+    return {
+      clickLat: [
+        (v) => {
+          if (v) return true;
+          return clickLat;
+        }
+      ],
+        clickLong: [
+          (v) => {
+            if (v) return true;
+            return clickLong
+          }
+        ]
+    };
+  },
+  */
+
   methods: {
     close () {
       this.$emit('close');
