@@ -74,34 +74,6 @@ export default {
       valid: false,
       zoom: 2,
       files: [],
-      soundRules: [
-        (v) => {
-          if (v?.length) {
-            return true;
-          }
-          return 'Choose a file';
-        }
-      ],
-      latitudeRules: [
-        (v) => {
-          if (v) return true;
-          return 'Latitude is required.';
-        },
-        (v) => {
-          if (v >= -90 && v <= 90) return true;
-          return 'Must be between -90 and 90.';
-        },
-      ],
-      longitudeRules: [
-        (v) => {
-          if (v) return true;
-          return 'Longitude is required.';
-        },
-        (v) => {
-          if (v >= -180 && v <= 180) return true;
-          return 'Must be between -180 and 180.';
-        },
-      ],
     };
   },
   beforeCreate () {
