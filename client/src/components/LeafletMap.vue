@@ -214,14 +214,21 @@ export default {
       this.mapInstance.flyTo(marker.getLatLng(), 15);
       marker.openPopup();
     },
+    handleResize () {
+      setTimeout(() => {
+        this.mapInstance.invalidateSize();
+      }, 200);
+    },
   },
   mounted () {
     this.initMap();
+    window.addEventListener('resize', this.handleResize);
   },
   unmounted () {
     if (this.mapInstance) {
       this.mapInstance.remove();
     }
+    window.removeEventListener('resize', this.handleResize);
   },
   watch: {
     files: {
