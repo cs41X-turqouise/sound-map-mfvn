@@ -88,6 +88,7 @@ Node.js installed on your local machine (specifically node 18)
 Docker installed (if you want to use Docker for containerization)
 
 Google OAuth 2.0 credentials for authentication setup
+
 MongoDB 
 ### Node.js
 This project features using node.js, which is a popular high-level project building ability on top of javascript. 
