@@ -13,28 +13,16 @@
           <v-row>
             <v-col cols="6">
               <v-text-field
-                label="Enter Latitude Coordinates"
-                hint="Must be between -90 and 90"
-                id="latitude"
-                name="latitude"
-                type="number"
-                min="-90"
-                max="90"
-                class="no-spinner"
+                label="Your Latitude Coordinates: " setClicked
+                :setClicked="Latitude"
                 clearable
                 :rules="latitudeRules"
               ></v-text-field>
             </v-col>
             <v-col cols="6">
               <v-text-field
-                label="Enter Longitude Coordinates"
-                hint="Must be between -180 and 180"
-                id="longitude"
-                name="longitude"
-                type="number"
-                min="-180"
-                max="180"
-                class="no-spinner"
+                label="Your Longitude Coordinates: " setclicked
+                :setClicked="Longitude"
                 clearable
                 :rules="longitudeRules"
               ></v-text-field>
