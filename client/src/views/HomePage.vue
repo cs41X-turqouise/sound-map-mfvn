@@ -73,12 +73,14 @@ export default {
       },
       valid: false,
       zoom: 2,
-      files: [],
+      files: new Map(),
     };
   },
   beforeCreate () {
     Api().get('uploads/filedata/all').then((response) => {
-      this.files = response.data;
+      response.data.forEach((file) => {
+        this.files.set(file._id, file);
+      });
     });
     if (!this.$store.state.user) {
       Api().get('users/self').then((response) => {
@@ -105,12 +107,15 @@ export default {
     /**
      * @async
      * @param {EventTarget} form
+     * @param {FormData} formData
      */
-    async upload (form) {
-      const formData = new FormData(form);
+    async upload (form, formData) {
       const response = await UploadService.upload(formData);
 
-      this.files.push(response.data);
+      if (!response.data._id && response.data.id) {
+        response.data._id = response.data.id;
+      }
+      this.files.set(response.data._id, response.data);
       form.reset();
       this.showUploadModal = false;
     },

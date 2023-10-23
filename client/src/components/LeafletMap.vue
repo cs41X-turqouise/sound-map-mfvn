@@ -82,8 +82,8 @@ export default {
      */
     /** @type {FileData[]} */
     files: {
-      type: Array,
-      default: () => [],
+      type: Map,
+      default: () => new Map(),
     },
   },
   data () {
@@ -172,8 +172,9 @@ export default {
         }
         this.currentPopup = null;
       });
-      if (this.files.length) {
-        this.markers = this.files.map((file) => {
+      if (this.files.size) {
+        for (const file of this.files) {
+          console.log(file);
           const { latitude, longitude, title, description } = file.metadata;
           const marker = L.marker([Number(latitude), Number(longitude)]).addTo(leafletMap);
           marker.bindPopup(`
@@ -188,8 +189,8 @@ export default {
             this.currentPopup = marker.getPopup();
           });
           marker.data = file;
-          return marker;
-        });
+          this.markers.push(marker);
+        }
       }
       leafletMap.on('click', (event) => {
         const lat = event.latlng.lat;
