@@ -7,8 +7,25 @@
         ></v-text-field>
         <v-text-field name="description" label="Description" id="description" clearable
         ></v-text-field>
-        <v-text-field name="tags" label="Tags" id="tags" clearable
+        <!-- Hacky - Fixes order in which formdata elements are processed though -->
+        <v-text-field name="tags" label="Tags" id="tags" style="display: none;"></v-text-field>
+        <v-text-field name="latitude" id="latitude" style="display: none;"></v-text-field>
+        <v-text-field name="longitude" id="longitude" style="display: none;"></v-text-field>
+        <v-text-field
+          label="Tags"
+          v-model="tagInput"
+          clearable
+          @keyup.space="addTag"
+          @keyup.enter="addTag"
         ></v-text-field>
+        <v-chip
+          v-for="tag in tags"
+          :key="tag"
+          closable
+          @click:close="removeTag(tag)"
+        >
+          {{ tag }}
+        </v-chip>
         <div>
           <v-row>
             <v-col cols="6">
@@ -68,51 +85,23 @@ export default {
           return 'Choose a file';
         }
       ],
-      latitudeRules: [
-        (v) => {
-          if (v) return true;
-          return 'Latitude is required.';
-        },
-        (v) => {
-          if (v >= -90 && v <= 90) return true;
-          return 'Must be between -90 and 90.';
-        },
-      ],
-      longitudeRules: [
-        (v) => {
-          if (v) return true;
-          return 'Longitude is required.';
-        },
-        (v) => {
-          if (v >= -180 && v <= 180) return true;
-          return 'Must be between -180 and 180.';
-        },
-      ],
+      tagInput: '',
+      tags: new Set(),
     };
   },
-
-  /*
-  click() {
-    return {
-      clickLat: [
-        (v) => {
-          if (v) return true;
-          return clickLat;
-        }
-      ],
-        clickLong: [
-          (v) => {
-            if (v) return true;
-            return clickLong
-          }
-        ]
-    };
-  },
-  */
-
   methods: {
     close () {
       this.$emit('close');
+    },
+    addTag () {
+      const tag = this.tagInput.trim();
+      if (tag) {
+        this.tags.add(tag);
+        this.tagInput = '';
+      }
+    },
+    removeTag (tag) {
+      this.tags.delete(tag);
     },
     /**
      * @async
@@ -123,7 +112,12 @@ export default {
       if (!valid) return;
 
       const form = e.target;
-      this.$emit('upload', form);
+      const formData = new FormData(form);
+      formData.set('tags', Array.from(this.tags));
+      formData.set('latitude', this.$store.state.clicked.lat);
+      formData.set('longitude', this.$store.state.clicked.lng);
+      this.tags.clear();
+      this.$emit('upload', form, formData);
     },
   },
 };
