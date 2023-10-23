@@ -9,30 +9,35 @@
       @focusMarker="focusMarker"
       @close="showPanel = false">
     </SidePanel>
-    <div v-if="showModal" class="click-modal" @click.stop @dblclick.stop>
-      <CloseButton @close="showModal = false"/>
-      <span>Latitude: {{ clicked.lat.toFixed(4) }}</span><br>
-      <span>Longitude: {{ clicked.lng.toFixed(4) }}</span><br>
-      <v-row style="justify-content: space-evenly; align-items: center;">
-        <v-col cols="auto" @click.stop>
-          <v-btn
-            color="info"
-            size="small"
-            density="comfortable"
-            @click.stop="togglePinPanel">
-            {{ showPanel ? 'Hide' : 'Show'}} Panel
-          </v-btn>
-          <v-btn
-            v-if="$store.state.user"
-            color="info"
-            size="small"
-            density="comfortable"
-            @click.stop="openUploadModal">
-            Upload
-          </v-btn>
-        </v-col>
-      </v-row>
-    </div>
+    <Transition name="fade">
+      <div
+        v-if="showModal"
+        :class="{ 'click-modal': true, highlight: highlight }"
+        @click.stop @dblclick.stop>
+        <CloseButton @close="showModal = false"/>
+        <span>Latitude: {{ clicked.lat.toFixed(4) }}</span><br>
+        <span>Longitude: {{ clicked.lng.toFixed(4) }}</span><br>
+        <v-row style="justify-content: space-evenly; align-items: center;">
+          <v-col cols="auto" @click.stop>
+            <v-btn
+              color="info"
+              size="small"
+              density="comfortable"
+              @click.stop="togglePinPanel">
+              {{ showPanel ? 'Hide' : 'Show'}} Panel
+            </v-btn>
+            <v-btn
+              v-if="$store.state.user"
+              color="info"
+              size="small"
+              density="comfortable"
+              @click.stop="openUploadModal">
+              Upload
+            </v-btn>
+          </v-col>
+        </v-row>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -88,6 +93,7 @@ export default {
       clicked: null,
       showPanel: false,
       showModal: false,
+      highlight: false,
     };
   },
   setup () {
@@ -163,6 +169,12 @@ export default {
         const lng = event.latlng.lng;
         this.clicked = { lat, lng, latlng: event.latlng };
         this.store.dispatch('setClicked', { lat, lng });
+        if (this.showModal) {
+          this.highlight = true;
+          setTimeout(() => {
+            this.highlight = false;
+          }, 1000);
+        }
         this.showModal = true;
       });
       this.mapInstance = leafletMap;
@@ -251,5 +263,20 @@ export default {
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+@keyframes highlight {
+  0% { background-color: white; }
+  50% { background-color: yellow; }
+  100% { background-color: white; }
+}
+
+.highlight {
+  animation: highlight 0.5s;
 }
 </style>
