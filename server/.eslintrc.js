@@ -25,5 +25,6 @@ module.exports = {
     'valid-jsdoc': 0,
     'indent': ['error', 2, { 'MemberExpression': 1 }],
     'new-cap': 0,
+    'no-trailing-spaces': ['error', { 'skipBlankLines': true }],
   }
 };
