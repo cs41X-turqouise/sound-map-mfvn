@@ -37,6 +37,8 @@
 </template>
 
 <script>
+// TODO: Redo using Vue 3 Composition API
+import { useStore } from 'vuex';
 import L from 'leaflet';
 import SidePanel from './SidePanel.vue';
 import CloseButton from './CloseButton.vue';
@@ -64,28 +66,6 @@ export default {
     SidePanel,
     CloseButton,
   },
-  props: {
-    /**
-     * @typedef {Object} FileData
-     * @property {string} _id
-     * @property {string} filename
-     * @property {string} contentType
-     * @property {Date} uploadDate
-     * @property {number} length
-     * @property {number} chunkSize
-     * @property {Object} metadata
-     * @property {string} metadata.title
-     * @property {string} metadata.description
-     * @property {string} metadata.latitude
-     * @property {string} metadata.longitude
-     * @property {string} metadata.tags
-     */
-    /** @type {FileData[]} */
-    files: {
-      type: Map,
-      default: () => new Map(),
-    },
-  },
   data () {
     return {
       mapId: 'leaflet-map',
@@ -109,6 +89,10 @@ export default {
       showPanel: false,
       showModal: false,
     };
+  },
+  setup () {
+    const store = useStore();
+    return { store };
   },
   methods: {
     initMap () {
@@ -161,6 +145,8 @@ export default {
         leafletMap.getCenter(),
         { icon: myIcon }
       ).addTo(leafletMap);
+
+      // Add event listeners
       leafletMap.on('move', () => {
         const center = leafletMap.getCenter();
         this.centerMarker.setLatLng(center);
@@ -172,34 +158,22 @@ export default {
         }
         this.currentPopup = null;
       });
-      if (this.files.size) {
-        for (const file of this.files) {
-          console.log(file);
-          const { latitude, longitude, title, description } = file.metadata;
-          const marker = L.marker([Number(latitude), Number(longitude)]).addTo(leafletMap);
-          marker.bindPopup(`
-            <h2>Upload Info</h2><br>
-            <span>Title: ${title}</span><br>
-            <span>Description: ${description}</span><br>
-          `);
-          marker.on('click', () => {
-            if (this.currentPopup) {
-              this.currentPopup.remove();
-            }
-            this.currentPopup = marker.getPopup();
-          });
-          marker.data = file;
-          this.markers.push(marker);
-        }
-      }
       leafletMap.on('click', (event) => {
         const lat = event.latlng.lat;
         const lng = event.latlng.lng;
         this.clicked = { lat, lng, latlng: event.latlng };
-        this.$store.dispatch('setClicked', { lat, lng });
+        this.store.dispatch('setClicked', { lat, lng });
         this.showModal = true;
       });
       this.mapInstance = leafletMap;
+
+      // Add markers
+      if (this.store.state.files.size) {
+        for (const file of this.store.state.files.values()) {
+          const marker = this.createMarker(file);
+          this.markers.push(marker);
+        }
+      }
     },
     openUploadModal () {
       this.showPanel = false;
@@ -220,6 +194,28 @@ export default {
         this.mapInstance.invalidateSize();
       }, 200);
     },
+    createMarker (file) {
+      const { latitude, longitude, title, description } = file.metadata;
+      const marker = L.marker([latitude, longitude]).addTo(this.mapInstance);
+      marker.bindPopup(`
+        <h2>Upload Info</h2><br>
+        <span>Title: ${title}</span><br>
+        <span>Description: ${description}</span><br>
+      `);
+      marker.data = file;
+      return marker;
+    },
+  },
+  created () {
+    this.$watch(() => this.store.state.files, (newValue, oldValue) => {
+      for (const file of newValue.values()) {
+        if (this.markers.some((marker) => marker.data._id === file._id)) {
+          continue;
+        }
+        const marker = this.createMarker(file);
+        this.markers.push(marker);
+      }
+    });
   },
   mounted () {
     this.initMap();
@@ -230,24 +226,6 @@ export default {
       this.mapInstance.remove();
     }
     window.removeEventListener('resize', this.handleResize);
-  },
-  watch: {
-    files: {
-      handler (newFiles) {
-        newFiles.forEach((file) => {
-          const { latitude, longitude, title, description } = file.metadata;
-          const marker = L.marker([latitude, longitude]).addTo(this.mapInstance);
-          marker.bindPopup(`
-            <h2>Upload Info</h2><br>
-            <span>Title: ${title}</span><br>
-            <span>Description: ${description}</span><br>
-          `);
-          marker.data = file;
-          this.markers.push(marker);
-        });
-      },
-      deep: true,
-    },
   },
 };
 </script>

@@ -53,6 +53,7 @@
 </template>
 
 <script>
+import { useStore } from 'vuex';
 import CenterModal from './CenterModal.vue';
 
 export default {
@@ -65,10 +66,6 @@ export default {
       type: Boolean,
       default: false,
     },
-    files: {
-      type: Map,
-      default: () => new Map(),
-    },
   },
   data () {
     return {
@@ -79,6 +76,10 @@ export default {
       dateFrom: '',
       dateTo: '',
     };
+  },
+  setup () {
+    const store = useStore();
+    return { store };
   },
   methods: {
     close () {
@@ -125,6 +126,9 @@ export default {
     }
   },
   computed: {
+    files () {
+      return this.store.state.files;
+    },
     tagList () {
       const tags = new Set();
       for (const file of this.files.values()) {
