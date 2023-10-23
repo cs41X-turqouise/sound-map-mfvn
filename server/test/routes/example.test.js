@@ -5,11 +5,15 @@ const { build } = require('../helper');
 
 test('example is loaded', async (t) => {
   const app = await build(t);
-
-  const res = await app.inject({
-    url: '/example'
-  });
-  t.equal(res.payload, 'this is an example');
+  try {
+    const res = await app.inject({
+      url: '/example'
+    });
+    t.equal(res.payload, 'this is an example');
+  } catch (error) {
+    console.error('Error during test:', error);
+    t.fail('Test failed due to an error.');
+  }
 });
 
 // inject callback style:
