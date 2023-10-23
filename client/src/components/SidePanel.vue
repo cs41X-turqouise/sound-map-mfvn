@@ -5,11 +5,17 @@
     </section>
     <ul id="popup-list" class="popup-list">
       <li v-for="(marker, index) in paginatedMarkers" :key="marker.data._id">
+        <!-- <span>ID: {{ marker.data._id }}</span><br> -->
         <b class="name">{{ marker.data.metadata.title }}</b>
         (<span class="distance">{{ clicked.latlng.distanceTo(marker._latlng).toFixed(2) }}</span> m)<br>
         Date: <span class="date">{{ new Date(marker.data.uploadDate).toLocaleDateString() }}</span><br>
-        <span class="description">{{ marker.data.metadata.description }}</span>
-        <v-carousel v-if="marker.data.images.length" :style="{ width: '400px', height: '200px' }">
+        <span class="description">{{ marker.data.metadata.description }}</span><br>
+        <v-chip v-for="(tag, index) of marker.data.metadata.tags" :key="index">
+          {{ tag }}
+        </v-chip>
+        <v-carousel
+          v-if="!!marker.data.images && marker.data.images.length"
+          :style="{ width: '350px', height: '150px' }">
           <v-carousel-item
             v-for="(image, index) in marker.data.images"
             :key="index"
