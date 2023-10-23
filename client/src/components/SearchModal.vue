@@ -133,7 +133,6 @@ export default {
       const tags = new Set();
       for (const file of this.files.values()) {
         for (const tag of file.metadata.tags) {
-          console.log(tag);
           tags.add(tag);
         }
       }

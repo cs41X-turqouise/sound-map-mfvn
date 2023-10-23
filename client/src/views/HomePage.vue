@@ -34,16 +34,18 @@
     <div v-if="showSearchModal || showUploadModal" class="overlay"></div>
     <SearchModal
       v-if="showSearchModal"
-      :files="files"
       :show="showSearchModal"
       @close="showSearchModal = false">
     </SearchModal>
-    <UploadModal :show="showUploadModal" @close="showUploadModal = false" @upload="upload">
+    <UploadModal
+      v-if="showUploadModal"
+      :show="showUploadModal"
+      @close="showUploadModal = false"
+      @upload="upload">
     </UploadModal>
     <UserMenu :user="user" :show="showUserMenu" />
     <v-main style="height: 100vh; width: 100vw; overflow-y: auto; margin-bottom: 1vh;">
       <LeafletMap
-        :files="files"
         @openUploadModal="showUploadModal = true"
         @closeUploadModal="showUploadModal = false"/>
     </v-main>
@@ -51,6 +53,7 @@
 </template>
 
 <script>
+import { useStore } from 'vuex';
 import LeafletMap from '../components/LeafletMap.vue';
 import SearchModal from '../components/SearchModal.vue';
 import UploadModal from '../components/UploadModal.vue';
@@ -66,6 +69,10 @@ export default {
     SearchModal,
     UploadModal,
   },
+  setup () {
+    const store = useStore();
+    return { store };
+  },
   data () {
     return {
       user: null,
@@ -77,14 +84,16 @@ export default {
       },
       valid: false,
       zoom: 2,
-      files: new Map(),
+      filteredFiles: new Map(),
     };
   },
   beforeCreate () {
     Api().get('uploads/filedata/all').then((response) => {
+      const fileMap = new Map();
       response.data.forEach((file) => {
-        this.files.set(file._id, file);
+        fileMap.set(file._id, file);
       });
+      this.store.dispatch('setFiles', fileMap);
     });
     if (!this.$store.state.user) {
       Api().get('users/self').then((response) => {
@@ -119,7 +128,7 @@ export default {
       if (!response.data._id && response.data.id) {
         response.data._id = response.data.id;
       }
-      this.files.set(response.data._id, response.data);
+      this.store.dispatch('addFile', response.data);
       form.reset();
       this.showUploadModal = false;
     },
