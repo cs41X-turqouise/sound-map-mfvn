@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "typeRoots": ["./node_modules/@types", "./server/global.d.ts"],
+    "target": "ESNext", // runs the latest version ECMAScript
+    "module": "commonjs", // Node.js uses CommonJS for require and module.exports.
+    "types": ["jest"], // allows you to use Jest's global types
+    "strict": true, //Enables all strict type-checking options
+    "esModuleInterop": true // useful if you're mixing JS and TS
+  },
+  "include": [
+    "*.ts", "src/**/*.ts",
+    "global.d.ts"
+  ]
+
+}

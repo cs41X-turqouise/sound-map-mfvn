@@ -1,0 +1,10 @@
+{
+    "extends": "fastify-tsconfig",
+    "compilerOptions": {
+        "allowJs": true,
+        "outDir": "dist",
+        "types": ["jest"]
+    },
+    "include": ["*.ts"]
+
+}

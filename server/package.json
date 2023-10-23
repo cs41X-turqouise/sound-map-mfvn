@@ -7,17 +7,13 @@
     "test": "test"
   },
   "scripts": {
-    "test": "eslint . && jest",
+    "test": "jest",
     "test:watch": "jest --watch",
     "start": "fastify start -l info app.js",
     "dev": "fastify start -w -l info -P app.js",
     "pretest": "eslint .",
     "lint": "eslint --fix",
     "clean-db": "node ./scripts/clean-db.js"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"]
   },
   "keywords": [],
   "author": "",
@@ -35,13 +31,20 @@
     "fastify": "^4.23.2",
     "fastify-cli": "^5.8.0",
     "fastify-multer": "^2.0.3",
-    "fastify-plugin": "^4.0.0",
+    "fastify-plugin": "^4.5.1",
     "mongoose": "^7.5.3"
   },
   "devDependencies": {
+    "@babel/core": "^7.23.2",
+    "@babel/preset-env": "^7.23.2",
+    "@types/jest": "^29.5.6",
+    "babel-jest": "^29.7.0",
     "eslint": "^8.52.0",
     "eslint-config-google": "^0.14.0",
+    "fastify-tsconfig": "^2.0.0",
     "jest": "^29.7.0",
-    "jest-environment-node": "^29.7.0"
+    "jest-environment-node": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.2.2"
   }
 }
