@@ -32,7 +32,11 @@
       </v-toolbar-items>
     </v-toolbar>
     <div v-if="showSearchModal || showUploadModal" class="overlay"></div>
-    <SearchModal :show="showSearchModal" @close="showSearchModal = false">
+    <SearchModal
+      v-if="showSearchModal"
+      :files="files"
+      :show="showSearchModal"
+      @close="showSearchModal = false">
     </SearchModal>
     <UploadModal :show="showUploadModal" @close="showUploadModal = false" @upload="upload">
     </UploadModal>
