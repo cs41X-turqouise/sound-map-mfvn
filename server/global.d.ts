@@ -12,3 +12,4 @@ declare module 'fastify' {
     upload: any;
   }
 }
+declare module '../app';
