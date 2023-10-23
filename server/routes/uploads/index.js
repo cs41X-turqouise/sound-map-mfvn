@@ -64,6 +64,7 @@ module.exports = async function (fastify, options) {
       request.session.user.uploads.push(upload._id);
       await request.session.user.save();
       await upload.save();
+      sound.images = images;
       return sound;
     }
   );
