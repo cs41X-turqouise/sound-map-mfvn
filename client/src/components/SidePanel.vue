@@ -1,28 +1,48 @@
 <template>
-  <div v-if="clicked" id="sidebar" class="sidebar" @click.stop>
+  <div
+    v-if="clicked"
+    id="sidebar"
+    class="sidebar"
+    @click.stop>
     <section id="heading">
       <CloseButton @close="close" />
     </section>
     <ul id="popup-list" class="popup-list">
       <li v-for="(marker, index) in paginatedMarkers" :key="marker.data._id">
-        <!-- <span>ID: {{ marker.data._id }}</span><br> -->
-        <b class="name">{{ marker.data.metadata.title }}</b>
-        (<span class="distance">{{ clicked.latlng.distanceTo(marker._latlng).toFixed(2) }}</span> m)<br>
-        Date: <span class="date">{{ new Date(marker.data.uploadDate).toLocaleDateString() }}</span><br>
-        <span class="description">{{ marker.data.metadata.description }}</span><br>
-        <v-chip v-for="(tag, index) of marker.data.metadata.tags" :key="index">
-          {{ tag }}
-        </v-chip>
-        <v-carousel
-          v-if="!!marker.data.images && marker.data.images.length"
-          :style="{ width: '350px', height: '150px' }">
-          <v-carousel-item
-            v-for="(image, index) in marker.data.images"
-            :key="index"
-            :src="urls.get(image) || fetchImage(image)"
-            cover>
-          </v-carousel-item>
-        </v-carousel>
+        <div class="file-info">
+          <div>
+            <span>ID: {{ marker.data._id }}</span><br>
+            <h2>
+              <b class="name">
+                {{ marker.data.metadata.title }}
+              </b>
+            </h2>
+            <span class="distance">
+              Distance: {{ clicked.latlng.distanceTo(marker._latlng).toFixed(2) }} m
+            </span>
+            <br>
+            <span class="date">
+              Date: {{ new Date(marker.data.uploadDate).toLocaleDateString() }}
+            </span><br>
+            <span class="description" v-if="marker.data.metadata.description">
+              Description: <p>{{ marker.data.metadata.description }}</p>
+            </span><br>
+            <v-chip v-for="(tag, index) of marker.data.metadata.tags" :key="index">
+              {{ tag }}
+            </v-chip>
+          </div>
+          <v-carousel
+            v-if="!!marker.data.images && marker.data.images.length"
+            show-arrows="hover"
+            :style="{ width: '350px', height: '150px' }">
+            <v-carousel-item
+              v-for="(image, index) in marker.data.images"
+              :key="index"
+              :src="urls.get(image) || fetchImage(image)"
+              cover>
+            </v-carousel-item>
+          </v-carousel>
+        </div>
         <div class="sound-bar" :style="{ backgroundColor: colors[index] }">
           <audio
             v-if="urls.has(marker.data._id)"
@@ -35,8 +55,8 @@
           <v-btn v-else @click="fetchAudio(marker.data)">Play</v-btn>
         </div>
       </li>
-      <v-pagination v-model="currentPage" :length="maxPage"></v-pagination>
     </ul>
+    <v-pagination class="pagination" v-model="currentPage" :length="maxPage"></v-pagination>
   </div>
 </template>
 
@@ -119,12 +139,9 @@ export default {
         return distanceA - distanceB;
       }).slice(start, end);
     },
-    /**
-     * @todo Figure out why when the `+ 1` is removed we get a recursion error
-     * @returns {number}
-     */
+    /** @returns {number} */
     maxPage () {
-      return Math.ceil(this.markers.length / this.perPage) + 1;
+      return Math.ceil(this.markers.length / this.perPage);
     }
   },
   watch: {
@@ -182,7 +199,7 @@ export default {
   left: 0;
   z-index: 9999;
   background-color: #f9f9f9;
-  width: auto;
+  width: 400px;
   min-width: 200px;
   height: auto;
   overflow: hidden;
@@ -215,6 +232,12 @@ h3 {
   text-decoration: none;
   display: block;
   border-bottom: 1px solid #ddd;
+}
+
+.file-info {
+  display: flex;
+  flex-direction: row;
+  text-align: left;
 }
 
 .popup-list li:hover {
