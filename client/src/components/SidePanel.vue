@@ -11,7 +11,7 @@
       <li v-for="(marker, index) in paginatedMarkers" :key="marker.data._id">
         <div class="file-info">
           <div>
-            <span>ID: {{ marker.data._id }}</span><br>
+            <!-- <span>ID: {{ marker.data._id }}</span><br> -->
             <h2>
               <b class="name">
                 {{ marker.data.metadata.title }}
@@ -55,8 +55,8 @@
           <v-btn v-else @click="fetchAudio(marker.data)">Play</v-btn>
         </div>
       </li>
+      <v-pagination class="pagination" v-model="currentPage" :length="maxPage"></v-pagination>
     </ul>
-    <v-pagination class="pagination" v-model="currentPage" :length="maxPage"></v-pagination>
   </div>
 </template>
 
@@ -89,8 +89,8 @@ export default {
       /** @type {HTMLAudioElement} */
       currentAudio: null,
       currentPage: 1,
-      perPage: 5,
-      colors: ['#FF0000', '#008000', '#0000FF', '#FFA500', '#800080'],
+      perPage: 4,
+      colors: ['red', 'green', 'blue', 'purple'],
     };
   },
   methods: {
