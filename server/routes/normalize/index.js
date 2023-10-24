@@ -17,44 +17,50 @@ const locale = path[platform === `win32` ? `win32` : `posix`];
  */
 module.exports = async function (fastify, options) {
     
-
+    
+    const Sound = require('../../models/Sound');
     /** @type {import("fluent-ffmpeg")} */
     const ffmpeg = fastify.ffmpeg
 
-    fastify.post('/', { preHandler: fastify.upload.single('sound') },
+    fastify.post('/:id',
         async function (request, reply) {
-            const data =  request.file
-            fastify.log.info(`request.file.buffer is ${!Buffer.isBuffer(data.buffer) ? 'not' : ''} a Buffer`)
-            fastify.log.info(`request.file.buffer ->  ${data.buffer }`)
-            const stream = new Readable();
-            stream._read = () => {}
-             stream.push(data.buffer)
-             stream.push(null)
+            
+            const _id = fastify.toObjectId(request.params.id);
+            const sound = await Sound.findById(_id);
+            const {fileStream:dstream, file} = await sound.getFileStream(fastify)
+            fastify.log.info(file)
+            fastify.log.info(dstream)
 
+            
+            fastify.log.info(`file->  ${file}`)
+            fastify.log.info(`dstream is ${!Buffer.isBuffer(dstream.buffer) ? 'not' : ''} a Buffer`)
+            fastify.log.info(`dstream->  ${dstream.buffer}`)
 
-            fastify.log.info(`file in MongoDB as ${data.filename}`)
             
             /**
-             * @todo rewrite this so it takes MongoDB id as URL param
              * @todo have the main upload route call this route
              * @todo auto detect file types for images/audio 
-             * @todo use buffer streams from MongoDB to read and write
              */
-            return;
+            //return;
+            
+
+            const outStream = await fastify.gridfsSounds.openUploadStream('compressed.mp3')
+            
+
             var command = 
-            ffmpeg(stream)
-            //.inputFormat('mp3')
+            ffmpeg(dstream)
+            .inputFormat('mp3')
             .audioBitrate(96)
-            .output(newFilePath)
+            .output(outStream)
             .outputFormat('mp3')
         
-            fastify.log.info(`outputting to ${newFilePath}`)
+            fastify.log.info(`outputting to ${outStream}`)
             
             command.on('start', (cmdline) => fastify.log.info(cmdline))
                 .on('error', (err) => fastify.log.error(err))
                 .on('end', () => fastify.log.info('ffmpeg command succesful'))
 
-            command.run()
+            await command.run()
             
             
         })
