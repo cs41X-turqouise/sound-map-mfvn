@@ -3,14 +3,10 @@
 module.exports = async function (fastify, options) {
 
     // Generate a token
-    fastify.route({
-        method: 'GET',
-        path: '/',
-        handler: async (req, reply) => {
-            const token = await reply.generateCsrf()
-            return { token }
-        }
-    })
+    fastify.get('/', async function(req, reply) {
+        const token = await reply.generateCsrf();
+        return { token };
+    });
 
     // Protect a route
     fastify.route({
@@ -18,8 +14,8 @@ module.exports = async function (fastify, options) {
         path: '/',
         onRequest: fastify.csrfProtection,
         handler: async (req, reply) => {
-            const token = await reply.generateCsrf()
-            reply.type('text/html')
+            const token = await reply.generateCsrf();
+            reply.type('text/html');
             return `
             <html>
               <script type='text/javascript'>
@@ -47,7 +43,7 @@ module.exports = async function (fastify, options) {
           
           `
         }
-    })
+    });
 
     // Define a Fastify plugin for CSRF protection.
     async function fastifyCsrfProtection (fastify, options) {
