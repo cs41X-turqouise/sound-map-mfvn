@@ -12,7 +12,28 @@ module.exports = async function (fastify, options) {
    * Get all users
    * Should be Admin only
    */
-  fastify.get('/', async function (request, reply) {
+  fastify.get('/', {
+    schema: {
+      tags: ['users'],
+      response: {
+        200: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              _id: { type: 'string', format: 'uuid' },
+              username: { type: 'string' },
+              fullname: { type: 'string' },
+              email: { type: 'string', format: 'email' },
+              gid: { type: 'string', format: 'uuid' },
+              uploads: { type: 'array', items: { type: 'string', format: 'uuid' } },
+              bookmarks: { type: 'array', items: { type: 'string', format: 'uuid' } },
+            }
+          }
+        }
+      }
+    }
+  }, async function (request, reply) {
     const users = await User.find({}).populate('uploads');
     return users;
   });

@@ -78,6 +78,9 @@ module.exports = fp(async function (fastify, opts) {
     },
     staticCSP: false, // Disable static content security policy
     transformStaticCSP: (header) => header, // Transformation function for static content security policy
+    transformSpecification: (swaggerObject, request, reply) => {
+      return swaggerObject;
+    },
     exposeRoute: true // Expose the route
   });
 });
