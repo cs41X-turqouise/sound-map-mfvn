@@ -16,7 +16,7 @@ module.exports = fp(async function (fastify, opts) {
         description: 'Sound Map Backend Documentation description',
         version: '0.0.0'
       },
-      host: 'localhost',
+      host: '127.0.0.1:3000',
       schemes: ['http', 'https'],
       consumes: ['application/json'],
       produces: ['application/json'],
