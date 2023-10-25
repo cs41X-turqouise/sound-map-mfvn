@@ -1,5 +1,6 @@
 <template>
-  <div class="home">
+  <div class="home" style="height: 100%; width: 100%;
+    display: flex; flex-direction: column;">
     <!-- <header>
       <img
         id="user-avatar"
@@ -128,9 +129,7 @@
         </v-form>
     </CenterModal>
     <UserMenu :user="user" :show="showUserMenu" />
-    <v-main style="height: 100vh; width: 100vw; overflow-y: auto; margin-bottom: 1vh;">
-      <LeafletMap :files="files"/>
-    </v-main>
+    <LeafletMap :files="files"/>
   </div>
 </template>
 
