@@ -3,7 +3,12 @@
     <h2>Upload Media</h2>
     <!-- TODO - better handling of these as tags are technically an array of strings -->
       <v-form @submit.prevent="upload" ref="form">
-        <v-text-field name="title" label="Title" id="title" clearable
+        <v-text-field
+          name="title"
+          label="Title"
+          id="title"
+          maxlength="60"
+          clearable
         ></v-text-field>
         <v-text-field name="description" label="Description" id="description" clearable
         ></v-text-field>
@@ -115,17 +120,31 @@ export default {
       const form = e.target;
       const formData = new FormData(form);
       const { lat, lng } = this.$store.state.clicked;
-      const geoLocation = fetch(`https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lng}&apiKey=${import.meta.env.VITE_GEOAPIFY_API_KEY}}`)
+      const geoLocation = fetch(`https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lng}&apiKey=${import.meta.env.VITE_GEOAPIFY_API_KEY}`)
         .then((response) => response.json())
         .then((result) => {
           return result.features[0].properties;
         })
         .catch((error) => console.log('error', error));
       const geoLocationData = await geoLocation;
+      if (this.tagInput) {
+        this.addTag();
+      }
+      const conjunctions = ['and', 'or', 'but', 'nor', 'for', 'yet', 'so'];
+      // Auto-capitalizes the first letter of each word in the title excluding conjunctions
+      const title = form.title.value.trim().split(' ').map((word, index) => {
+        if (index !== 0 && conjunctions.includes(word.toLowerCase())) {
+          return word.toLowerCase();
+        }
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      }).join(' ');
+      formData.set('title', title);
       formData.set('tags', Array.from(this.tags));
       formData.set('latitude', lat);
       formData.set('longitude', lng);
-      formData.set('geodata', JSON.stringify(geoLocationData));
+      if (geoLocationData) {
+        formData.set('geodata', JSON.stringify(geoLocationData));
+      }
       this.tags.clear();
       this.$emit('upload', form, formData);
     },
