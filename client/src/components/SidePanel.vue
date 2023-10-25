@@ -17,6 +17,16 @@
                 {{ marker.data.metadata.title }}
               </b>
             </h2>
+            <div v-if="marker.data.metadata.geodata">
+              <p>
+                {{ JSON.parse(marker.data.metadata.geodata).formatted }}
+              </p>
+            </div>
+            <span>
+              Lat: {{ Number(marker.data.metadata.latitude).toFixed(4) }}
+              Lng: {{ Number(marker.data.metadata.longitude).toFixed(4) }}
+              <br>
+            </span>
             <span class="distance">
               Distance: {{ clicked.latlng.distanceTo(marker._latlng).toFixed(2) }} m
             </span>
