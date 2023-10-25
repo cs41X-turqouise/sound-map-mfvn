@@ -183,9 +183,13 @@ export default {
 #leaflet-map {
   height: 100%;
   width: 100%;
+  right: 5px;
 }
 .leaflet-control-layers-list {
   text-align: left;
   flex: 1;
+}
+.leaflet-control-attribution, .leaflet-control-scale-line {
+  padding: 0px 15px 0px 0px;
 }
 </style>
