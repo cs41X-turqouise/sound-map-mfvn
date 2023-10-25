@@ -1,5 +1,6 @@
 <template>
-  <div class="home">
+  <div class="home" style="height: 100%; width: 100%;
+    display: flex; flex-direction: column;">
     <v-toolbar fixed color="cyan" style="height: fit-content;" dark>
       <v-toolbar-items>
         <v-btn @click="showSearchModal = true" flat>
@@ -44,11 +45,9 @@
       @upload="upload">
     </UploadModal>
     <UserMenu :user="user" :show="showUserMenu" />
-    <v-main style="height: 100vh; width: 100vw; overflow-y: auto; margin-bottom: 1vh;">
-      <LeafletMap
+    <LeafletMap
         @openUploadModal="showUploadModal = true"
         @closeUploadModal="showUploadModal = false"/>
-    </v-main>
   </div>
 </template>
 

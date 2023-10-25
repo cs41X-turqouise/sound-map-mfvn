@@ -245,12 +245,16 @@ export default {
 <style>
 @import "leaflet/dist/leaflet.css";
 #leaflet-map {
-  height: 86vh;
+  height: 100%;
   width: 100%;
-  overflow: hidden;
+  right: 5px;
 }
 .leaflet-control-layers-list {
   text-align: left;
+  flex: 1;
+}
+.leaflet-control-attribution, .leaflet-control-scale-line {
+  padding: 0px 15px 0px 0px;
 }
 .click-modal {
   position: absolute;
