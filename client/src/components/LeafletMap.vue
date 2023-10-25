@@ -29,7 +29,29 @@ export default {
   components: {
     // Sidebar,
   },
-  data() {
+  props: {
+    /**
+     * @typedef {Object} FileData
+     * @property {string} _id
+     * @property {string} filename
+     * @property {string} contentType
+     * @property {Date} uploadDate
+     * @property {number} length
+     * @property {number} chunkSize
+     * @property {Object} metadata
+     * @property {string} metadata.title
+     * @property {string} metadata.description
+     * @property {string} metadata.latitude
+     * @property {string} metadata.longitude
+     * @property {string} metadata.tags
+     */
+    /** @type {FileData[]} */
+    files: {
+      type: Array,
+      default: () => [],
+    },
+  },
+  data () {
     return {
       mapId: 'leaflet-map',
       mapOptions: {
@@ -42,7 +64,7 @@ export default {
         ),
         layers: [],
       },
-      popups: [],
+      markers: [],
       geojsonData: null,
       mapInstance: null,
       layerControlInstance: null,
@@ -52,7 +74,7 @@ export default {
   },
   methods: {
     // Initialize map function:
-    initMap() {
+    initMap () {
       // Create the leaflet map
       const leafletMap = L.map(this.mapId, this.mapOptions);
       leafletMap.zoomControl.setPosition('bottomright');
@@ -104,25 +126,54 @@ export default {
       this.centerMarker = new L.Marker(
         leafletMap.getCenter(),
         { icon: myIcon }
-        ).addTo(leafletMap);
-        // Add event listeners to the map:
+      ).addTo(leafletMap);
+      // Add event listeners to the map:
       leafletMap.on('move', () => {
         const center = leafletMap.getCenter();
         this.centerMarker.setLatLng(center);
         this.coordinatesControl.getContainer().innerHTML = 'Center: ' + center.lat.toFixed(4) + ', ' + center.lng.toFixed(4);
       });
+      if (this.files.length) {
+        this.markers = this.files.map((file) => {
+          const { latitude, longitude, title, description } = file.metadata;
+          const marker = L.marker([Number(latitude), Number(longitude)]).addTo(leafletMap);
+          marker.bindPopup(`
+            <h2>Upload Info</h2><br>
+            <span>Title: ${title}</span><br>
+            <span>Description: ${description}</span><br>
+          `);
+          marker.fileId = file._id;
+          return marker;
+        });
+      }
       this.mapInstance = leafletMap;
     },
   },
-  mounted() {
+  mounted () {
     this.initMap();
   },
-  destroyed() {
+  unmounted () {
     if (this.mapInstance) {
       this.mapInstance.remove();
     }
   },
   watch: {
+    files: {
+      handler (newFiles) {
+        newFiles.forEach((file) => {
+          const { latitude, longitude, title, description } = file.metadata;
+          const marker = L.marker([latitude, longitude]).addTo(this.mapInstance);
+          marker.bindPopup(`
+            <h2>Upload Info</h2><br>
+            <span>Title: ${title}</span><br>
+            <span>Description: ${description}</span><br>
+          `);
+          marker.fileId = file._id;
+          this.markers.push(marker);
+        });
+      },
+      deep: true,
+    },
   },
 };
 </script>
@@ -130,11 +181,15 @@ export default {
 <style>
 @import "leaflet/dist/leaflet.css";
 #leaflet-map {
-  height: 86vh;
+  height: 100%;
   width: 100%;
-  overflow: hidden;
+  right: 5px;
 }
 .leaflet-control-layers-list {
   text-align: left;
+  flex: 1;
+}
+.leaflet-control-attribution, .leaflet-control-scale-line {
+  padding: 0px 15px 0px 0px;
 }
 </style>

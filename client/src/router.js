@@ -1,31 +1,26 @@
-import { createRouter, createWebHistory } from "vue-router";
-import Home from "./views/Home.vue";
-import Profile from "./views/Profile.vue";
-import Register from "./views/Register.vue";
+import { createRouter, createWebHistory } from 'vue-router';
+import HomePage from './views/HomePage.vue';
+import ProfilePage from './views/ProfilePage.vue';
+import AboutPage from './views/AboutPage.vue';
 
 export default createRouter({
-  mode: "history",
+  mode: 'history',
   history: createWebHistory(),
   routes: [
     {
-      path: '/register',
-      name: 'register',
-      component: Register
+      path: '/',
+      name: 'HomePage',
+      component: HomePage,
     },
     {
-      path: "/",
-      name: "home",
-      component: Home,
+      path: '/about',
+      name: 'AboutPage',
+      component: AboutPage,
     },
     {
-      path: "/about",
-      name: "about",
-      component: () => import("./views/About.vue"),
-    },
-    {
-      path: "/profile",
-      name: "profile",
-      component: Profile,
+      path: '/profile',
+      name: 'ProfilePage',
+      component: ProfilePage,
     },
     {
       path: '/:pathMatch(.*)*',

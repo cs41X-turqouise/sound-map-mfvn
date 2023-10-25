@@ -1,71 +1,52 @@
-'use strict'
+'use strict';
 
 /**
- * 
- * @param {import("fastify").FastifyInstance} fastify 
+ * Routes for handling CRUD (Create, Read, Update, and Delete) operations on users
+ * @param {import("fastify").FastifyInstance} fastify
  * @param {Object} options plugin options, refer to https://www.fastify.io/docs/latest/Reference/Plugins/#plugin-options
  */
 module.exports = async function (fastify, options) {
-  const fs = require('fs');
+  const User = require('../../models/User');
 
-  /** @type {import("mongoose").Mongoose} */
-  const mongoose = fastify.mongoose;
-
-  const userSchema = new mongoose.Schema({
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    email: {
-      type: String, 
-      required: true,
-      unique: true,
-    },
-    uploads: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Upload',
-    }],
-  });
-
-  const uploadSchema = new mongoose.Schema({
-    filename: {
-      type: String,
-      required: true,
-    },
-    path: {
-      type: String,
-      required: true,
-    },
-    mimetype: {
-      type: String,
-      required: true,
-    },
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    },
-  });
-
-  const User = mongoose.model('User', userSchema);
-  const Upload = mongoose.model('Upload', uploadSchema);
-
+  /**
+   * Get all users
+   * Should be Admin only
+   */
   fastify.get('/', async function (request, reply) {
-    const users = await User.find({});
+    const users = await User.find({}).populate('uploads');
     return users;
-  })
+  });
+
+  /**
+   * Get a single user by ID
+   * Should be Admin only
+   */
   fastify.get('/:id', async function (request, reply) {
-    const user = await User.findById(request.params.id).populate('uploads');
+    const user = await User.findById(request.params.id);
     return user;
-  })
-  fastify.get('/:id/:filename', async function (request, reply) {
-    const file = await User.findById(request.params.id)
-      .populate('uploads')
-      .find({ filename: request.params.filename });
-    // const fileStream = fs.createReadStream(file.path);
-    // reply.type(file.mimetype).send(fileStream);
-    return file;
-  })
+  });
+
+  /**
+   * Get the currently logged in user
+   */
+  fastify.get('/self', async function (request, reply) {
+    if (!request.session.user) {
+      return reply.send(new Error('User not logged in'));
+    }
+    return request.session.user;
+  });
+
+  /**
+   * Gets a file uploaded by a user
+   * @todo Implement this or remove it
+   */
+  fastify.get('/:userId/:fileId', async function (request, reply) {
+    return null;
+  });
+
+  /**
+   * Create a new user
+   */
   fastify.post('/', async function (request, reply) {
     try {
       const user = new User(request.body);
@@ -75,20 +56,11 @@ module.exports = async function (fastify, options) {
       fastify.log.error(err);
       reply.code(500).send(err);
     }
-  })
-  fastify.post('/:id/upload', 
-    { preHandler: fastify.upload.single('file') },
-    async function (request, reply) {
-    const { filename, mimetype, path } = request.file;
-    const upload = new Upload({
-      filename,
-      mimetype,
-      path,
-      user: request.params.id,
-    });
-    await upload.save();
-    return upload;
-  })
+  });
+
+  /**
+   * Delete a user - should be Admin only or limited to the user themselves
+   */
   fastify.delete('/:id', async function (request, reply) {
     try {
       const user = await User.findByIdAndDelete(request.params.id);
@@ -96,5 +68,18 @@ module.exports = async function (fastify, options) {
     } catch (err) {
       fastify.log.error(err);
     }
-  })
-}
+  });
+
+  /**
+   * Update a user
+   */
+  fastify.patch('/:id', async function (request, reply) {
+    try {
+      const user = await User.findByIdAndUpdate(request.params.id, request.body, { new: true });
+      return user;
+    } catch (err) {
+      fastify.log.error(err);
+    }
+  });
+};
+

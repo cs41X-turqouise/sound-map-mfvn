@@ -1,18 +1,18 @@
-'use strict'
+'use strict';
 
-const path = require('path')
-const AutoLoad = require('@fastify/autoload')
+const path = require('path');
+const AutoLoad = require('@fastify/autoload');
 
 /**
  * @typedef {import('fastify').FastifyInstance} FastifyInstance
  */
 
 // Pass --options via CLI arguments in command to enable these options.
-module.exports.options = {}
+module.exports.options = {};
 
 /**
- * @param {FastifyInstance} fastify 
- * @param {Object} opts 
+ * @param {FastifyInstance} fastify
+ * @param {Object} opts
  */
 module.exports = async function (fastify, opts) {
   // Place here your custom code!
@@ -20,7 +20,7 @@ module.exports = async function (fastify, opts) {
     confKey: 'config', // optional, default: 'config'
     schema: {
       type: 'object',
-      required: ['PORT', 'MONGODB_URL', 'JWT_SECRET'],
+      required: ['PORT', 'MONGODB_URL', 'JWT_SECRET', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'],
       properties: {
         PORT: {
           type: 'number',
@@ -33,7 +33,15 @@ module.exports = async function (fastify, opts) {
         JWT_SECRET: {
           type: 'string',
           default: '155453cr37'
-        }
+        },
+        GOOGLE_CLIENT_ID: {
+          type: 'string',
+          default: '155453cr37'
+        },
+        GOOGLE_CLIENT_SECRET: {
+          type: 'string',
+          default: '155453cr37'
+        },
       }
     },
     // will read .env in root folder
@@ -52,12 +60,12 @@ module.exports = async function (fastify, opts) {
   fastify.register(AutoLoad, {
     dir: path.join(__dirname, 'plugins'),
     options: Object.assign({}, opts)
-  })
+  });
 
   // This loads all plugins defined in routes
   // define your routes in one of these
   fastify.register(AutoLoad, {
     dir: path.join(__dirname, 'routes'),
     options: Object.assign({}, opts)
-  })
-}
+  });
+};
