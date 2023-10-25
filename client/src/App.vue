@@ -1,10 +1,11 @@
 <template>
-  <v-app fullscreen>
-    <v-main style="height: 100vh; width: 100vw; overflow-y: hidden;">
-      <v-container fluid style="padding: 0;">
+  <v-app fullscreen style="width:100vw">
+    <v-main>
+      <v-container fluid style="padding: 0; height: 100%">
         <router-view></router-view>
       </v-container>
     </v-main>
+    
     <PageFooter></PageFooter>
   </v-app>
 </template>
@@ -33,7 +34,14 @@ export default {
   text-align: center;
   color: #2c3e50;
 }
+
 .v-container {
   background-color: cyan;
+}
+</style>
+<style scoped>
+.v-main{
+  display: flex; 
+  flex-direction: column;
 }
 </style>

@@ -181,11 +181,11 @@ export default {
 <style>
 @import "leaflet/dist/leaflet.css";
 #leaflet-map {
-  height: 86vh;
+  height: 100%;
   width: 100%;
-  overflow: hidden;
 }
 .leaflet-control-layers-list {
   text-align: left;
+  flex: 1;
 }
 </style>
