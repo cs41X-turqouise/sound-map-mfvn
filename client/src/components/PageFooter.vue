@@ -31,7 +31,7 @@ export default {
   line-height: 2.5rem;
   background-color: #00bcd4;
   text-align: center;
-  
+  justify-content: center;
 }
 span {
   cursor: pointer;

@@ -5,7 +5,6 @@
         <router-view></router-view>
       </v-container>
     </v-main>
-    
     <PageFooter></PageFooter>
   </v-app>
 </template>
@@ -41,7 +40,7 @@ export default {
 </style>
 <style scoped>
 .v-main{
-  display: flex; 
+  display: flex;
   flex-direction: column;
 }
 </style>
