@@ -11,6 +11,7 @@
         <v-text-field name="tags" label="Tags" id="tags" style="display: none;"></v-text-field>
         <v-text-field name="latitude" id="latitude" style="display: none;"></v-text-field>
         <v-text-field name="longitude" id="longitude" style="display: none;"></v-text-field>
+        <v-text-field name="geodata" id="geodata" style="display: none;"></v-text-field>
         <v-text-field
           label="Tags"
           v-model="tagInput"
@@ -113,9 +114,18 @@ export default {
 
       const form = e.target;
       const formData = new FormData(form);
+      const { lat, lng } = this.$store.state.clicked;
+      const geoLocation = fetch(`https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lng}&apiKey=${import.meta.env.VITE_GEOAPIFY_API_KEY}}`)
+        .then((response) => response.json())
+        .then((result) => {
+          return result.features[0].properties;
+        })
+        .catch((error) => console.log('error', error));
+      const geoLocationData = await geoLocation;
       formData.set('tags', Array.from(this.tags));
-      formData.set('latitude', this.$store.state.clicked.lat);
-      formData.set('longitude', this.$store.state.clicked.lng);
+      formData.set('latitude', lat);
+      formData.set('longitude', lng);
+      formData.set('geodata', JSON.stringify(geoLocationData));
       this.tags.clear();
       this.$emit('upload', form, formData);
     },
