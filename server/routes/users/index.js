@@ -21,13 +21,13 @@ module.exports = async function (fastify, options) {
           items: {
             type: 'object',
             properties: {
-              _id: { type: 'string', format: 'uuid' },
+              _id: { type: 'string', description: 'MongoDB ObjectId' },
               username: { type: 'string' },
               fullname: { type: 'string' },
               email: { type: 'string', format: 'email' },
               gid: { type: 'string', format: 'uuid' },
-              uploads: { type: 'array', items: { type: 'string', format: 'uuid' } },
-              bookmarks: { type: 'array', items: { type: 'string', format: 'uuid' } },
+              uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
+              bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
             }
           }
         }
@@ -42,7 +42,31 @@ module.exports = async function (fastify, options) {
    * Get a single user by ID
    * Should be Admin only
    */
-  fastify.get('/:id', async function (request, reply) {
+  fastify.get('/:id', {
+    schema: {
+      tags: ['users'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'MongoDB ObjectId' }
+        }
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', description: 'MongoDB ObjectId' },
+            username: { type: 'string' },
+            fullname: { type: 'string' },
+            email: { type: 'string', format: 'email' },
+            gid: { type: 'string', format: 'uuid' },
+            uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
+            bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
+          }
+        }
+      }
+    }
+  }, async function (request, reply) {
     const user = await User.findById(request.params.id);
     return user;
   });
@@ -50,7 +74,25 @@ module.exports = async function (fastify, options) {
   /**
    * Get the currently logged in user
    */
-  fastify.get('/self', async function (request, reply) {
+  fastify.get('/self', {
+    schema: {
+      tags: ['users'],
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', description: 'MongoDB ObjectId' },
+            username: { type: 'string' },
+            fullname: { type: 'string' },
+            email: { type: 'string', format: 'email' },
+            gid: { type: 'string', format: 'uuid' },
+            uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
+            bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
+          }
+        }
+      }
+    }
+  }, async function (request, reply) {
     if (!request.session.user) {
       return reply.send(new Error('User not logged in'));
     }
@@ -61,14 +103,58 @@ module.exports = async function (fastify, options) {
    * Gets a file uploaded by a user
    * @todo Implement this or remove it
    */
-  fastify.get('/:userId/:fileId', async function (request, reply) {
+  fastify.get('/:uid/:fid', {
+    schema: {
+      tags: ['users'],
+      params: {
+        type: 'object',
+        properties: {
+          uid: { type: 'string', description: 'MongoDB ObjectId' },
+          fid: { type: 'string', description: 'MongoDB ObjectId' }
+        }
+      },
+      response: {
+        200: {
+          type: 'null',
+        }
+      }
+    }
+  }, async function (request, reply) {
     return null;
   });
 
   /**
    * Create a new user
    */
-  fastify.post('/', async function (request, reply) {
+  fastify.post('/', {
+    schema: {
+      tags: ['users'],
+      body: {
+        type: 'object',
+        required: ['username', 'fullname', 'email', 'gid'],
+        properties: {
+          username: { type: 'string' },
+          fullname: { type: 'string' },
+          email: { type: 'string', format: 'email' },
+          gid: { type: 'string', description: 'Google Id' },
+        }
+      },
+      response: {
+        201: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', description: 'MongoDB ObjectId' },
+            username: { type: 'string' },
+            fullname: { type: 'string' },
+            email: { type: 'string', format: 'email' },
+            gid: { type: 'string', format: 'uuid' },
+            uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
+            bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
+          }
+        }
+      }
+    }
+  }, async function (request, reply) {
     try {
       const user = new User(request.body);
       await user.save();
@@ -82,7 +168,31 @@ module.exports = async function (fastify, options) {
   /**
    * Delete a user - should be Admin only or limited to the user themselves
    */
-  fastify.delete('/:id', async function (request, reply) {
+  fastify.delete('/:id', {
+    schema: {
+      tags: ['users'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'MongoDB ObjectId' }
+        }
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', description: 'MongoDB ObjectId' },
+            username: { type: 'string' },
+            fullname: { type: 'string' },
+            email: { type: 'string', format: 'email' },
+            gid: { type: 'string', format: 'uuid' },
+            uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
+            bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
+          }
+        }
+      }
+    }
+  }, async function (request, reply) {
     try {
       const user = await User.findByIdAndDelete(request.params.id);
       return user;
@@ -94,7 +204,34 @@ module.exports = async function (fastify, options) {
   /**
    * Update a user
    */
-  fastify.patch('/:id', async function (request, reply) {
+  fastify.patch('/:id', {
+    schema: {
+      tags: ['users'],
+      body: {
+        type: 'object',
+        properties: {
+          username: { type: 'string' },
+          fullname: { type: 'string' },
+          email: { type: 'string', format: 'email' },
+          gid: { type: 'string', description: 'Google Id' },
+        }
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', description: 'MongoDB ObjectId' },
+            username: { type: 'string' },
+            fullname: { type: 'string' },
+            email: { type: 'string', format: 'email' },
+            gid: { type: 'string', format: 'uuid' },
+            uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
+            bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
+          }
+        }
+      }
+    }
+  }, async function (request, reply) {
     try {
       const user = await User.findByIdAndUpdate(request.params.id, request.body, { new: true });
       return user;
@@ -103,4 +240,3 @@ module.exports = async function (fastify, options) {
     }
   });
 };
-
