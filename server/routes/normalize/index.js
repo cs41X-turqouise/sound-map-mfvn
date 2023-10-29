@@ -27,14 +27,14 @@ module.exports = async function (fastify, options) {
             
             const _id = fastify.toObjectId(request.params.id);
             const sound = await Sound.findById(_id);
-            const {fileStream:dstream, file} = await sound.getFileStream(fastify)
+            const {fileStream, file} = await sound.getFileStream(fastify)
             fastify.log.info(file)
-            fastify.log.info(dstream)
+            fastify.log.info(fileStream)
 
             
             fastify.log.info(`file->  ${file}`)
-            fastify.log.info(`dstream is ${!Buffer.isBuffer(dstream.buffer) ? 'not' : ''} a Buffer`)
-            fastify.log.info(`dstream->  ${dstream.buffer}`)
+            fastify.log.info(`fileStream is ${!Buffer.isBuffer(fileStream.buffer) ? 'not' : ''} a Buffer`)
+            fastify.log.info(`fileStream->  ${fileStream.buffer}`)
 
             
             /**
@@ -45,10 +45,9 @@ module.exports = async function (fastify, options) {
             
 
             const outStream = await fastify.gridfsSounds.openUploadStream('compressed.mp3')
-            
 
             var command = 
-            ffmpeg(dstream)
+            ffmpeg(fileStream)
             .inputFormat('mp3')
             .audioBitrate(96)
             .output(outStream)
@@ -58,7 +57,7 @@ module.exports = async function (fastify, options) {
             
             command.on('start', (cmdline) => fastify.log.info(cmdline))
                 .on('error', (err) => fastify.log.error(err))
-                .on('end', () => fastify.log.info('ffmpeg command succesful'))
+                .on('end', () => fastify.log.info('ffmpeg command succesful') )
 
             await command.run()
             
