@@ -15,8 +15,6 @@ app.get('/users', async (res) =>
 
     const db = client.db(dbName);
     const users = await db.collection('users').find().toArray();
-
-    // Fetch associated uploads for each user
     for (const user of users) 
     {
       user.uploads = await db.collection('uploads').find({ userId: user._id }).toArray();
@@ -39,13 +37,13 @@ app.listen(PORT, () =>
 */
 
 
-<html lang="en">
+<template>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta></meta> charset="UTF-8">
+  <meta></meta> name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel</title>
 </head>
-
+<table></table>
 <body>
   <h1>Admin Panel</h1>
   <table border="1">
@@ -82,4 +80,4 @@ app.listen(PORT, () =>
       .catch(error => console.error(error));
   </script>
 </body>
-</html>
+</head>
