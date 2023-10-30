@@ -44,7 +44,13 @@ fastify.post('/single',
       body: {
         type: 'object',
         properties: {
-          // Define properties for the request body here (if applicable)
+          _id: { type: 'string', description: 'MongoDB ObjectId' },
+            username: { type: 'string' },
+            fullname: { type: 'string' },
+            email: { type: 'string', format: 'email' },
+            gid: { type: 'string', format: 'uuid' },
+            uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
+            bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
         },
       },
       response: {
@@ -98,7 +104,13 @@ fastify.post('/single',
         body: {
             type: 'object',
             properties: {
-                user: { type: 'string', description: 'MongoDB ObjectId of the user' },
+              _id: { type: 'string', description: 'MongoDB ObjectId' },
+              username: { type: 'string' },
+              fullname: { type: 'string' },
+              email: { type: 'string', format: 'email' },
+              gid: { type: 'string', format: 'uuid' },
+              uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
+              bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
             },
             required: ['user'],
         },
@@ -154,8 +166,13 @@ fastify.post('/single',
                 items: {
                     type: 'object',
                     properties: {
-                        file: { type: 'object' }, // Define properties for 'file' object here
-                        buffer: { type: 'string', format: 'binary' }, // Assuming buffer is returned as binary data
+                      _id: { type: 'string', description: 'MongoDB ObjectId' },
+                      username: { type: 'string' },
+                      fullname: { type: 'string' },
+                      email: { type: 'string', format: 'email' },
+                      gid: { type: 'string', format: 'uuid' },
+                      uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
+                      bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
                         // Add more properties as needed
                     },
                 },
@@ -194,7 +211,22 @@ fastify.post('/single',
                 type: 'array',
                 items: {
                     type: 'object', // Define properties for each item in the array here
-                    // Add more properties as needed
+                    properties: {
+                      _id: { type: 'string', description: 'MongoDB ObjectId' },
+                      username: { type: 'string' },
+                      fullname: { type: 'string' },
+                      email: { type: 'string', format: 'email' },
+                      gid: { type: 'string', format: 'uuid' },
+                      uploads: {
+                          type: 'array',
+                          items: { type: 'string', description: 'MongoDB ObjectId' }
+                      },
+                      bookmarks: {
+                          type: 'array',
+                          items: { type: 'string', description: 'MongoDB ObjectId' }
+                      },
+                      // Add more properties as needed
+                  },
                 },
             },
             // Add more response codes if needed
@@ -220,8 +252,8 @@ fastify.post('/single',
         params: {
             type: 'object',
             properties: {
-                fileId: { type: 'string', description: 'MongoDB ObjectId of the file' },
-                userId: { type: 'string', description: 'MongoDB ObjectId of the user' },
+                fid: { type: 'string', description: 'MongoDB ObjectId of the file' },
+                uid: { type: 'string', description: 'MongoDB ObjectId of the user' },
             },
         },
         response: {
@@ -247,7 +279,13 @@ fastify.post('/single',
         params: {
             type: 'object',
             properties: {
-                id: { type: 'string', description: 'MongoDB ObjectId of the sound file' },
+              _id: { type: 'string', description: 'MongoDB ObjectId' },
+              username: { type: 'string' },
+              fullname: { type: 'string' },
+              email: { type: 'string', format: 'email' },
+              gid: { type: 'string', format: 'uuid' },
+              uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
+              bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
             },
         },
         response: {
@@ -293,7 +331,7 @@ fastify.post('/single',
         params: {
             type: 'object',
             properties: {
-                id: { type: 'string', description: 'MongoDB ObjectId of the image file' },
+              _id: { type: 'string', description: 'MongoDB ObjectId' },
             },
         },
         response: {
@@ -327,7 +365,7 @@ fastify.post('/single',
         params: {
             type: 'object',
             properties: {
-                id: { type: 'string', description: 'MongoDB ObjectId of the file' },
+               _id: { type: 'string', description: 'MongoDB ObjectId' },
             },
         },
         body: {
@@ -368,7 +406,7 @@ fastify.post('/single',
         params: {
             type: 'object',
             properties: {
-                id: { type: 'string', description: 'MongoDB ObjectId of the file' },
+              _id: { type: 'string', description: 'MongoDB ObjectId' },
             },
         },
         body: {
