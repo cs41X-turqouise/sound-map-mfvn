@@ -39,8 +39,8 @@ app.listen(PORT, () =>
 
 <template>
 <head>
-  <meta></meta> charset="UTF-8">
-  <meta></meta> name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta></meta> charset="UTF-8"
+  <meta></meta> name="viewport" content="width=device-width, initial-scale=1.0"
   <title>Admin Panel</title>
 </head>
 <table></table>
@@ -56,17 +56,17 @@ app.listen(PORT, () =>
       </tr>
     </thead>
     <tbody id="usersTable">
-      <!-- Users and their uploads will be displayed here -->
+    <!-- Users and content will be kept here -->  
     </tbody>
   </table>
 
   <script>
     // Fetch users and their uploads from the server and populate the table
     fetch('/users')
-      .then(response => response.json())
-      .then(users => {
+      .then(response '{'>'}' response.json())
+      .then(users '{'>'}' {
         const usersTable = document.getElementById('usersTable');
-        users.forEach(user => {
+        users.forEach(user '{'>'}' {
           const row = document.createElement('tr');
           row.innerHTML = `
             <td>${user._id}</td>    //replace user with actual info
@@ -77,7 +77,7 @@ app.listen(PORT, () =>
           usersTable.appendChild(row);
         });
       })
-      .catch(error => console.error(error));
+      .catch(error '{'>'}' console.error(error));
   </script>
 </body>
 </template>
