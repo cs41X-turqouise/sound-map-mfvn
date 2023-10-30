@@ -80,4 +80,4 @@ app.listen(PORT, () =>
       .catch(error => console.error(error));
   </script>
 </body>
-</head>
+</template>
