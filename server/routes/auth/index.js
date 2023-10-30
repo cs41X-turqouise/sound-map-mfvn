@@ -40,60 +40,60 @@ module.exports = async function (fastify, options) {
   };
   fastify.get('/google/callback', {
     schema: {
-        tags: ['auth'],
-        response: {
-            200: {
-                type: 'object', // Define properties for the response object
-                // Add more properties as needed
-            },
-        },
-    },
-    async handler(request, reply) {
-        try {
-            const token = await fastify.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
-            const userInfo = await getUserInfo(token.token.access_token);
-            let user = await User.findOne({ gid: userInfo.id });
-
-            if (!user) {
-                user = new User({
-                    gid: userInfo.id,
-                    username: userInfo.name,
-                    fullname: userInfo.name,
-                    email: userInfo.email,
-                    picture: userInfo.picture,
-                });
-                await user.save();
-            }
-
-            request.session.user = user;
-            reply.redirect('http://localhost:5173/');
-        } catch (err) {
-            fastify.log.error(err);
-            throw new Error('Internal Server Error');
-        }
-    },
-});
-
-fastify.post('/logout', {
-  schema: {
       tags: ['auth'],
       response: {
-          200: {
-              type: 'string', // Define the type of the response
-              description: 'User is sucessfully logged out',
-          },
+        200: {
+          type: 'object', // Define properties for the response object
+          // Add more properties as needed
+        },
       },
-  },
-  async handler(request, reply) {
+    },
+    async handler (request, reply) {
       try {
-          request.session.destroy();
-          return 'Logged out';
-      } catch (err) {
-          fastify.log.error(err);
-          throw new Error('Internal Server Error');
-      }
-  },
-});
+        const token = await fastify.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
+        const userInfo = await getUserInfo(token.token.access_token);
+        let user = await User.findOne({ gid: userInfo.id });
 
-fastify.log.info('Oauth Route registered.');
+        if (!user) {
+          user = new User({
+            gid: userInfo.id,
+            username: userInfo.name,
+            fullname: userInfo.name,
+            email: userInfo.email,
+            picture: userInfo.picture,
+          });
+          await user.save();
+        }
+
+        request.session.user = user;
+        reply.redirect('http://localhost:5173/');
+      } catch (err) {
+        fastify.log.error(err);
+        throw new Error('Internal Server Error');
+      }
+    },
+  });
+
+  fastify.post('/logout', {
+    schema: {
+      tags: ['auth'],
+      response: {
+        200: {
+          type: 'string', // Define the type of the response
+          description: 'User is sucessfully logged out',
+        },
+      },
+    },
+    async handler (request, reply) {
+      try {
+        request.session.destroy();
+        return 'Logged out';
+      } catch (err) {
+        fastify.log.error(err);
+        throw new Error('Internal Server Error');
+      }
+    },
+  });
+
+  fastify.log.info('Oauth Route registered.');
 };
