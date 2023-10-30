@@ -11,7 +11,7 @@ app.get('/users', async (res) =>
   try 
   {
     const client = new MongoClient(mongoURL, { useUnifiedTopology: true });
-    await client.connect();
+    await client.connect();     //connects mongoDB servers
 
     const db = client.db(dbName);
     const users = await db.collection('users').find().toArray();
@@ -25,7 +25,7 @@ app.get('/users', async (res) =>
   } 
   catch (error) 
   {
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Internal Server Error' });   //error statement
   }
 });
 
@@ -61,12 +61,13 @@ app.listen(PORT, () =>
   </table>
 
   <script>
-    // Fetch users and their uploads from the server and populate the table
+    // User uploads will fill into the table for storage
     fetch('/users')
       .then(response '{'>'}' response.json())
       .then(users '{'>'}' {
         const usersTable = document.getElementById('usersTable');
-        users.forEach(user '{'>'}' {
+        users.forEach(user '{'>'}' 
+        {
           const row = document.createElement('tr');
           row.innerHTML = `
             <td>${user._id}</td>    //replace user with actual info
