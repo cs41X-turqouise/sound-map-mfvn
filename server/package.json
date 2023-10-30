@@ -10,9 +10,14 @@
     "test": "tap \"test/**/*.test.js\"",
     "start": "fastify start -l info app.js",
     "dev": "fastify start -w -l info -P app.js",
-    "pretest": "standard",
-    "lint": "eslint --fix",
+    "pretest": "npm run lint",
+    "lint": "eslint --fix ./**/*.js",
     "clean-db": "node ./scripts/clean-db.js"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint"
+    }
   },
   "keywords": [],
   "author": "",
@@ -37,6 +42,7 @@
   "devDependencies": {
     "eslint": "^8.52.0",
     "eslint-config-google": "^0.14.0",
+    "husky": "^8.0.3",
     "tap": "^18.5.2"
   }
 }
