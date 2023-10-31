@@ -2,6 +2,7 @@
   "name": "server",
   "version": "1.0.0",
   "description": "This project was bootstrapped with Fastify-CLI.",
+  "type": "module",
   "main": "app.js",
   "directories": {
     "test": "test"
