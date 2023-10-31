@@ -1,10 +1,10 @@
 'use strict';
 
 import fp from 'fastify-plugin';
-import fastifySession from '@fastify/session';
+import Session from '@fastify/session';
 
-export default fp( async function (fastify, options) {
-  fastify.register(fastifySession, {
+export default fp(async function (fastify, options) {
+  fastify.register(Session, {
     secret: 'FMMpiVXBnTJEJQIuQTtObXE5aLgfa3Pkdsfg897', // Place holder
     cookie: { secure: false }, //  Set secure to true in production
     cookieName: 'user-session'
