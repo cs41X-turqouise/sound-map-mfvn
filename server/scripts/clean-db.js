@@ -14,7 +14,7 @@ async function cleanDatabase () {
     await mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true });
     console.log('Connected to MongoDB');
     
-      const soundBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+    const soundBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
       bucketName: 'sounds'
     });
     const imageBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {

@@ -293,4 +293,4 @@ export default async function (fastify, options) {
       return file;
     }
   );
-};
+}

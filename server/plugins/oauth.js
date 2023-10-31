@@ -1,8 +1,6 @@
 'use strict';
 import fp from 'fastify-plugin';
 import fastifyOauth2 from '@fastify/oauth2';
-import pkg from '@fastify/oauth2';
-const { GOOGLE_CONFIGURATION } = pkg;
 /**
  * registers the OAuth2 configuration for Google authentication.
  */

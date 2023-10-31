@@ -81,5 +81,5 @@ export default async function (fastify, options) {
       fastify.log.error(err);
     }
   });
-};
+}
 

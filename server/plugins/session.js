@@ -3,8 +3,7 @@ import fp from 'fastify-plugin';
 import fastifySession from '@fastify/session';
 
 
-export default  fp( async function (fastify, options) {
-  
+export default fp( async function (fastify, options) {
   fastify.register(fastifySession, {
     secret: 'FMMpiVXBnTJEJQIuQTtObXE5aLgfa3Pkdsfg897', // Place holder
     cookie: { secure: false }, //  Set secure to true in production
@@ -16,5 +15,5 @@ export default  fp( async function (fastify, options) {
     done();
   });
 }
-)
+);
 

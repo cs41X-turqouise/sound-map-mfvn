@@ -62,4 +62,4 @@ export default async function (fastify, options) {
     reply.send('Logged out');
   });
   fastify.log.info('Oauth Route registered.');
-};
+}
