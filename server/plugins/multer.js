@@ -26,6 +26,12 @@ module.exports = fp(async function (fastify, options) {
           fileInfo.metadata = {
             ...req.body,
           };
+          // have to manually convert tags from string to array - why??
+          if (!Array.isArray(fileInfo.metadata.tags)) {
+            fileInfo.metadata.tags = fileInfo.metadata.tags
+              ? fileInfo.metadata.tags.split(',')
+              : [];
+          }
         }
         resolve(fileInfo);
       });
