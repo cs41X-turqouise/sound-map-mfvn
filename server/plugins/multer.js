@@ -1,10 +1,13 @@
 'use strict';
 
-const fp = require('fastify-plugin');
-const multer = require('fastify-multer');
-const { GridFsStorage } = require('@thebguy/multer-gridfs-storage');
 
-module.exports = fp(async function (fastify, options) {
+//  convert above to esm
+import fp from 'fastify-plugin';
+import multer from 'fastify-multer';
+import { GridFsStorage } from '@thebguy/multer-gridfs-storage';
+
+
+export default fp(async function (fastify, options) {
   fastify.register(multer.contentParser);
 
   const storage = new GridFsStorage({

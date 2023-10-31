@@ -1,5 +1,6 @@
 /** @type {import("mongoose").Mongoose} */
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+
 /**
  * Mongoose schema for user accounts.
  *
@@ -42,5 +43,4 @@ const userSchema = new mongoose.Schema({
     ref: 'sounds',
   }],
 });
-
-module.exports = mongoose.model('users', userSchema);
+export default mongoose.model('users', userSchema);
