@@ -1,3 +1,6 @@
+import { https } from 'https';
+import { User } from '../../models/User';
+
 'use strict';
 
 /**
@@ -5,10 +8,7 @@
  * @param {import("fastify").FastifyInstance} fastify
  * @param {Object} options plugin options, refer to https://www.fastify.io/docs/latest/Reference/Plugins/#plugin-options
  */
-module.exports = async function (fastify, options) {
-  const https = require('https');
-  const User = require('../../models/User');
-  const getUserInfo = (accessToken) => {
+export default async function (fastify, options) {
     return new Promise((resolve, reject) => {
       const options = {
         hostname: 'www.googleapis.com',

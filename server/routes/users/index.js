@@ -1,3 +1,5 @@
+import { User } from '../../models/User';
+
 'use strict';
 
 /**
@@ -5,9 +7,7 @@
  * @param {import("fastify").FastifyInstance} fastify
  * @param {Object} options plugin options, refer to https://www.fastify.io/docs/latest/Reference/Plugins/#plugin-options
  */
-module.exports = async function (fastify, options) {
-  const User = require('../../models/User');
-
+export default async function (fastify, options) {
   /**
    * Get all users
    * Should be Admin only
