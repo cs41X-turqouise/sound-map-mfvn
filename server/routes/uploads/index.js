@@ -1,6 +1,6 @@
-import { User } from '../../models/User';
-import { Sound } from '../../models/Sound';
-import { Image } from '../../models/Image';
+import User from '../../models/User.js';
+import Sound from '../../models/Sound.js';
+import Image from '../../models/Image.js';
 
 'use strict';
 /**

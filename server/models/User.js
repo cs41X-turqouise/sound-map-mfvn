@@ -43,4 +43,5 @@ const userSchema = new mongoose.Schema({
     ref: 'sounds',
   }],
 });
+
 export default mongoose.model('users', userSchema);

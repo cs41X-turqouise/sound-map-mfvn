@@ -1,5 +1,5 @@
-import { https } from 'https';
-import * as User from '../../models/User.js';
+import https from 'https';
+import User from '../../models/User.js';
 
 'use strict';
 

@@ -1,5 +1,5 @@
 /** @type {import("mongoose").Mongoose} */
-const mongoose = require('mongoose');
+import { mongoose } from 'mongoose';
 /**
  * Mongoose schema for photo file uploads.
  *
@@ -57,4 +57,4 @@ const uploadSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model('images', uploadSchema);
+export default mongoose.model('images', uploadSchema);
