@@ -1,7 +1,7 @@
+'use strict';
+
 import https from 'https';
 import User from '../../models/User.js';
-
-'use strict';
 
 /**
  * Route handlers for the Google OAuth2 callback.
@@ -61,5 +61,4 @@ export default async function (fastify, options) {
     request.session.destroy();
     reply.send('Logged out');
   });
-  fastify.log.info('Oauth Route registered.');
 }

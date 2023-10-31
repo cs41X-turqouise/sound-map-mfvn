@@ -1,5 +1,5 @@
 /** @type {import("mongoose").Mongoose} */
-import { mongoose } from 'mongoose';
+import mongoose from 'mongoose';
 /**
  * Mongoose schema for photo file uploads.
  *

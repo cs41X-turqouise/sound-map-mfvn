@@ -1,8 +1,9 @@
+'use strict';
+
 import User from '../../models/User.js';
 import Sound from '../../models/Sound.js';
 import Image from '../../models/Image.js';
 
-'use strict';
 /**
  * Routes for handling CRUD (Create, Read, Update, and Delete) operations on uploads
  * @param {import("fastify").FastifyInstance} fastify

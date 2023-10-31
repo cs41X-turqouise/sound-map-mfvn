@@ -1,10 +1,10 @@
-// require('dotenv').config({ path: './local.env' });
 import pkg from 'dotenv';
-pkg.config({ path: './local.env' });
 import mongoose from 'mongoose';
 import User from '../models/User.js';
 import Sound from '../models/Sound.js';
 import Image from '../models/Image.js';
+
+pkg.config({ path: './local.env' });
 /**
  * Cleans the MongoDB database.
  * @async

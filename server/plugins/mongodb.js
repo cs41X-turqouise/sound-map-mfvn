@@ -1,8 +1,8 @@
 'use strict';
 
-//  convert above to esm
 import fp from 'fastify-plugin';
 import mongoose from 'mongoose';
+
 export default fp(async function (fastify, options) {
   // Log a message when the MongoDB connection is established
   mongoose.connection.on('connected', () => {

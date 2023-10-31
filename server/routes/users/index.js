@@ -1,6 +1,6 @@
-import User from '../../models/User.js';
-
 'use strict';
+
+import User from '../../models/User.js';
 
 /**
  * Routes for handling CRUD (Create, Read, Update, and Delete) operations on users
@@ -82,4 +82,3 @@ export default async function (fastify, options) {
     }
   });
 }
-

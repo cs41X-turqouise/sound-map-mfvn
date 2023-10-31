@@ -1,7 +1,7 @@
 'use strict';
+
 import fp from 'fastify-plugin';
 import fastifySession from '@fastify/session';
-
 
 export default fp( async function (fastify, options) {
   fastify.register(fastifySession, {
@@ -14,6 +14,4 @@ export default fp( async function (fastify, options) {
     request.session.user = request.session.user || null;
     done();
   });
-}
-);
-
+});
