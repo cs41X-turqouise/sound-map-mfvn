@@ -1,20 +1,22 @@
-'use strict';
+import path from 'path';
+import AutoLoad from '@fastify/autoload';
+import FastifyEnv from '@fastify/env';
+import { fileURLToPath } from 'url';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const path = require('path');
-const AutoLoad = require('@fastify/autoload');
 
 /**
  * @typedef {import('fastify').FastifyInstance} FastifyInstance
  */
 
 // Pass --options via CLI arguments in command to enable these options.
-module.exports.options = {};
+export const options = {};
 
 /**
  * @param {FastifyInstance} fastify
  * @param {Object} opts
  */
-module.exports = async function (fastify, opts) {
+export default async function (fastify, opts) {
   // Place here your custom code!
   const envOptions = {
     confKey: 'config', // optional, default: 'config'
@@ -50,7 +52,7 @@ module.exports = async function (fastify, opts) {
       debug: true
     }
   };
-  await fastify.register(require('@fastify/env'), envOptions);
+  await fastify.register(FastifyEnv, envOptions);
 
   // Do not touch the following lines
 
