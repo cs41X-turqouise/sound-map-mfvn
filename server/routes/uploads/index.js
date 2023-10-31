@@ -41,18 +41,6 @@ module.exports = async function (fastify, options) {
       ],
       schema: {
         tags: ['uploads'],
-        body: {
-          type: 'object',
-          properties: {
-            _id: { type: 'string', description: 'MongoDB ObjectId' },
-            username: { type: 'string' },
-            fullname: { type: 'string' },
-            email: { type: 'string', format: 'email' },
-            gid: { type: 'string', format: 'uuid' },
-            uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
-            bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
-          },
-        },
         response: {
           200: {
             type: 'object',
@@ -101,19 +89,6 @@ module.exports = async function (fastify, options) {
     preHandler: fastify.upload.array('files', 12),
     schema: {
       tags: ['uploads'],
-      body: {
-        type: 'object',
-        properties: {
-          _id: { type: 'string', description: 'MongoDB ObjectId' },
-          username: { type: 'string' },
-          fullname: { type: 'string' },
-          email: { type: 'string', format: 'email' },
-          gid: { type: 'string', format: 'uuid' },
-          uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
-          bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
-        },
-        required: ['user'],
-      },
       response: {
         200: {
           type: 'array',
@@ -167,12 +142,12 @@ module.exports = async function (fastify, options) {
             type: 'object',
             properties: {
               _id: { type: 'string', description: 'MongoDB ObjectId' },
-              username: { type: 'string' },
-              fullname: { type: 'string' },
-              email: { type: 'string', format: 'email' },
-              gid: { type: 'string', format: 'uuid' },
-              uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
-              bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
+              length: { type: 'string' },
+              chunkSize: { type: 'string' },
+              uploadData: { type: 'string', format: 'date-time' },
+              filename: { type: 'string' },
+              contentType: { type: 'string' },
+              metadata: { type: 'object' },
               // Add more properties as needed
             },
           },
@@ -213,19 +188,12 @@ module.exports = async function (fastify, options) {
             type: 'object', // Define properties for each item in the array here
             properties: {
               _id: { type: 'string', description: 'MongoDB ObjectId' },
-              username: { type: 'string' },
-              fullname: { type: 'string' },
-              email: { type: 'string', format: 'email' },
-              gid: { type: 'string', format: 'uuid' },
-              uploads: {
-                type: 'array',
-                items: { type: 'string', description: 'MongoDB ObjectId' }
-              },
-              bookmarks: {
-                type: 'array',
-                items: { type: 'string', description: 'MongoDB ObjectId' }
-              },
-              // Add more properties as needed
+              length: { type: 'string' },
+              chunkSize: { type: 'string' },
+              uploadData: { type: 'string', format: 'date-time' },
+              filename: { type: 'string' },
+              contentType: { type: 'string' },
+              metadata: { type: 'object' },
             },
           },
         },
@@ -246,7 +214,7 @@ module.exports = async function (fastify, options) {
   /**
    * Find user who uploaded a file
    */
-  fastify.get('/:fileId/:userId', {
+  fastify.get('/:uid/:fid', {
     schema: {
       tags: ['uploads'],
       params: {
@@ -280,12 +248,12 @@ module.exports = async function (fastify, options) {
         type: 'object',
         properties: {
           _id: { type: 'string', description: 'MongoDB ObjectId' },
-          username: { type: 'string' },
-          fullname: { type: 'string' },
-          email: { type: 'string', format: 'email' },
-          gid: { type: 'string', format: 'uuid' },
-          uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
-          bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
+          length: { type: 'string' },
+          chunkSize: { type: 'string' },
+          uploadData: { type: 'string', format: 'date-time' },
+          filename: { type: 'string' },
+          contentType: { type: 'string' },
+          metadata: { type: 'object' },
         },
       },
       response: {
