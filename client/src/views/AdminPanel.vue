@@ -59,7 +59,7 @@ export default {
   display: contents;
   display: loginWithGoogle;
   display: audio;
-  display: audioType
+  display: audioType;
 }
 #userTable{ 
 }
