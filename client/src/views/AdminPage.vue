@@ -27,6 +27,8 @@
 </template>
 
 <script>
+import Api from '../services/Api';
+
 export default {
   name: 'AdminPage',
   /*
@@ -39,16 +41,6 @@ export default {
       uploads: [],
       email: [],
     };
-    /*
-    if (!empty($_SESSION['logged_in'])) {
-    header ('Location: ''); //something to fill in, maybe?
-      exit;
-      }
-  else
-    {
-      //something
-    }
-    */
   },
   methods: {
     getUser () {
@@ -69,7 +61,13 @@ export default {
           // code
         });
     }
-  }
+  },
+  beforeCreate () {
+    Api().get('uploads/filedata/all').then((response) => {
+      this.uploads = response.data;
+      console.log(this.uploads);
+    });
+  },
 };
 </script>
 
