@@ -35,6 +35,7 @@
     <SearchModal
       v-if="showSearchModal"
       :show="showSearchModal"
+      @filteredFiles="search"
       @close="showSearchModal = false">
     </SearchModal>
     <UploadModal
@@ -132,6 +133,15 @@ export default {
       form.reset();
       this.showUploadModal = false;
     },
+    search () {
+      Api().get(filteredFiles).then((response) => {
+        const fileMap = new Map();
+        response.data.forEach((file) => {
+          fileMap.set(file._id, file);
+        });
+        this.store.dispatch('setFiles', fileMap);
+      });
+    }
   }
 };
 </script>
