@@ -7,6 +7,7 @@
  */
 module.exports = async function (fastify, options) {
   const User = require('../../models/User');
+  const { userSchema } = require('./schemas');
 
   /**
    * Get all users
@@ -18,18 +19,7 @@ module.exports = async function (fastify, options) {
       response: {
         200: {
           type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              _id: { type: 'string', description: 'MongoDB ObjectId' },
-              username: { type: 'string' },
-              fullname: { type: 'string' },
-              email: { type: 'string', format: 'email' },
-              gid: { type: 'string', format: 'uuid' },
-              uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
-              bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
-            }
-          }
+          items: userSchema
         }
       }
     }
@@ -52,22 +42,13 @@ module.exports = async function (fastify, options) {
         }
       },
       response: {
-        200: {
-          type: 'object',
-          properties: {
-            _id: { type: 'string', description: 'MongoDB ObjectId' },
-            username: { type: 'string' },
-            fullname: { type: 'string' },
-            email: { type: 'string', format: 'email' },
-            gid: { type: 'string', format: 'uuid' },
-            uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
-            bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
-          }
-        }
+        200: userSchema
       }
     }
   }, async function (request, reply) {
-    const user = await User.findById(request.params.id);
+    const _id = fastify.toObjectId(request.params.id);
+    if (!_id) return reply.code(400).send(new Error('Invalid ID'));
+    const user = await User.findById(_id);
     return user;
   });
 
@@ -78,18 +59,7 @@ module.exports = async function (fastify, options) {
     schema: {
       tags: ['users'],
       response: {
-        200: {
-          type: 'object',
-          properties: {
-            _id: { type: 'string', description: 'MongoDB ObjectId' },
-            username: { type: 'string' },
-            fullname: { type: 'string' },
-            email: { type: 'string', format: 'email' },
-            gid: { type: 'string', format: 'uuid' },
-            uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
-            bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
-          }
-        }
+        200: userSchema
       }
     }
   }, async function (request, reply) {
@@ -140,18 +110,7 @@ module.exports = async function (fastify, options) {
         }
       },
       response: {
-        201: {
-          type: 'object',
-          properties: {
-            _id: { type: 'string', description: 'MongoDB ObjectId' },
-            username: { type: 'string' },
-            fullname: { type: 'string' },
-            email: { type: 'string', format: 'email' },
-            gid: { type: 'string', format: 'uuid' },
-            uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
-            bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
-          }
-        }
+        201: userSchema
       }
     }
   }, async function (request, reply) {
@@ -178,23 +137,14 @@ module.exports = async function (fastify, options) {
         }
       },
       response: {
-        200: {
-          type: 'object',
-          properties: {
-            _id: { type: 'string', description: 'MongoDB ObjectId' },
-            username: { type: 'string' },
-            fullname: { type: 'string' },
-            email: { type: 'string', format: 'email' },
-            gid: { type: 'string', format: 'uuid' },
-            uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
-            bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
-          }
-        }
+        200: userSchema
       }
     }
   }, async function (request, reply) {
     try {
-      const user = await User.findByIdAndDelete(request.params.id);
+      const _id = fastify.toObjectId(request.params.id);
+      if (!_id) return reply.code(400).send(new Error('Invalid ID'));
+      const user = await User.findByIdAndDelete(_id);
       return user;
     } catch (err) {
       fastify.log.error(err);
@@ -217,23 +167,14 @@ module.exports = async function (fastify, options) {
         }
       },
       response: {
-        200: {
-          type: 'object',
-          properties: {
-            _id: { type: 'string', description: 'MongoDB ObjectId' },
-            username: { type: 'string' },
-            fullname: { type: 'string' },
-            email: { type: 'string', format: 'email' },
-            gid: { type: 'string', format: 'uuid' },
-            uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
-            bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
-          }
-        }
+        200: userSchema
       }
     }
   }, async function (request, reply) {
     try {
-      const user = await User.findByIdAndUpdate(request.params.id, request.body, { new: true });
+      const _id = fastify.toObjectId(request.params.id);
+      if (!_id) return reply.code(400).send(new Error('Invalid ID'));
+      const user = await User.findByIdAndUpdate(_id, request.body, { new: true });
       return user;
     } catch (err) {
       fastify.log.error(err);

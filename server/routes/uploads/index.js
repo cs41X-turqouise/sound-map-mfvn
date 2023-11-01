@@ -232,6 +232,9 @@ module.exports = async function (fastify, options) {
       },
     },
     async handler (request, reply) {
+      const fid = fastify.toObjectId(request.params.fid);
+      const uid = fastify.toObjectId(request.params.uid);
+      if (!fid || !uid) return reply.code(400).send(new Error('Invalid ID'));
       const user = await Sound.findById(request.params.fileId)
         .populate('users')
         .findById(request.params.userId);
@@ -247,25 +250,28 @@ module.exports = async function (fastify, options) {
       params: {
         type: 'object',
         properties: {
-          _id: { type: 'string', description: 'MongoDB ObjectId' },
-          length: { type: 'string' },
-          chunkSize: { type: 'string' },
-          uploadData: { type: 'string', format: 'date-time' },
-          filename: { type: 'string' },
-          contentType: { type: 'string' },
-          metadata: { type: 'object' },
+          id: { type: 'string', description: 'MongoDB ObjectId' },
         },
       },
       response: {
         200: {
-          type: 'object', // Define properties for the response object
-          // Add more properties as needed
+          type: 'object',
+          properties: {
+            _id: { type: 'string', description: 'MongoDB ObjectId' },
+            length: { type: 'string' },
+            chunkSize: { type: 'string' },
+            uploadData: { type: 'string', format: 'date-time' },
+            filename: { type: 'string' },
+            contentType: { type: 'string' },
+            metadata: { type: 'object' },
+          },
         },
       },
     },
     async handler (request, reply) {
       try {
         const _id = fastify.toObjectId(request.params.id);
+        if (!_id) return reply.code(400).send(new Error('Invalid ID'));
         await fastify.gridfsSounds.delete(_id);
         const file = await Sound.findByIdAndDelete(_id);
         if (file.images) {
@@ -299,7 +305,7 @@ module.exports = async function (fastify, options) {
       params: {
         type: 'object',
         properties: {
-          _id: { type: 'string', description: 'MongoDB ObjectId' },
+          id: { type: 'string', description: 'MongoDB ObjectId' },
         },
       },
       response: {
@@ -312,6 +318,7 @@ module.exports = async function (fastify, options) {
     async handler (request, reply) {
       try {
         const _id = fastify.toObjectId(request.params.id);
+        if (!_id) return reply.code(400).send(new Error('Invalid ID'));
         await fastify.gridfsImages.delete(_id);
         const file = await Image.findByIdAndDelete(_id);
         const sound = await Sound.findById(file.soundFile);
@@ -353,6 +360,7 @@ module.exports = async function (fastify, options) {
     async handler (request, reply) {
       try {
         const _id = fastify.toObjectId(request.params.id);
+        if (!_id) return reply.code(400).send(new Error('Invalid ID'));
         const newFileName = request.body.newFileName;
 
         // Renames the file to new file name
@@ -397,6 +405,7 @@ module.exports = async function (fastify, options) {
     async handler (request, reply) {
       try {
         const _id = fastify.toObjectId(request.params.id);
+        if (!_id) return reply.code(400).send(new Error('Invalid ID'));
 
         if (!Object.keys(request.body).length) {
           throw new Error('No metadata provided');
