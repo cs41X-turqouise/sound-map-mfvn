@@ -36,6 +36,8 @@ export default {
   data () {
     return {
       users: [],
+      upload: [],
+      email: [],
     };
     /*
     if (!empty($_SESSION['logged_in'])) {
@@ -47,6 +49,26 @@ export default {
       //something
     }
     */
+  },
+  methods: {
+    getUser () {
+      fetch('users')
+        .then((data) => {
+          // code
+        })
+        .then((blob) => {
+          // code
+        });
+      fetch(upload)
+        .then((data) => {
+          // code
+        });
+      // fetch(name);
+      fetch(email)
+        .then((data) => {
+          // code
+        });
+    }
   }
 };
 </script>
@@ -61,6 +83,7 @@ export default {
   display: audio;
   display: audioType;
 }
-#userTable{ 
+#userTable {
+  <!-- something -->
 }
 </style>
