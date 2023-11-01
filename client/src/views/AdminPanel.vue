@@ -37,11 +37,25 @@ export default {
     return {
       users: [],
     };
+    /*
+    if (!empty($_SESSION['logged_in'])) {
+    header ('Location: ''); //something to fill in, maybe?
+      exit;
+      }
+  else
+    {
+      //something
+    }
+    */
   }
-
 };
 </script>
 
 <style>
-
+AdminPage {
+  //something
+}
+.userTable{
+  //something
+}
 </style>
