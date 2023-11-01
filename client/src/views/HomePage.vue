@@ -133,14 +133,9 @@ export default {
       form.reset();
       this.showUploadModal = false;
     },
-    search () {
-      Api().get(filteredFiles).then((response) => {
-        const fileMap = new Map();
-        response.data.forEach((file) => {
-          fileMap.set(file._id, file);
-        });
-        this.store.dispatch('setFiles', fileMap);
-      });
+    // I need this to show filtered files from the search modal
+    search (filteredFiles) {
+      this.store.dispatch('setFiles', filteredFiles);
     }
   }
 };
