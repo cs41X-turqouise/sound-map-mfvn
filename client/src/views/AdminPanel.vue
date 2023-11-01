@@ -89,5 +89,8 @@ export default {
   */
 }
 #userTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
 }
 </style>
