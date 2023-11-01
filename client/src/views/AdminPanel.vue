@@ -82,12 +82,12 @@ export default {
   display: loginWithGoogle;
   display: audio;
   display: audioType;
-}
-#userTable {
   /*
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
   */
+}
+#userTable {
 }
 </style>
