@@ -74,7 +74,7 @@ export default {
 </script>
 
 <style>
-#AdminPage {
+.AdminPage {
   display: users;
   display: uploadedContent;
   display: uploaded-content-list;
@@ -88,9 +88,30 @@ export default {
   padding: 20px;
   */
 }
-#userTable {
+.userTable {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
 }
+/*
+.userTable th,
+userTable td {
+
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+}
+.userTable th {
+  background-color: #f2f2f2;
+}
+
+.userTable td span {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.userTable td span:last-child {
+  margin-bottom: 0;
+}
+*/
 </style>
