@@ -52,10 +52,15 @@ export default {
 </script>
 
 <style>
-AdminPage {
-  //something
+#AdminPage {
+  display: users;
+  display: uploadedContent;
+  display: uploaded-content-list;
+  display: contents;
+  display: loginWithGoogle;
+  display: audio;
+  display: audioType
 }
-.userTable{
-  //something
+#userTable{ 
 }
 </style>
