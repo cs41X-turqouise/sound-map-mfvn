@@ -36,7 +36,7 @@ export default {
   data () {
     return {
       users: [],
-      upload: [],
+      uploads: [],
       email: [],
     };
     /*
@@ -59,7 +59,7 @@ export default {
         .then((blob) => {
           // code
         });
-      fetch(upload)
+      fetch(uploads)
         .then((data) => {
           // code
         });
@@ -84,6 +84,10 @@ export default {
   display: audioType;
 }
 #userTable {
-  <!-- something -->
+  /*
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  */
 }
 </style>
