@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import HomePage from './views/HomePage.vue';
 import ProfilePage from './views/ProfilePage.vue';
 import AboutPage from './views/AboutPage.vue';
+import AdminPage from './views/AdminPage.vue';
 
 export default createRouter({
   mode: 'history',
@@ -21,6 +22,11 @@ export default createRouter({
       path: '/profile',
       name: 'ProfilePage',
       component: ProfilePage,
+    },
+    {
+      path: '/admin',
+      name: 'AdminPage',
+      component: AdminPage,
     },
     {
       path: '/:pathMatch(.*)*',

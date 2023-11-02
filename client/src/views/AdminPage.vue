@@ -27,6 +27,8 @@
 </template>
 
 <script>
+import Api from '../services/Api';
+
 export default {
   name: 'AdminPage',
   data () {
@@ -55,7 +57,13 @@ export default {
           // code
         });
     }
-  }
+  },
+  beforeCreate () {
+    Api().get('uploads/filedata/all').then((response) => {
+      this.uploads = response.data;
+      console.log(this.uploads);
+    });
+  },
 };
 </script>
 
