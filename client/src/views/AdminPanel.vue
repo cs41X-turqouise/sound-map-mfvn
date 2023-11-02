@@ -29,26 +29,12 @@
 <script>
 export default {
   name: 'AdminPage',
-  /*
-  // componets: {
-  },
-  */
   data () {
     return {
       users: [],
       uploads: [],
       email: [],
     };
-    /*
-    if (!empty($_SESSION['logged_in'])) {
-    header ('Location: ''); //something to fill in, maybe?
-      exit;
-      }
-  else
-    {
-      //something
-    }
-    */
   },
   methods: {
     getUser () {
@@ -75,25 +61,15 @@ export default {
 
 <style>
 .AdminPage {
-  display: users;
-  display: uploadedContent;
-  display: uploaded-content-list;
-  display: contents;
-  display: loginWithGoogle;
-  display: audio;
-  display: audioType;
-  /*
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
-  */
 }
 .userTable {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
 }
-/*
 .userTable th,
 userTable td {
 
@@ -104,14 +80,12 @@ userTable td {
 .userTable th {
   background-color: #f2f2f2;
 }
-
 .userTable td span {
   display: block;
   margin-bottom: 5px;
 }
-
 .userTable td span:last-child {
   margin-bottom: 0;
 }
-*/
+
 </style>
