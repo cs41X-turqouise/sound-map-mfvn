@@ -134,8 +134,9 @@ export default {
       this.showUploadModal = false;
     },
     // I need this to show filtered files from the search modal
-    search (filteredFiles) {
+    async search (filteredFiles) {
       this.store.dispatch('setFiles', filteredFiles);
+      this.showSearchModal = false;
     }
   }
 };
