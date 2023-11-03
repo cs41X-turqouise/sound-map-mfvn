@@ -2,6 +2,7 @@
 import { FastifyInstance } from 'fastify';
 import { Mongoose } from 'mongoose';
 import { GridFSBucket } from 'mongodb';
+import { Multer } from 'multer';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -9,6 +10,13 @@ declare module 'fastify' {
     toObjectId: (id: string) => Mongoose.Types.ObjectId;
     gridfsSounds: GridFSBucket;
     gridfsImages: GridFSBucket;
-    upload: any;
+    upload: Multer;
+    config: {
+      PORT: number;
+      MONGODB_URL: string;
+      JWT_SECRET: string;
+      GOOGLE_CLIENT_ID: string;
+      GOOGLE_CLIENT_SECRET: string;
+    };
   }
 }
