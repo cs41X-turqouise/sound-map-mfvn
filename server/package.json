@@ -40,9 +40,17 @@
     "mongoose": "^7.6.3"
   },
   "devDependencies": {
+    "@istanbuljs/esm-loader-hook": "^0.2.0",
     "eslint": "^8.52.0",
     "eslint-config-google": "^0.14.0",
     "husky": "^8.0.3",
     "tap": "^18.5.2"
+  },
+  "tap": {
+    "node-arg": [
+      "--no-warnings",
+      "--experimental-loader",
+      "@istanbuljs/esm-loader-hook"
+    ]
   }
 }
