@@ -1,5 +1,3 @@
-'use strict';
-
 import User from '../../models/User.js';
 import { userSchema } from './schemas.js';
 

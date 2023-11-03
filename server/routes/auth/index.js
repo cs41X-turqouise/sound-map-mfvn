@@ -1,5 +1,3 @@
-'use strict';
-
 import https from 'https';
 import User from '../../models/User.js';
 
@@ -88,7 +86,7 @@ export default async function (fastify, options) {
     async handler (request, reply) {
       try {
         request.session.destroy();
-        return 'Logged out';
+        reply.send('Logged out');
       } catch (err) {
         fastify.log.error(err);
         throw new Error('Internal Server Error');

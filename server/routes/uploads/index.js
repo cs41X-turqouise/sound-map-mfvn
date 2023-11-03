@@ -1,5 +1,3 @@
-'use strict';
-
 import User from '../../models/User.js';
 import Sound from '../../models/Sound.js';
 import Image from '../../models/Image.js';
@@ -433,4 +431,4 @@ export default async function (fastify, options) {
       }
     },
   });
-};
+}
