@@ -50,18 +50,14 @@ export default async function (fastify, opts) {
   };
   await fastify.register(FastifyEnv, envOptions);
 
-  // Do not touch the following lines
-
-  // This loads all plugins defined in plugins
-  // those should be support plugins that are reused
-  // through your application
+  // ~~~ Do not touch the following lines ~~~ //
+  // loads all plugins defined in plugins
   fastify.register(AutoLoad, {
     dir: path.join(__dirname, 'plugins'),
     options: Object.assign({}, opts)
   });
 
-  // This loads all plugins defined in routes
-  // define your routes in one of these
+  // loads all plugins defined in routes
   fastify.register(AutoLoad, {
     dir: path.join(__dirname, 'routes'),
     options: Object.assign({}, opts)
