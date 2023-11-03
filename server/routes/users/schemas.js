@@ -2,7 +2,7 @@
  * Schemas for user routes
  */
 
-const userSchema = {
+export const userSchema = {
   type: 'object',
   properties: {
     _id: { type: 'string', description: 'MongoDB ObjectId' },
@@ -13,8 +13,4 @@ const userSchema = {
     uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
     bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
   }
-};
-
-module.exports = {
-  userSchema
 };
