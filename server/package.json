@@ -13,7 +13,8 @@
     "dev": "fastify start -w -l info -P app.js",
     "pretest": "npm run lint",
     "lint": "eslint --fix ./**/*.js",
-    "clean-db": "node ./scripts/clean-db.js"
+    "clean-db": "node ./scripts/clean-db.js",
+    "seed-db": "node ./scripts/seed-db.js"
   },
   "husky": {
     "hooks": {
@@ -40,6 +41,7 @@
     "mongoose": "^7.6.3"
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.2.0",
     "@istanbuljs/esm-loader-hook": "^0.2.0",
     "eslint": "^8.52.0",
     "eslint-config-google": "^0.14.0",
