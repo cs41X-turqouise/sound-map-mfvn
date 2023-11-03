@@ -11,26 +11,6 @@ export default fp(async function (fastify, options) {
     const imageBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
       bucketName: 'images'
     });
-    // uncomment to see all current files in the bucket
-    // soundBucket.find({}).forEach((file) => {
-    //   fastify.log.info(file);
-    // });
-    // imageBucket.find({}).forEach((file) => {
-    //   fastify.log.info(file);
-    // });
-    // uncomment to drop the bucket
-    // soundBucket.drop((err, result) => {
-    //   if (err) {
-    //     fastify.log.error(err);
-    //   }
-    //   fastify.log.info(result);
-    // });
-    // imageBucket.drop((err, result) => {
-    //   if (err) {
-    //     fastify.log.error(err);
-    //   }
-    //   fastify.log.info(result);
-    // });
     fastify.decorate('gridfsSounds', soundBucket);
     fastify.decorate('gridfsImages', imageBucket);
     fastify.decorate('toObjectId', (val) => new mongoose.Types.ObjectId(val));
