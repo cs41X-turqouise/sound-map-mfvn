@@ -1,5 +1,5 @@
 /** @type {import("mongoose").Mongoose} */
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 /**
  * Mongoose schema for sound file uploads.
  *
@@ -55,4 +55,4 @@ const soundSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model('sounds', soundSchema);
+export default mongoose.model('Sounds', soundSchema);
