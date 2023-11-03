@@ -45,36 +45,28 @@ export default {
   name: 'AdminPage',
   data () {
     return {
-      users: [],
-      uploads: [],
-      email: [],
+      UserID: [
+      _id: 1,
+          name: 'Prestin B.',
+          email: 'Prestin97@gmail.com.com',
+          uploads: [
+            { fileName: 'file1.txt' },
+            { fileName: 'file2.jpg' },
+      ],
+    ],
+    selectedUser: null,
     };
   },
-  methods: {
-    getUser () {
-      fetch('users')
-        .then((data) => {
-          // code
-        })
-        .then((blob) => {
-          // code
-        });
-      fetch(uploads)
-        .then((data) => {
-          // code
-        });
-      // fetch(name);
-      fetch(email)
-        .then((data) => {
-          // code
-        });
-    }
+    methods: {
+    showMenu(user) {
+      this.selectedUser = user;
   },
   beforeCreate () {
     Api().get('uploads/filedata/all').then((response) => {
       this.uploads = response.data;
       console.log(this.uploads);
-    });
+      });
+    },
   },
 };
 </script>
@@ -106,6 +98,12 @@ userTable td {
 }
 .userTable td span:last-child {
   margin-bottom: 0;
+}
+.selected-user-files {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-radius: 5px;
 }
 
 </style>
