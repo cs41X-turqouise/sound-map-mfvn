@@ -47,7 +47,7 @@ export default {
     return {
       UserID: [
       _id: 1,
-          name: 'Prestin B.',
+          user: 'Prestin B.',
           email: 'Prestin97@gmail.com.com',
           uploads: [
             { fileName: 'file1.txt' },
