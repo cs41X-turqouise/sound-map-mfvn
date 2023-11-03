@@ -1,18 +1,20 @@
 'use strict';
+
+import User from '../../models/User.js';
+import Sound from '../../models/Sound.js';
+import Image from '../../models/Image.js';
+
 /**
  * Routes for handling CRUD (Create, Read, Update, and Delete) operations on uploads
  * @param {import("fastify").FastifyInstance} fastify
  * @param {Object} options plugin options, refer to https://www.fastify.io/docs/latest/Reference/Plugins/#plugin-options
  */
-module.exports = async function (fastify, options) {
+export default async function (fastify, options) {
   /**
    * @typedef {import("../../global")}
    * @typedef {import("fastify").FastifyRequest} Request
    * @typedef {import("fastify").FastifyReply} Reply
    */
-  const User = require('../../models/User');
-  const Sound = require('../../models/Sound');
-  const Image = require('../../models/Image');
 
   /**
    * User upload a file
@@ -292,4 +294,4 @@ module.exports = async function (fastify, options) {
       return file;
     }
   );
-};
+}
