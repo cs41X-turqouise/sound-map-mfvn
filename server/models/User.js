@@ -32,7 +32,6 @@ const userSchema = new mongoose.Schema({
   },
   profilePhoto: {
     type: String,
-    unique: true,
   },
   uploads: [{
     type: mongoose.Schema.Types.ObjectId,
