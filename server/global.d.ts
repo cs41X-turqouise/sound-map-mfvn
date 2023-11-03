@@ -5,6 +5,11 @@ import { GridFSBucket } from 'mongodb';
 import { Multer } from 'multer';
 
 declare module 'fastify' {
+  interface FastifyRequest {
+    file?: Express.Multer.File;
+    files?: Record<string, Express.Multer.File[]>;
+  }
+
   interface FastifyInstance {
     mongoose: Mongoose;
     toObjectId: (id: string) => Mongoose.Types.ObjectId;
