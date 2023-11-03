@@ -182,8 +182,13 @@ export default {
       // Add markers
       if (this.store.state.files.size) {
         for (const file of this.store.state.files.values()) {
-          const marker = this.createMarker(file);
-          this.markers.push(marker);
+          try {
+            const marker = this.createMarker(file);
+            this.markers.push(marker);
+          } catch (error) {
+            console.log('Failed to create marker for ', file);
+            console.error(error);
+          }
         }
       }
     },

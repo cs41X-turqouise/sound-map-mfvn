@@ -39,13 +39,14 @@ async function populateDB () {
   
       // Create mock file upload for the user
       const upload = fs.createReadStream(path.resolve(__dirname, '..', 'test/mock_data/waves-crashing.wav'))
-        .pipe(soundBucket.openUploadStream(`${faker.string.numeric({ length: { min: 5, max: 10 } })}_waves-crashing`, {
+        .pipe(soundBucket.openUploadStream(`${faker.string.numeric({ length: { min: 5, max: 10 } })}_waves-crashing.wav`, {
+          contentType: 'audio/wav',
           metadata: {
             title: faker.lorem.lines(1),
             description: faker.lorem.paragraph({ min: 1, max: 3 }),
             tags: faker.lorem.words({ min: 3, max: 5 }).split(' '),
-            lattitude: faker.location.latitude(),
-            longitude: faker.location.longitude(),
+            latitude: faker.location.latitude().toString(),
+            longitude: faker.location.longitude().toString(),
             geodata: null,
           }
         }));
