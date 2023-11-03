@@ -1,5 +1,3 @@
-'use strict';
-
 import fp from 'fastify-plugin';
 import multer from 'fastify-multer';
 import { GridFsStorage } from '@thebguy/multer-gridfs-storage';
@@ -42,16 +40,6 @@ export default fp(async function (fastify, options) {
     // Db is the database instance
     fastify.log.info('GRIDFS connection established!');
   });
-
-  // storage.on('streamError', (err) => {
-  //   // err is the error received from the GridFSBucketReadStream
-  //   fastify.log.error(err);
-  // });
-
-  // storage.on('dbError', (err) => {
-  //   // err is the error received from the MongoDB client
-  //   fastify.log.error(err);
-  // });
 
   // Decorate the Fastify instance
   fastify.decorate('upload', multer({ storage: storage }));

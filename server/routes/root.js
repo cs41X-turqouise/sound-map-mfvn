@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Root handler
  * @param {import("fastify").FastifyInstance} fastify
