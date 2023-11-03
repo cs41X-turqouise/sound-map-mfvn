@@ -1,7 +1,7 @@
 <template>
-  <div class = 'AdminPage'>
+  <div class="AdminPage">
     <h1>User List</h1>
-    <table class='userTable'>
+    <table class="userTable">
       <thead>
         <tr>
           <th>User ID</th>
@@ -12,7 +12,11 @@
       </thead>
       <tbody>
         <tr v-for="(user, index) in users" :key="index">
-          <td>{{ user._id }}</td>
+          <td>
+            <button @click="showMenu(user)">
+              {{ user._id }}
+            </button>
+          </td>
           <td>{{ user.name }}</td>
           <td>{{ user.email }}</td>
           <td>
@@ -23,6 +27,14 @@
         </tr>
       </tbody>
     </table>
+    <div v-if="selectedUser">
+      <h2>Uploaded Files</h2>
+      <ul>
+        <li v-for="(upload, uploadIndex) in selectedUser.uploads" :key="uploadIndex">
+          {{ upload.fileName }}
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
