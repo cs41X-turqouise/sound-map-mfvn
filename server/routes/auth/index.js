@@ -1,13 +1,14 @@
 'use strict';
 
+import https from 'https';
+import User from '../../models/User.js';
+
 /**
  * Route handlers for the Google OAuth2 callback.
  * @param {import("fastify").FastifyInstance} fastify
  * @param {Object} options plugin options, refer to https://www.fastify.io/docs/latest/Reference/Plugins/#plugin-options
  */
-module.exports = async function (fastify, options) {
-  const https = require('https');
-  const User = require('../../models/User');
+export default async function (fastify, options) {
   const getUserInfo = (accessToken) => {
     return new Promise((resolve, reject) => {
       const options = {
@@ -60,5 +61,4 @@ module.exports = async function (fastify, options) {
     request.session.destroy();
     reply.send('Logged out');
   });
-  fastify.log.info('Oauth Route registered.');
-};
+}

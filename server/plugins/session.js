@@ -1,12 +1,12 @@
-'use strict';
-const fp = require('fastify-plugin');
+import fp from 'fastify-plugin';
+import Session from '@fastify/session';
 
-
-module.exports = fp( async function (fastify, options) {
-  
-  fastify.register(require('@fastify/session'), {
-    secret: 'FMMpiVXBnTJEJQIuQTtObXE5aLgfa3Pkdsfg897', // Place holder
-    cookie: { secure: false }, //  Set secure to true in production
+export default fp(async function (fastify, options) {
+  fastify.register(Session, {
+    secret: 'FMMpiVXBnTJEJQIuQTtObXE5aLgfa3Pkdsfg897',
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+    },
     cookieName: 'user-session'
   });
 
@@ -14,6 +14,4 @@ module.exports = fp( async function (fastify, options) {
     request.session.user = request.session.user || null;
     done();
   });
-}
-)
-
+});

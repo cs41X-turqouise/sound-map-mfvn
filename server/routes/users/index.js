@@ -1,13 +1,13 @@
 'use strict';
 
+import User from '../../models/User.js';
+
 /**
  * Routes for handling CRUD (Create, Read, Update, and Delete) operations on users
  * @param {import("fastify").FastifyInstance} fastify
  * @param {Object} options plugin options, refer to https://www.fastify.io/docs/latest/Reference/Plugins/#plugin-options
  */
-module.exports = async function (fastify, options) {
-  const User = require('../../models/User');
-
+export default async function (fastify, options) {
   /**
    * Get all users
    * Should be Admin only
@@ -81,5 +81,4 @@ module.exports = async function (fastify, options) {
       fastify.log.error(err);
     }
   });
-};
-
+}
