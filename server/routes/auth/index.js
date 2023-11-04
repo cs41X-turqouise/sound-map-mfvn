@@ -53,7 +53,7 @@ export default async function (fastify, options) {
             username: userInfo.name,
             fullname: userInfo.name,
             email: userInfo.email,
-            picture: userInfo.picture,
+            profilePhoto: userInfo.picture,
           });
           await user.save();
         }
