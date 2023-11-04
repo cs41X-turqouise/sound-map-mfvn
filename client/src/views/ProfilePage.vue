@@ -1,61 +1,142 @@
 <template>
   <div>
-    <header>
-      <h1 id="page-title">Sound Map for a Changing Landscape</h1>
-      <figure>
-        <router-link to="/">
-          <img src="../assets/globe-icon.png" height="50" width="50">
-          <figcaption>Home</figcaption>
-        </router-link>
-      </figure>
-    </header>
-    <main>
-      <div id="profile">
-        <div id="profile-header">
-          <img id="profile-avatar" src="../assets/default-avatar.png" alt="Profile Avatar">
-          <h2 id="profile-username">Username</h2>
-        </div>
-        <div id="profile-content">
-          <h3>Uploaded Content</h3>
-          <ul id="uploaded-content-list">
-            <li v-for="(item, index) in uploadedContent" :key="index">{{ item }}</li>
-          </ul>
-          <h3>Bookmarked Content</h3>
-          <ul id="bookmarked-content-list">
-            <li v-for="(item, index) in bookmarkedContent" :key="index">{{ item }}</li>
-          </ul>
-        </div>
-        <div style="border: 2px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.25);">
-          <v-form @submit.prevent="getSound">
-            <v-text-field name="fileid" label="FileId" id="fileid" v-model="soundFile"></v-text-field>
-            <v-btn type="submit" name="submit" value="Submit">Submit</v-btn>
-          </v-form>
-          <div style="padding: 20px;">
-            <audio controls ref="audio">
-              <source :src="audioSrc" :type="audioType">
-            </audio>
-          </div>
-        </div>
-        <div>
-          <v-btn @click="getSounds">Get Sounds</v-btn>
-          <div ref="sounddiv"></div>
-        </div>
-      </div>
+    <v-toolbar fixed color="cyan" style="height: 85px;" dark>
+      <v-toolbar-items style="padding: 0 50px;">
+        <figure>
+          <router-link to="/">
+            <img src="../assets/globe-icon.png" height="50" width="50">
+            <figcaption>Home</figcaption>
+          </router-link>
+        </figure>
+      </v-toolbar-items>
+    </v-toolbar>
+    <main style="height: 100vh; background-color: beige;">
+      <v-container>
+        <v-row>
+          <v-col cols="6">
+            <div id="profile">
+              <div id="profile-header">
+                <img id="profile-avatar" src="../assets/default-avatar.png" alt="Profile Avatar">
+                <div>
+                  <h2 v-if="!editMode" id="profile-username">
+                    {{ store.state.user.username }}
+                  </h2>
+                  <v-text-field v-else v-model="username" label="Username">
+                  </v-text-field>
+                  <v-btn v-if="!editMode" color="info" @click="editMode = !editMode">
+                    Edit
+                  </v-btn>
+                  <v-btn v-else color="info" @click="saveEdit">
+                    Save
+                  </v-btn>
+                  <v-btn v-if="editMode" color="red" @click="cancelEdit">
+                    Cancel
+                  </v-btn>
+                </div>
+              </div>
+            </div>
+          </v-col>
+          <v-col cols="6">
+            <div class="profile-content">
+              <h3>Uploaded Content</h3>
+              <ul id="uploaded-content-list">
+                <li v-for="(item, index) in uploadedContent" :key="index" style="border: 2px solid black;">
+                  <div class="file-info">
+                    <div>
+                      <span>ID: {{ item._id }}</span><br>
+                      <h4>
+                        <b class="name">
+                          {{ item.metadata.title }}
+                        </b>
+                      </h4>
+                      <span class="distance">
+                        Lat: {{ item.metadata.latitude }}<br>
+                        Lng: {{ item.metadata.longitude }}<br>
+                      </span>
+                      <span class="date">
+                        Date: {{ new Date(item.uploadDate).toLocaleDateString() }}
+                      </span><br>
+                      <span class="description" v-if="item.metadata.description">
+                        Description: <p>{{ item.metadata.description }}</p>
+                      </span><br>
+                      <v-chip v-for="(tag, index) of item.metadata.tags" :key="index">
+                        {{ tag }}
+                      </v-chip>
+                    </div>
+                    <!-- <v-carousel
+                      v-if="!!item.images && item.images.length"
+                      show-arrows="hover"
+                      :style="{ width: '350px', height: '150px' }">
+                      <v-carousel-item
+                        v-for="(image, index) in item.images"
+                        :key="index"
+                        :src="urls.get(image) || fetchImage(image)"
+                        cover>
+                      </v-carousel-item>
+                    </v-carousel> -->
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </v-col>
+          <!-- <v-col cols="5">
+            <div class="profile-content">
+              <h3>Bookmarked Content</h3>
+              <ul id="bookmarked-content-list">
+                <li v-for="(item, index) in bookmarkedContent" :key="index">{{ item }}</li>
+              </ul>
+            </div>
+          </v-col> -->
+        </v-row>
+      </v-container>
     </main>
   </div>
 </template>
 
 <script>
+import { useStore } from 'vuex';
+import Api from '../services/Api';
+
 export default {
   name: 'ProfilePage',
+  setup () {
+    const store = useStore();
+    console.log(store.state.user);
+    return { store };
+  },
   data () {
     return {
-      uploadedContent: ['Item 1', 'Item 2', 'Item 3'],
+      editMode: false,
+      username: '',
       bookmarkedContent: ['Item 1', 'Item 2', 'Item 3'],
       soundFile: '',
       audioSrc: '',
       audioType: '',
     };
+  },
+  computed: {
+    /**
+     * @typedef {Object} FileData
+     * @property {string} _id
+     * @property {string} filename
+     * @property {string} contentType
+     * @property {Date} uploadDate
+     * @property {number} length
+     * @property {number} chunkSize
+     * @property {Object} metadata
+     * @property {string} metadata.title
+     * @property {string} metadata.description
+     * @property {string} metadata.latitude
+     * @property {string} metadata.longitude
+     * @property {string} metadata.tags
+     */
+    /** @return {Array<FileData>} */
+    uploadedContent () {
+      const files = this.store.state.user.uploads.map((file) => {
+        return this.store.state.files.get(file);
+      });
+      return files;
+    },
   },
   methods: {
     getSound () {
@@ -94,12 +175,27 @@ export default {
           }
         });
     },
+    cancelEdit () {
+      this.username = this.store.state.user.username;
+      this.editMode = false;
+    },
+    saveEdit () {
+      this.editMode = false;
+      Api().patch(`users/${this.store.state.user._id}`, { username: this.username }).then((response) => {
+        this.store.dispatch('setUser', response.data);
+      }).catch((error) => {
+        console.log(error);
+      });
+    },
   },
+  created () {
+    this.username = this.store.state.user.username;
+  }
 };
 </script>
 
 <style scoped>
-header a {
+/* header a {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -137,15 +233,15 @@ header a:hover {
   height: 100px;
   border-radius: 50%;
   margin-bottom: 10px;
-}
+}*/
 
-#profile-content {
+.profile-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: left;
 }
-
+/*
 #uploaded-content-list,
 #bookmarked-content-list {
   list-style: none;
@@ -156,5 +252,5 @@ header a:hover {
 #uploaded-content-list li,
 #bookmarked-content-list li {
   margin-bottom: 10px;
-}
+} */
 </style>
