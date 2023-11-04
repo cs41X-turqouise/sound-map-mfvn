@@ -3,11 +3,6 @@
 const path = require('path')
 const AutoLoad = require('@fastify/autoload')
 
-
-/*need these lines to tell where to pull routes from */
-const routes = require('./server/routes');
-app.use("/", routes);
-
 /**
  * @typedef {import('fastify').FastifyInstance} FastifyInstance
  */
