@@ -1,4 +1,12 @@
 import fp from 'fastify-plugin';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const { version } = JSON.parse(readFileSync(join(__dirname, '../package.json')));
 
 /**
  * A Fastify plugin for serving Swagger (OpenAPI v2) or OpenAPI v3 schemas,
@@ -12,7 +20,7 @@ export default fp(async function (fastify, opts) {
       info: {
         title: 'Sound Map Documentation',
         description: 'Sound Map Backend Documentation description',
-        version: '0.0.0'
+        version: version
       },
       host: '127.0.0.1:3000',
       schemes: ['http', 'https'],
@@ -57,28 +65,32 @@ export default fp(async function (fastify, opts) {
           },
         },
       },
-    }
-  });
-  // Register Fastify Swagger UI plugin with configuration
-  fastify.register(import('@fastify/swagger-ui'), {
-    routePrefix: '/docs', // Route to access Swagger UI http://127.0.0.1:3000/docs/
-    uiConfig: {
-      docExpansion: 'none', // How the documentation is initially displayed (none/list/full)
-      deepLinking: true // Enable deep linking
     },
-    uiHooks: {
-      onRequest: function (request, reply, next) {
-        next();
+    exposeRoute: fastify.config.NODE_ENV !== 'production',
+  });
+
+  // For development only
+  if (fastify.config.NODE_ENV !== 'production') {
+    // Register Fastify Swagger UI plugin with configuration
+    fastify.register(import('@fastify/swagger-ui'), {
+      routePrefix: '/docs', // Route to access Swagger UI http://127.0.0.1:3000/docs/
+      uiConfig: {
+        docExpansion: 'none', // How the documentation is initially displayed (none/list/full)
+        deepLinking: true // Enable deep linking
       },
-      preHandler: function (request, reply, next) {
-        next();
-      }
-    },
-    staticCSP: false, // Disable static content security policy
-    transformStaticCSP: (header) => header, // Transformation function for static content security policy
-    transformSpecification: (swaggerObject, request, reply) => {
-      return swaggerObject;
-    },
-    exposeRoute: true // Expose the route
-  });
+      uiHooks: {
+        onRequest: function (request, reply, next) {
+          next();
+        },
+        preHandler: function (request, reply, next) {
+          next();
+        }
+      },
+      staticCSP: false, // Disable static content security policy
+      transformStaticCSP: (header) => header, // Transformation function for static content security policy
+      transformSpecification: (swaggerObject, request, reply) => {
+        return swaggerObject;
+      },
+    });
+  }
 });
