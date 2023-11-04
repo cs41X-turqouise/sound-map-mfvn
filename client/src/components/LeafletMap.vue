@@ -226,11 +226,16 @@ export default {
   created () {
     this.$watch(() => this.store.state.files, (newValue, oldValue) => {
       for (const file of newValue.values()) {
-        if (this.markers.some((marker) => marker.data._id === file._id)) {
-          continue;
+        try {
+          if (this.markers.some((marker) => marker.data._id === file._id)) {
+            continue;
+          }
+          const marker = this.createMarker(file);
+          this.markers.push(marker);
+        } catch (error) {
+          console.log('Failed to create marker for ', file);
+          console.error(error);
         }
-        const marker = this.createMarker(file);
-        this.markers.push(marker);
       }
     });
   },
