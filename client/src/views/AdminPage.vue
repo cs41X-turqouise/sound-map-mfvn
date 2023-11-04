@@ -45,28 +45,25 @@ export default {
   name: 'AdminPage',
   data () {
     return {
-      UserID: [
-      _id: 1,
-          user: 'Prestin B.',
-          email: 'Prestin97@gmail.com.com',
-          uploads: [
-            { fileName: 'file1.txt' },
-            { fileName: 'file2.jpg' },
-      ],
-    ],
-    selectedUser: null,
+      users: [],
+      uploads: [],
+      selectedUser: null,
     };
   },
-    methods: {
-    showMenu(user) {
+  methods: {
+    showMenu (user) {
       this.selectedUser = user;
+    },
   },
   beforeCreate () {
     Api().get('uploads/filedata/all').then((response) => {
       this.uploads = response.data;
       console.log(this.uploads);
-      });
-    },
+    });
+    Api().get('users/').then((response) => {
+      this.users = response.data;
+      console.log(this.users);
+    });
   },
 };
 </script>
