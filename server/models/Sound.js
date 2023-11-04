@@ -55,4 +55,4 @@ const soundSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model('Sounds', soundSchema);
+export default mongoose.model('sounds', soundSchema);
