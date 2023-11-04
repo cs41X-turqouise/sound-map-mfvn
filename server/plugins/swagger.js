@@ -1,6 +1,4 @@
-'use strict';
-
-const fp = require('fastify-plugin');
+import fp from 'fastify-plugin';
 
 /**
  * A Fastify plugin for serving Swagger (OpenAPI v2) or OpenAPI v3 schemas,
@@ -8,8 +6,8 @@ const fp = require('fastify-plugin');
  * @see https://github.com/fastify/fastify-swagger
  * @see https://github.com/fastify/fastify-swagger-ui
  */
-module.exports = fp(async function (fastify, opts) {
-  await fastify.register(require('@fastify/swagger'), {
+export default fp(async function (fastify, opts) {
+  await fastify.register(import('@fastify/swagger'), {
     swagger: {
       info: {
         title: 'Sound Map Documentation',
@@ -62,7 +60,7 @@ module.exports = fp(async function (fastify, opts) {
     }
   });
   // Register Fastify Swagger UI plugin with configuration
-  fastify.register(require('@fastify/swagger-ui'), {
+  fastify.register(import('@fastify/swagger-ui'), {
     routePrefix: '/docs', // Route to access Swagger UI http://127.0.0.1:3000/docs/
     uiConfig: {
       docExpansion: 'none', // How the documentation is initially displayed (none/list/full)
