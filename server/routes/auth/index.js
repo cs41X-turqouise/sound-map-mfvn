@@ -40,12 +40,6 @@ export default async function (fastify, options) {
   fastify.get('/google/callback', {
     schema: {
       tags: ['auth'],
-      response: {
-        200: {
-          type: 'object', // Define properties for the response object
-          // Add more properties as needed
-        },
-      },
     },
     async handler (request, reply) {
       try {
@@ -78,8 +72,8 @@ export default async function (fastify, options) {
       tags: ['auth'],
       response: {
         200: {
-          type: 'string', // Define the type of the response
-          description: 'User is sucessfully logged out',
+          type: 'string',
+          description: 'Logout message',
         },
       },
     },
