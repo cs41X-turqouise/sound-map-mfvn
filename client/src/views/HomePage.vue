@@ -31,13 +31,18 @@
         /> -->
       </v-toolbar-items>
     </v-toolbar>
-    <div v-if="showSearchModal || showUploadModal" class="overlay"></div>
+    <div v-if="showSearchModal || showUploadModal || showSearchResultsModal" class="overlay"></div>
     <SearchModal
       v-if="showSearchModal"
       :show="showSearchModal"
       @filteredFiles="search"
       @close="showSearchModal = false">
     </SearchModal>
+    <SearchResultsModal
+      v-if="showSearchResultsModal"
+      :show="showSearchResultsModal"
+      @close="showSearchResultsModal = false">
+  </SearchResultsModal>
     <UploadModal
       v-if="showUploadModal"
       :show="showUploadModal"
@@ -61,6 +66,7 @@ import UploadModal from '../components/UploadModal.vue';
 import UserMenu from '../components/UserMenu.vue';
 import UploadService from '../services/UploadService';
 import Api from '../services/Api';
+import SearchResultsModal from '../components/SearchResultsModal.vue';
 
 export default {
   name: 'HomePage',
@@ -69,6 +75,7 @@ export default {
     UserMenu,
     SearchModal,
     UploadModal,
+    SearchResultsModal
   },
   setup () {
     const store = useStore();
@@ -79,6 +86,7 @@ export default {
       user: null,
       showUserMenu: false,
       showSearchModal: false,
+      showSearchResultsModal: false,
       showUploadModal: false,
       uploadForm: {
         valid: false
@@ -135,8 +143,8 @@ export default {
     },
     // I need this to show filtered files from the search modal
     async search (filteredFiles) {
-      this.store.dispatch('setFiles', filteredFiles);
       this.showSearchModal = false;
+      this.showSearchResultsModal = true;
     }
   }
 };
