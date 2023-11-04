@@ -38,7 +38,16 @@ export default async function (fastify, options) {
       schema: {
         tags: ['uploads'],
         response: {
-          201: uploadSchema,
+          201: {
+            type: 'object',
+            properties: {
+              ...uploadSchema.properties,
+              images: {
+                type: 'array',
+                items: { type: 'string', description: 'MongoDB ObjectId' }
+              },
+            },
+          },
         },
       },
       async handler (request, reply) {
@@ -68,8 +77,9 @@ export default async function (fastify, options) {
 
         await request.session.user.save();
         await upload.save();
+        sound.images = images;
+        sound._id = upload._id;
 
-        // return sound;
         reply.code(201).send(sound);
       }
     }
@@ -139,6 +149,50 @@ export default async function (fastify, options) {
   });
 
   /**
+   * Get a specific audio upload
+   */
+  fastify.get('/:id', {
+    schema: {
+      tags: ['uploads'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'MongoDB ObjectId' },
+        },
+      },
+    },
+  }, async function (request, reply) {
+    const _id = fastify.toObjectId(request.params.id);
+    if (!_id) return reply.code(400).send(new Error('Invalid ID'));
+    const fileDoc = await Sound.findById(_id).exec();
+    const { file, fileStream } = await fileDoc.getFileStream(fastify);
+    reply.header('Content-Type', file.contentType);
+    return reply.send(fileStream);
+  });
+
+  /**
+   * Get a specific image upload
+   */
+  fastify.get('/image/:id', {
+    schema: {
+      tags: ['uploads'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'MongoDB ObjectId' },
+        },
+      },
+    },
+  }, async function (request, reply) {
+    const _id = fastify.toObjectId(request.params.id);
+    if (!_id) return reply.code(400).send(new Error('Invalid ID'));
+    const fileDoc = await Image.findById(_id).exec();
+    const { file, fileStream } = await fileDoc.getFileStream(fastify);
+    reply.header('Content-Type', file.contentType);
+    return reply.send(fileStream);
+  });
+
+  /**
    * Get all the file data from the sounds bucket
    */
   fastify.get('/filedata/all', {
@@ -147,7 +201,16 @@ export default async function (fastify, options) {
       response: {
         200: {
           type: 'array',
-          items: uploadSchema,
+          items: {
+            type: 'object',
+            properties: {
+              ...uploadSchema.properties,
+              images: {
+                type: 'array',
+                items: { type: 'string', description: 'MongoDB ObjectId' }
+              },
+            },
+          },
         },
       },
     },
@@ -156,6 +219,7 @@ export default async function (fastify, options) {
       const uploads = await Sound.find({});
       for (const upload of uploads) {
         const file = await upload.getFile(fastify);
+        file.images = upload.images || [];
         data.push(file);
       }
       return reply.send(data);
