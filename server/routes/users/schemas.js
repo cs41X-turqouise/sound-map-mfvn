@@ -9,7 +9,7 @@ export const userSchema = {
     username: { type: 'string' },
     fullname: { type: 'string' },
     email: { type: 'string', format: 'email' },
-    gid: { type: 'string', format: 'uuid' },
+    gid: { type: 'string', description: 'Google ID' },
     uploads: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
     bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
   }
