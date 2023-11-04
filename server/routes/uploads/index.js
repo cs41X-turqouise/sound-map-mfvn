@@ -1,6 +1,8 @@
 import User from '../../models/User.js';
 import Sound from '../../models/Sound.js';
 import Image from '../../models/Image.js';
+import { uploadSchema } from './schemas.js';
+import { userSchema } from '../users/schemas.js';
 
 /**
  * Routes for handling CRUD (Create, Read, Update, and Delete) operations on uploads
@@ -8,12 +10,6 @@ import Image from '../../models/Image.js';
  * @param {Object} options plugin options, refer to https://www.fastify.io/docs/latest/Reference/Plugins/#plugin-options
  */
 export default async function (fastify, options) {
-  /**
-   * @typedef {import("../../global")}
-   * @typedef {import("fastify").FastifyRequest} Request
-   * @typedef {import("fastify").FastifyReply} Reply
-   */
-
   /**
    * User upload a file
    */
@@ -42,13 +38,7 @@ export default async function (fastify, options) {
       schema: {
         tags: ['uploads'],
         response: {
-          200: {
-            type: 'object',
-            properties: {
-              _id: { type: 'string', description: 'MongoDB ObjectId' },
-            },
-          },
-        // Add more response codes if needed
+          201: uploadSchema,
         },
       },
       async handler (request, reply) {
@@ -56,6 +46,7 @@ export default async function (fastify, options) {
         const userId = fastify.toObjectId(request.session.user._id);
         const sound = request.files.sound[0];
         const images = [];
+
         if (request.files.images) {
           for (const image of request.files.images) {
             const upload = new Image({
@@ -67,15 +58,19 @@ export default async function (fastify, options) {
             images.push(upload._id);
           }
         }
+
         const upload = new Sound({
           images,
           user: userId,
           _id: fastify.toObjectId(sound.id),
         });
         request.session.user.uploads.push(upload._id);
+
         await request.session.user.save();
         await upload.save();
-        return sound;
+
+        // return sound;
+        reply.code(201).send(sound);
       }
     }
   );
@@ -86,44 +81,19 @@ export default async function (fastify, options) {
    * @todo We should be able to upload multiple sound files and corresponding images if any
    */
   fastify.post('/bulk', {
-    preHandler: fastify.upload.array('files', 12),
     schema: {
       tags: ['uploads'],
       response: {
-        200: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              // Define properties for each uploaded file object here (if applicable)
-              _id: { type: 'string', description: 'MongoDB ObjectId' },
-              // Add more properties as needed
-            },
-          },
+        501: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' }
+          }
         },
-        // Add more response codes if needed
       },
     },
     async handler (request, reply) {
-      // Extract the user ID from the request body
-      const userId = fastify.toObjectId(request.body.user);
-
-      // Process file uploads concurrently using Promise.all and map by using Promise.all
-      // in combination with map, the code is able to process multiple file uploads simultaneously
-      const uploads = await Promise.all(request.files.map(async (file) => {
-        // Create a new Upload object with file details and user ID
-        const sound = request.files.sound[0];
-        const upload = new Sound({
-          ...request.file,
-          user: userId,
-          _id: fastify.toObjectId(sound.id),
-        });
-        // Save the Upload object to the database and return the result
-        return await upload.save();
-      }));
-
-      // Return an array of uploaded file objects
-      return uploads;
+      reply.code(501).send({ error: 'Not Implemented' });
     }
   });
 
@@ -141,18 +111,11 @@ export default async function (fastify, options) {
           items: {
             type: 'object',
             properties: {
-              _id: { type: 'string', description: 'MongoDB ObjectId' },
-              length: { type: 'string' },
-              chunkSize: { type: 'string' },
-              uploadData: { type: 'string', format: 'date-time' },
-              filename: { type: 'string' },
-              contentType: { type: 'string' },
-              metadata: { type: 'object' },
-              // Add more properties as needed
+              file: uploadSchema,
+              buffer: { type: 'string', format: 'byte' }
             },
           },
         },
-        // Add more response codes if needed
       },
     },
     async handler (request, reply) {
@@ -174,6 +137,7 @@ export default async function (fastify, options) {
       return reply.send(data);
     },
   });
+
   /**
    * Get all the file data from the sounds bucket
    */
@@ -183,20 +147,8 @@ export default async function (fastify, options) {
       response: {
         200: {
           type: 'array',
-          items: {
-            type: 'object', // Define properties for each item in the array here
-            properties: {
-              _id: { type: 'string', description: 'MongoDB ObjectId' },
-              length: { type: 'string' },
-              chunkSize: { type: 'string' },
-              uploadData: { type: 'string', format: 'date-time' },
-              filename: { type: 'string' },
-              contentType: { type: 'string' },
-              metadata: { type: 'object' },
-            },
-          },
+          items: uploadSchema,
         },
-        // Add more response codes if needed
       },
     },
     async handler (request, reply) {
@@ -224,10 +176,7 @@ export default async function (fastify, options) {
         },
       },
       response: {
-        200: {
-          type: 'object', // Define properties for the response object
-          // Add more properties as needed
-        },
+        200: userSchema,
       },
     },
     async handler (request, reply) {
@@ -240,6 +189,7 @@ export default async function (fastify, options) {
       return user;
     },
   });
+
   /**
    * Delete a sound file - should be Admin only or limited to the user themselves
    */
@@ -253,18 +203,7 @@ export default async function (fastify, options) {
         },
       },
       response: {
-        200: {
-          type: 'object',
-          properties: {
-            _id: { type: 'string', description: 'MongoDB ObjectId' },
-            length: { type: 'string' },
-            chunkSize: { type: 'string' },
-            uploadData: { type: 'string', format: 'date-time' },
-            filename: { type: 'string' },
-            contentType: { type: 'string' },
-            metadata: { type: 'object' },
-          },
-        },
+        200: uploadSchema,
       },
     },
     async handler (request, reply) {
@@ -308,21 +247,20 @@ export default async function (fastify, options) {
         },
       },
       response: {
-        200: {
-          type: 'object', // Define properties for the response object
-          // Add more properties as needed
-        },
+        200: uploadSchema,
       },
     },
     async handler (request, reply) {
       try {
         const _id = fastify.toObjectId(request.params.id);
         if (!_id) return reply.code(400).send(new Error('Invalid ID'));
+
         await fastify.gridfsImages.delete(_id);
         const file = await Image.findByIdAndDelete(_id);
         const sound = await Sound.findById(file.soundFile);
         sound.images.pull(file._id);
         await sound.save();
+
         return file;
       } catch (err) {
         fastify.log.error(err);
@@ -330,6 +268,7 @@ export default async function (fastify, options) {
       }
     },
   });
+
   /**
    * Rename a file - should be Admin only or limited to the user themselves
    */
@@ -339,7 +278,7 @@ export default async function (fastify, options) {
       params: {
         type: 'object',
         properties: {
-          _id: { type: 'string', description: 'MongoDB ObjectId' },
+          id: { type: 'string', description: 'MongoDB ObjectId' },
         },
       },
       body: {
@@ -350,10 +289,7 @@ export default async function (fastify, options) {
         },
       },
       response: {
-        200: {
-          type: 'object', // Define properties for the response object
-          // Add more properties as needed
-        },
+        200: uploadSchema,
       },
     },
     async handler (request, reply) {
@@ -381,7 +317,7 @@ export default async function (fastify, options) {
       params: {
         type: 'object',
         properties: {
-          _id: { type: 'string', description: 'MongoDB ObjectId' },
+          id: { type: 'string', description: 'MongoDB ObjectId' },
         },
       },
       body: {
@@ -395,10 +331,7 @@ export default async function (fastify, options) {
         },
       },
       response: {
-        200: {
-          type: 'object', // Define properties for the response object
-          // Add more properties as needed
-        },
+        200: uploadSchema,
       },
     },
     async handler (request, reply) {
