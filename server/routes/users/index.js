@@ -1,18 +1,27 @@
-'use strict';
+import User from '../../models/User.js';
+import { userSchema } from './schemas.js';
 
 /**
  * Routes for handling CRUD (Create, Read, Update, and Delete) operations on users
  * @param {import("fastify").FastifyInstance} fastify
  * @param {Object} options plugin options, refer to https://www.fastify.io/docs/latest/Reference/Plugins/#plugin-options
  */
-module.exports = async function (fastify, options) {
-  const User = require('../../models/User');
-
+export default async function (fastify, options) {
   /**
    * Get all users
    * Should be Admin only
    */
-  fastify.get('/', async function (request, reply) {
+  fastify.get('/', {
+    schema: {
+      tags: ['users'],
+      response: {
+        200: {
+          type: 'array',
+          items: userSchema
+        }
+      }
+    }
+  }, async function (request, reply) {
     const users = await User.find({}).populate('uploads');
     return users;
   });
@@ -21,15 +30,37 @@ module.exports = async function (fastify, options) {
    * Get a single user by ID
    * Should be Admin only
    */
-  fastify.get('/:id', async function (request, reply) {
-    const user = await User.findById(request.params.id);
+  fastify.get('/:id', {
+    schema: {
+      tags: ['users'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'MongoDB ObjectId' }
+        }
+      },
+      response: {
+        200: userSchema
+      }
+    }
+  }, async function (request, reply) {
+    const _id = fastify.toObjectId(request.params.id);
+    if (!_id) return reply.code(400).send(new Error('Invalid ID'));
+    const user = await User.findById(_id);
     return user;
   });
 
   /**
    * Get the currently logged in user
    */
-  fastify.get('/self', async function (request, reply) {
+  fastify.get('/self', {
+    schema: {
+      tags: ['users'],
+      response: {
+        200: userSchema
+      }
+    }
+  }, async function (request, reply) {
     if (!request.session.user) {
       return reply.send(new Error('User not logged in'));
     }
@@ -40,14 +71,47 @@ module.exports = async function (fastify, options) {
    * Gets a file uploaded by a user
    * @todo Implement this or remove it
    */
-  fastify.get('/:userId/:fileId', async function (request, reply) {
+  fastify.get('/:uid/:fid', {
+    schema: {
+      tags: ['users'],
+      params: {
+        type: 'object',
+        properties: {
+          uid: { type: 'string', description: 'MongoDB ObjectId' },
+          fid: { type: 'string', description: 'MongoDB ObjectId' }
+        }
+      },
+      response: {
+        200: {
+          type: 'null',
+        }
+      }
+    }
+  }, async function (request, reply) {
     return null;
   });
 
   /**
    * Create a new user
    */
-  fastify.post('/', async function (request, reply) {
+  fastify.post('/', {
+    schema: {
+      tags: ['users'],
+      body: {
+        type: 'object',
+        required: ['username', 'fullname', 'email', 'gid'],
+        properties: {
+          username: { type: 'string' },
+          fullname: { type: 'string' },
+          email: { type: 'string', format: 'email' },
+          gid: { type: 'string', description: 'Google Id' },
+        }
+      },
+      response: {
+        201: userSchema
+      }
+    }
+  }, async function (request, reply) {
     try {
       const user = new User(request.body);
       await user.save();
@@ -61,9 +125,24 @@ module.exports = async function (fastify, options) {
   /**
    * Delete a user - should be Admin only or limited to the user themselves
    */
-  fastify.delete('/:id', async function (request, reply) {
+  fastify.delete('/:id', {
+    schema: {
+      tags: ['users'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'MongoDB ObjectId' }
+        }
+      },
+      response: {
+        200: userSchema
+      }
+    }
+  }, async function (request, reply) {
     try {
-      const user = await User.findByIdAndDelete(request.params.id);
+      const _id = fastify.toObjectId(request.params.id);
+      if (!_id) return reply.code(400).send(new Error('Invalid ID'));
+      const user = await User.findByIdAndDelete(_id);
       return user;
     } catch (err) {
       fastify.log.error(err);
@@ -73,13 +152,30 @@ module.exports = async function (fastify, options) {
   /**
    * Update a user
    */
-  fastify.patch('/:id', async function (request, reply) {
+  fastify.patch('/:id', {
+    schema: {
+      tags: ['users'],
+      body: {
+        type: 'object',
+        properties: {
+          username: { type: 'string' },
+          fullname: { type: 'string' },
+          email: { type: 'string', format: 'email' },
+          gid: { type: 'string', description: 'Google Id' },
+        }
+      },
+      response: {
+        200: userSchema
+      }
+    }
+  }, async function (request, reply) {
     try {
-      const user = await User.findByIdAndUpdate(request.params.id, request.body, { new: true });
+      const _id = fastify.toObjectId(request.params.id);
+      if (!_id) return reply.code(400).send(new Error('Invalid ID'));
+      const user = await User.findByIdAndUpdate(_id, request.body, { new: true });
       return user;
     } catch (err) {
       fastify.log.error(err);
     }
   });
-};
-
+}

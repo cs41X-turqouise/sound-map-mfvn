@@ -2,6 +2,7 @@
   "name": "server",
   "version": "1.0.0",
   "description": "This project was bootstrapped with Fastify-CLI.",
+  "type": "module",
   "main": "app.js",
   "directories": {
     "test": "test"
@@ -10,9 +11,15 @@
     "test": "tap \"test/**/*.test.js\"",
     "start": "fastify start -l info app.js",
     "dev": "fastify start -w -l info -P app.js",
-    "pretest": "standard",
-    "lint": "eslint --fix",
-    "clean-db": "node ./scripts/clean-db.js"
+    "pretest": "npm run lint",
+    "lint": "eslint --fix ./**/*.js",
+    "clean-db": "node ./scripts/clean-db.js",
+    "seed-db": "node ./scripts/seed-db.js"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint"
+    }
   },
   "keywords": [],
   "author": "",
@@ -31,6 +38,7 @@
     "@fastify/sensible": "^5.5.0",
     "@fastify/session": "^10.5.0",
     "@fastify/swagger": "^8.12.0",
+    "@fastify/swagger-ui": "^1.10.1",
     "@thebguy/multer-gridfs-storage": "^5.0.3",
     "fastify": "^4.24.3",
     "fastify-cli": "^5.8.0",
@@ -39,8 +47,18 @@
     "mongoose": "^7.6.3"
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.2.0",
+    "@istanbuljs/esm-loader-hook": "^0.2.0",
     "eslint": "^8.52.0",
     "eslint-config-google": "^0.14.0",
+    "husky": "^8.0.3",
     "tap": "^18.5.2"
+  },
+  "tap": {
+    "node-arg": [
+      "--no-warnings",
+      "--experimental-loader",
+      "@istanbuljs/esm-loader-hook"
+    ]
   }
 }
