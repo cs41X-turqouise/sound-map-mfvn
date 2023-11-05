@@ -32,6 +32,9 @@
                   <v-btn v-if="editMode" color="red" @click="cancelEdit">
                     Cancel
                   </v-btn>
+                  <v-btn color="red" @click="deleteProfile">
+                   Delete Upload
+                  </v-btn>
                 </div>
               </div>
             </div>
@@ -63,6 +66,11 @@
                         {{ tag }}
                       </v-chip>
                     </div>
+                     <!-- Edit Mode -->
+                    <div v-if="editMode">
+                    <v-text-field v-model="item.metadata.title" label="Title"></v-text-field>
+                    <v-text-field v-model="item.metadata.description" label="Description"></v-text-field>
+                     </div>
                     <!-- <v-carousel
                       v-if="!!item.images && item.images.length"
                       show-arrows="hover"
