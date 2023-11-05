@@ -8,28 +8,28 @@
         </v-btn>
       </v-toolbar-items>
       <v-spacer></v-spacer>
-      <v-toolbar-title v-if="$store.state.user">
-        Welcome {{ $store.state.user.username }}
+      <v-toolbar-title v-if="store.state.user">
+        Welcome {{ store.state.user.username }}!
       </v-toolbar-title>
       <v-toolbar-items style="padding: 0 10px;">
         <v-btn
-          v-if="!$store.state.user"
+          v-if="!store.state.user"
           flat
           @click="loginWithGoogle">
           Sign in with Google
         </v-btn>
         <v-btn
-          v-if="$store.state.user"
+          v-if="store.state.user"
           flat
           @click="logout">
           Log Out
         </v-btn>
-        <!-- Figure out why v-avatar and v-img cause this to break -->
-        <!-- <img id="user-avatar"
-          src="../assets/default-avatar.png"
-          alt="User Avatar"
-          @click="showUserMenu = !showUserMenu"
-        /> -->
+        <figure v-if="store.state.user">
+          <router-link to="/profile">
+            <img src="../assets/default-avatar.png" height="25" width="25">
+            <figcaption>Profile</figcaption>
+          </router-link>
+        </figure>
       </v-toolbar-items>
     </v-toolbar>
     <div v-if="showSearchModal || showUploadModal" class="overlay"></div>
@@ -46,8 +46,9 @@
     </UploadModal>
     <UserMenu :user="user" :show="showUserMenu" />
     <LeafletMap
-        @openUploadModal="showUploadModal = true"
-        @closeUploadModal="showUploadModal = false"/>
+      @openUploadModal="showUploadModal = true"
+      @closeUploadModal="showUploadModal = false">
+    </LeafletMap>
   </div>
 </template>
 
