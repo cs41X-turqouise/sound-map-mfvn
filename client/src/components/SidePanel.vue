@@ -132,10 +132,12 @@ export default {
         });
     },
     playing (marker) {
+      const newAudio = this.$refs[`audio-${marker.data._id}`][0];
       if (this.currentAudio) {
+        if (this.currentAudio === newAudio) return;
         this.currentAudio.pause();
       }
-      this.currentAudio = this.$refs[`audio-${marker.data._id}`][0];
+      this.currentAudio = newAudio;
       this.$emit('focusMarker', marker);
     },
   },

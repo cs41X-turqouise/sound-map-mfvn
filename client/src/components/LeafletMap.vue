@@ -1,6 +1,5 @@
 <template>
-  <!-- dblclick event was buggy and uneeded for this map, stop it from passing this point -->
-  <div :id="mapId" @dblclick="($event) => $event.stopImmediatePropagation()">
+  <div :id="mapId">
     <SidePanel
       v-if="showPanel"
       :markers="markers"
@@ -13,7 +12,7 @@
       <div
         v-if="showModal"
         :class="{ 'click-modal': true, highlight: highlight }"
-        @click.stop @dblclick.stop>
+        @click.stop>
         <CloseButton @close="showModal = false"/>
         <span>Latitude: {{ clicked.lat.toFixed(4) }}</span><br>
         <span>Longitude: {{ clicked.lng.toFixed(4) }}</span><br>
@@ -55,7 +54,7 @@ const CoordinatesControl = L.Control.extend({
     container.style.padding = '5px';
     container.style.marginRight = '10px';
     const center = map.getCenter();
-    container.innerHTML = 'Center: ' + center.lat.toFixed(4) + ', ' + center.lng.toFixed(4);
+    container.innerHTML = `Center: ${center.lat.toFixed(4)}, ${center.lng.toFixed(4)} | Zoom: ${map.getZoom()}`;
     return container;
   }
 });
@@ -74,11 +73,16 @@ export default {
   data () {
     return {
       mapId: 'leaflet-map',
+      /** @type {import("leaflet").MapOptions} */
       mapOptions: {
         center: L.latLng(36.88546327183475, -76.30592151771837),
         zoom: 10,
+        minZoom: 2,
         zoomControl: true,
         zoomAnimation: true,
+        doubleClickZoom: false,
+        trackResize: true,
+        worldCopyJump: true,
         maxBounds: L.latLngBounds(
           L.latLng(-90, -180), L.latLng(90, 180)
         ),
@@ -156,7 +160,7 @@ export default {
       leafletMap.on('move', () => {
         const center = leafletMap.getCenter();
         this.centerMarker.setLatLng(center);
-        this.coordinatesControl.getContainer().innerHTML = 'Center: ' + center.lat.toFixed(4) + ', ' + center.lng.toFixed(4);
+        this.coordinatesControl.getContainer().innerHTML = `Center: ${center.lat.toFixed(4)}, ${center.lng.toFixed(4)} | Zoom: ${leafletMap.getZoom()}`;
       });
       leafletMap.on('zoomstart', () => {
         if (this.currentPopup) {
@@ -206,11 +210,6 @@ export default {
       this.mapInstance.flyTo(marker.getLatLng(), 15);
       marker.openPopup();
     },
-    handleResize () {
-      setTimeout(() => {
-        this.mapInstance.invalidateSize();
-      }, 200);
-    },
     createMarker (file) {
       const { latitude, longitude, title, description } = file.metadata;
       const marker = L.marker([latitude, longitude]).addTo(this.mapInstance);
@@ -226,23 +225,26 @@ export default {
   created () {
     this.$watch(() => this.store.state.files, (newValue, oldValue) => {
       for (const file of newValue.values()) {
-        if (this.markers.some((marker) => marker.data._id === file._id)) {
-          continue;
+        try {
+          if (this.markers.some((marker) => marker.data._id === file._id)) {
+            continue;
+          }
+          const marker = this.createMarker(file);
+          this.markers.push(marker);
+        } catch (error) {
+          console.log('Failed to create marker for ', file);
+          console.error(error);
         }
-        const marker = this.createMarker(file);
-        this.markers.push(marker);
       }
     });
   },
   mounted () {
     this.initMap();
-    window.addEventListener('resize', this.handleResize);
   },
   unmounted () {
     if (this.mapInstance) {
       this.mapInstance.remove();
     }
-    window.removeEventListener('resize', this.handleResize);
   },
 };
 </script>
