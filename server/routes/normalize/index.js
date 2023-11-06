@@ -56,7 +56,11 @@ export default async function (fastify, options) {
           tempFileStream.pipe(outStream);
         });
         outStream.on('finish', () => {
-          //fastify.log.info(`deleting temp file at: \n\t${tempFilePath}`);
+          fastify.log.info(`deleting temp file at: \n\t${tempFilePath}`);
+          fs.unlink(tempFilePath, (err) => {
+            if (err) return fastify.log.error(err);
+            fastify.log.info('file deleted successfully');
+          });
         });
 
         await command.run();
