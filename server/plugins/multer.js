@@ -1,10 +1,8 @@
-'use strict';
+import fp from 'fastify-plugin';
+import multer from 'fastify-multer';
+import { GridFsStorage } from '@thebguy/multer-gridfs-storage';
 
-const fp = require('fastify-plugin');
-const multer = require('fastify-multer');
-const { GridFsStorage } = require('@thebguy/multer-gridfs-storage');
-
-module.exports = fp(async function (fastify, options) {
+export default fp(async function (fastify, options) {
   fastify.register(multer.contentParser);
 
   const dir = __dirname.replace('plugins', 'uploads');
@@ -22,6 +20,7 @@ module.exports = fp(async function (fastify, options) {
 
   const storage = new GridFsStorage({
     url: fastify.config.MONGODB_URL,
+    // db: fastify.mongoose.connection.db,
     /**
      * @param {Request} req
      * @param {import("@thebguy/multer-gridfs-storage").GridFile} file
@@ -39,6 +38,12 @@ module.exports = fp(async function (fastify, options) {
           fileInfo.metadata = {
             ...req.body,
           };
+          // have to manually convert tags from string to array - why??
+          if (!Array.isArray(fileInfo.metadata.tags)) {
+            fileInfo.metadata.tags = fileInfo.metadata.tags
+              ? fileInfo.metadata.tags.split(',')
+              : [];
+          }
         }
         resolve(fileInfo);
       });
@@ -49,16 +54,6 @@ module.exports = fp(async function (fastify, options) {
     // Db is the database instance
     fastify.log.info('GRIDFS connection established!');
   });
-
-  // storage.on('streamError', (err) => {
-  //   // err is the error received from the GridFSBucketReadStream
-  //   fastify.log.error(err);
-  // });
-
-  // storage.on('dbError', (err) => {
-  //   // err is the error received from the MongoDB client
-  //   fastify.log.error(err);
-  // });
 
   // Decorate the Fastify instance
   fastify.decorate('upload', multer({ storage: storage }));

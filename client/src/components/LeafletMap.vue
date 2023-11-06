@@ -1,12 +1,51 @@
 <template>
   <div :id="mapId">
-    <!-- <Sidebar :popups="popups" :map="mapInstance"/> -->
+    <SidePanel
+      v-if="showPanel"
+      :markers="markers"
+      :map="mapInstance"
+      :clicked="clicked"
+      @focusMarker="focusMarker"
+      @close="showPanel = false">
+    </SidePanel>
+    <Transition name="fade">
+      <div
+        v-if="showModal"
+        :class="{ 'click-modal': true, highlight: highlight }"
+        @click.stop>
+        <CloseButton @close="showModal = false"/>
+        <span>Latitude: {{ clicked.lat.toFixed(4) }}</span><br>
+        <span>Longitude: {{ clicked.lng.toFixed(4) }}</span><br>
+        <v-row style="justify-content: space-evenly; align-items: center;">
+          <v-col cols="auto" @click.stop>
+            <v-btn
+              color="info"
+              size="small"
+              density="comfortable"
+              @click.stop="togglePinPanel">
+              {{ showPanel ? 'Hide' : 'Show'}} Panel
+            </v-btn>
+            <v-btn
+              v-if="$store.state.user"
+              color="info"
+              size="small"
+              density="comfortable"
+              @click.stop="openUploadModal">
+              Upload
+            </v-btn>
+          </v-col>
+        </v-row>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script>
+// TODO: Redo using Vue 3 Composition API
+import { useStore } from 'vuex';
 import L from 'leaflet';
-// import Sidebar from './Sidebar.vue';
+import SidePanel from './SidePanel.vue';
+import CloseButton from './CloseButton.vue';
 
 const CoordinatesControl = L.Control.extend({
   onAdd: function (map) {
@@ -14,7 +53,8 @@ const CoordinatesControl = L.Control.extend({
     container.style.backgroundColor = 'white';
     container.style.padding = '5px';
     container.style.marginRight = '10px';
-    container.innerHTML = 'Center: ' + map.getCenter().lat.toFixed(4) + ', ' + map.getCenter().lng.toFixed(4);
+    const center = map.getCenter();
+    container.innerHTML = `Center: ${center.lat.toFixed(4)}, ${center.lng.toFixed(4)} | Zoom: ${map.getZoom()}`;
     return container;
   }
 });
@@ -27,55 +67,45 @@ const myIcon = L.icon({
 export default {
   name: 'LeafletMap',
   components: {
-    // Sidebar,
-  },
-  props: {
-    /**
-     * @typedef {Object} FileData
-     * @property {string} _id
-     * @property {string} filename
-     * @property {string} contentType
-     * @property {Date} uploadDate
-     * @property {number} length
-     * @property {number} chunkSize
-     * @property {Object} metadata
-     * @property {string} metadata.title
-     * @property {string} metadata.description
-     * @property {string} metadata.latitude
-     * @property {string} metadata.longitude
-     * @property {string} metadata.tags
-     */
-    /** @type {FileData[]} */
-    files: {
-      type: Array,
-      default: () => [],
-    },
+    SidePanel,
+    CloseButton,
   },
   data () {
     return {
       mapId: 'leaflet-map',
+      /** @type {import("leaflet").MapOptions} */
       mapOptions: {
         center: L.latLng(36.88546327183475, -76.30592151771837),
         zoom: 10,
+        minZoom: 2,
         zoomControl: true,
         zoomAnimation: true,
+        doubleClickZoom: false,
+        trackResize: true,
+        worldCopyJump: true,
         maxBounds: L.latLngBounds(
           L.latLng(-90, -180), L.latLng(90, 180)
         ),
         layers: [],
       },
       markers: [],
-      geojsonData: null,
       mapInstance: null,
       layerControlInstance: null,
       coordinatesControl: null,
       centerMarker: null,
+      currentPopup: null,
+      clicked: null,
+      showPanel: false,
+      showModal: false,
+      highlight: false,
     };
   },
+  setup () {
+    const store = useStore();
+    return { store };
+  },
   methods: {
-    // Initialize map function:
     initMap () {
-      // Create the leaflet map
       const leafletMap = L.map(this.mapId, this.mapOptions);
       leafletMap.zoomControl.setPosition('bottomright');
       // L.control.locate({ position: 'bottomright' }).addTo(leafletMap);
@@ -114,9 +144,7 @@ export default {
           subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
         })),
       };
-      // set inital view
       views.OpenStreetMap.addTo(leafletMap);
-      // Create the layer control and add it to the map:
       this.layerControlInstance = L.control
         .layers(views, null, { position: 'bottomleft' })
         .addTo(leafletMap);
@@ -127,27 +155,88 @@ export default {
         leafletMap.getCenter(),
         { icon: myIcon }
       ).addTo(leafletMap);
-      // Add event listeners to the map:
+
+      // Add event listeners
       leafletMap.on('move', () => {
         const center = leafletMap.getCenter();
         this.centerMarker.setLatLng(center);
-        this.coordinatesControl.getContainer().innerHTML = 'Center: ' + center.lat.toFixed(4) + ', ' + center.lng.toFixed(4);
+        this.coordinatesControl.getContainer().innerHTML = `Center: ${center.lat.toFixed(4)}, ${center.lng.toFixed(4)} | Zoom: ${leafletMap.getZoom()}`;
       });
-      if (this.files.length) {
-        this.markers = this.files.map((file) => {
-          const { latitude, longitude, title, description } = file.metadata;
-          const marker = L.marker([Number(latitude), Number(longitude)]).addTo(leafletMap);
-          marker.bindPopup(`
-            <h2>Upload Info</h2><br>
-            <span>Title: ${title}</span><br>
-            <span>Description: ${description}</span><br>
-          `);
-          marker.fileId = file._id;
-          return marker;
-        });
-      }
+      leafletMap.on('zoomstart', () => {
+        if (this.currentPopup) {
+          this.currentPopup.remove();
+        }
+        this.currentPopup = null;
+      });
+      leafletMap.on('click', (event) => {
+        const lat = event.latlng.lat;
+        const lng = event.latlng.lng;
+        this.clicked = { lat, lng, latlng: event.latlng };
+        this.store.dispatch('setClicked', { lat, lng });
+        if (this.showModal) {
+          this.highlight = true;
+          setTimeout(() => {
+            this.highlight = false;
+          }, 1000);
+        }
+        this.showModal = true;
+      });
       this.mapInstance = leafletMap;
+
+      // Add markers
+      if (this.store.state.files.size) {
+        for (const file of this.store.state.files.values()) {
+          try {
+            const marker = this.createMarker(file);
+            this.markers.push(marker);
+          } catch (error) {
+            console.log('Failed to create marker for ', file);
+            console.error(error);
+          }
+        }
+      }
     },
+    openUploadModal () {
+      this.showPanel = false;
+      this.$emit('openUploadModal');
+    },
+    togglePinPanel () {
+      this.showPanel = !this.showPanel;
+      if (this.showPanel) {
+        this.$emit('closeUploadModal');
+      }
+    },
+    focusMarker (marker) {
+      this.mapInstance.flyTo(marker.getLatLng(), 15);
+      marker.openPopup();
+    },
+    createMarker (file) {
+      const { latitude, longitude, title, description } = file.metadata;
+      const marker = L.marker([latitude, longitude]).addTo(this.mapInstance);
+      marker.bindPopup(`
+        <h2>Upload Info</h2><br>
+        <span>Title: ${title}</span><br>
+        <span>Description: ${description}</span><br>
+      `);
+      marker.data = file;
+      return marker;
+    },
+  },
+  created () {
+    this.$watch(() => this.store.state.files, (newValue, oldValue) => {
+      for (const file of newValue.values()) {
+        try {
+          if (this.markers.some((marker) => marker.data._id === file._id)) {
+            continue;
+          }
+          const marker = this.createMarker(file);
+          this.markers.push(marker);
+        } catch (error) {
+          console.log('Failed to create marker for ', file);
+          console.error(error);
+        }
+      }
+    });
   },
   mounted () {
     this.initMap();
@@ -157,35 +246,48 @@ export default {
       this.mapInstance.remove();
     }
   },
-  watch: {
-    files: {
-      handler (newFiles) {
-        newFiles.forEach((file) => {
-          const { latitude, longitude, title, description } = file.metadata;
-          const marker = L.marker([latitude, longitude]).addTo(this.mapInstance);
-          marker.bindPopup(`
-            <h2>Upload Info</h2><br>
-            <span>Title: ${title}</span><br>
-            <span>Description: ${description}</span><br>
-          `);
-          marker.fileId = file._id;
-          this.markers.push(marker);
-        });
-      },
-      deep: true,
-    },
-  },
 };
 </script>
 
 <style>
 @import "leaflet/dist/leaflet.css";
 #leaflet-map {
-  height: 86vh;
+  height: 100%;
   width: 100%;
-  overflow: hidden;
+  right: 5px;
 }
 .leaflet-control-layers-list {
   text-align: left;
+  flex: 1;
+}
+.leaflet-control-attribution, .leaflet-control-scale-line {
+  padding: 0px 15px 0px 0px;
+}
+.click-modal {
+  position: absolute;
+  top: 1em;
+  right: 2em;
+  min-width: 150px;
+  padding: 0.5em;
+  text-align: left;
+  z-index: 9999;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+@keyframes highlight {
+  0% { background-color: white; }
+  50% { background-color: yellow; }
+  100% { background-color: white; }
+}
+
+.highlight {
+  animation: highlight 0.5s;
 }
 </style>
