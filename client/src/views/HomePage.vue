@@ -1,7 +1,7 @@
 <template>
   <div class="home" style="height: 100%; width: 100%;
     display: flex; flex-direction: column;">
-    <v-toolbar fixed color="cyan" style="height: fit-content;" dark>
+    <v-toolbar fixed color="pink" style="height: fit-content;" >
       <v-toolbar-items>
         <v-btn @click="showSearchModal = true" flat>
           Search

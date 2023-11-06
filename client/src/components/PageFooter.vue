@@ -1,10 +1,8 @@
 <template>
-  <v-footer app>
-    <p>
-      <span @click="nav()">
-        &copy; 2023 Sound Map for a Changing Landscape
-      </span>
-    </p>
+  <v-footer color="blue" inset app absolute padless>
+    <span @click="nav()">
+      &copy; 2023 Sound Map for a Changing Landscape
+    </span>
   </v-footer>
 </template>
 
@@ -27,9 +25,7 @@ export default {
 <style scoped>
 .v-footer {
   width: 100%;
-  height: 2.5rem;
-  line-height: 2.5rem;
-  background-color: #00bcd4;
+  height: fit-content;
   text-align: center;
   justify-content: center;
 }

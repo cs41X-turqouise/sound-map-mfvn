@@ -1,11 +1,11 @@
 <template>
   <v-app fullscreen style="width:100vw">
-    <v-main>
+    <v-main no-gutters>
       <v-container fluid style="padding: 0; height: 100%">
         <router-view></router-view>
       </v-container>
+      <PageFooter></PageFooter>
     </v-main>
-    <PageFooter></PageFooter>
   </v-app>
 </template>
 
