@@ -21,57 +21,8 @@ export default async function (fastify, options) {
     async function (request, reply) {
       const _id = fastify.toObjectId(request.params.id);
       const sound = await Sound.findById(_id);
-      const { fileStream } = await sound.getFileStream(fastify);
 
-      const outStream = await fastify.gridfsSounds.openUploadStream('compressed.mp3');
-      outStream.on('finish', () => {
-        console.log(`SUCCESSFUL upload to MongoDB`);
-      });
-    
-      const command
-            = ffmpeg(fileStream)
-              .inputFormat('mp3')
-              .audioBitrate(96);
-        
-      command
-        .on('start', (cmdline) => fastify.log.info(cmdline))
-        .on('error', (err) => fastify.log.error(err))
-        .on('end', () => fastify.log.info('ffmpeg command succesful') );
-
-
-      if (fastify.ffmpegStatic.path.includes('linux')) {
-        fastify.log.info('Dumb linux workaround...');
-        const dir = dirname(dirname(fileURLToPath(import.meta.url)))
-          .replace('routes', 'uploads');
-        const tempId = crypto.randomBytes(16).toString('hex');
-        const tempFilename = tempId + '.mp3';
-        const tempFilePath = dir + '/' + tempFilename;
-        fastify.log.info(`uploading compressed file to ${tempFilePath}...`);
-        command
-          .output(tempFilePath)
-          .outputFormat('mp3');
-
-        command.on('end', () => {
-          const tempFileStream = fs.createReadStream(tempFilePath);
-          tempFileStream.pipe(outStream);
-        });
-        outStream.on('finish', () => {
-          fastify.log.info(`deleting temp file at: \n\t${tempFilePath}`);
-          fs.unlink(tempFilePath, (err) => {
-            if (err) return fastify.log.error(err);
-            fastify.log.info('file deleted successfully');
-          });
-        });
-
-        await command.run();
-      } else {
-        command
-          .output(outStream)
-          .outputFormat('mp3');
-        fastify.log.info(`outputting to ${outStream}`);
-            
-        await command.run();
-      }
+      uploadCompressedFile(sound, fastify, options);
     });
 
 
@@ -108,4 +59,68 @@ export default async function (fastify, options) {
 
       command.run();
     });
+}
+/**
+ * Generate compressed sound
+ * @param {*} sound the sound to be compressed
+ * @param {*} fastify fastify instance
+ * @param {*} options fastify options
+ */
+async function uploadCompressedFile (sound, fastify, options) {
+  const { fileStream } = await sound.getFileStream(fastify);
+  const outStream = await fastify.gridfsSounds.openUploadStream('compressed.mp3');
+  outStream.on('finish', async () => {
+    fastify.log.info(`SUCCESSFUL upload to MongoDB`);
+    fastify.log.info(
+      `Attaching compressed sound file ${outStream.id}\n`,
+      `\tto MongoDB Sound ${sound.id}`);
+    
+    sound.compressed.push(outStream.id);
+    await sound.save();
+  });
+  
+  const command
+      = fastify.ffmpeg(fileStream)
+        .inputFormat('mp3')
+        .audioBitrate(96);
+      
+  command
+    .on('start', (cmdline) => fastify.log.info(cmdline))
+    .on('error', (err) => fastify.log.error(err))
+    .on('end', () => {
+      fastify.log.info('ffmpeg command succesful');
+    } );
+
+
+  if (fastify.ffmpegStatic.path.includes('linux')) {
+    fastify.log.info('Dumb linux workaround...');
+    const dir = dirname(dirname(fileURLToPath(import.meta.url)))
+      .replace('routes', 'uploads');
+    const tempId = crypto.randomBytes(16).toString('hex');
+    const tempFilename = tempId + '.mp3';
+    const tempFilePath = dir + '/' + tempFilename;
+    fastify.log.info(`uploading compressed file to ${tempFilePath}...`);
+    command
+      .output(tempFilePath)
+      .outputFormat('mp3');
+
+    command.on('end', () => {
+      const tempFileStream = fs.createReadStream(tempFilePath);
+      tempFileStream.pipe(outStream);
+    });
+    outStream.on('finish', () => {
+      fastify.log.info(`deleting temp file at: \n\t${tempFilePath}`);
+      fs.unlink(tempFilePath, (err) => {
+        if (err) return fastify.log.error(err);
+        fastify.log.info('file deleted successfully');
+      });
+    });
+  } else {
+    command
+      .output(outStream)
+      .outputFormat('mp3');
+    fastify.log.info(`outputting to MongoDB upload stream...`);
+  }
+    
+  await command.run();
 }

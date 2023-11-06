@@ -22,6 +22,10 @@ const soundSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'images',
     }],
+    compressed: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'sounds.files',
+    }],
   },
   {
     methods: {
