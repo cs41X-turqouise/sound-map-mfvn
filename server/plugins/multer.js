@@ -1,21 +1,24 @@
 import fp from 'fastify-plugin';
 import multer from 'fastify-multer';
 import { GridFsStorage } from '@thebguy/multer-gridfs-storage';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
 export default fp(async function (fastify, options) {
   fastify.register(multer.contentParser);
+  const dir = dirname(fileURLToPath(import.meta.url))
+    .replace('plugins', 'uploads');
 
-  const dir = __dirname.replace('plugins', 'uploads');
-  const storage_local = multer.diskStorage({
+  const storageLocal = multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, dir)
+      cb(null, dir);
     },
     filename: function (req, file, cb) {
-      cb(null, file.fieldname + '-' + Date.now())
+      cb(null, file.fieldname + '-' + Date.now());
     }
-  })
+  });
   
-  fastify.decorate('upload_local', multer({ storage: storage_local }));
+  fastify.decorate('uploadLocal', multer({ storage: storageLocal }));
 
 
   const storage = new GridFsStorage({

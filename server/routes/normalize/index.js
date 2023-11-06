@@ -1,103 +1,107 @@
-
-'use strict'
-
-const {Readable} = require('stream')
-const {Buffer} = require('node:buffer')
-const path = require("path");
-const fs = require("fs");
-const fastifyAutoload = require('@fastify/autoload');
-
+import { Buffer } from 'node:buffer';
+import path from 'path';
 
 const { platform } = process;
 const locale = path[platform === `win32` ? `win32` : `posix`];
+import Sound from '../../models/Sound.js';
+import crypto from 'crypto';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
 /**
- * 
- * @param {import("fastify").FastifyInstance} fastify 
+ *
+ * @param {import("fastify").FastifyInstance} fastify
  * @param {Object} options plugin options, refer to https://www.fastify.io/docs/latest/Reference/Plugins/#plugin-options
  */
-module.exports = async function (fastify, options) {
+export default async function (fastify, options) {
+  /** @type {import("fluent-ffmpeg")} */
+  const ffmpeg = fastify.ffmpeg;
+
+  fastify.post('/:id',
+    async function (request, reply) {
+      const _id = fastify.toObjectId(request.params.id);
+      const sound = await Sound.findById(_id);
+      const { fileStream } = await sound.getFileStream(fastify);
+
+      const outStream = await fastify.gridfsSounds.openUploadStream('compressed.mp3');
+      outStream.on('finish', () => {
+        console.log(`SUCCESSFUL upload to MongoDB`);
+      });
     
-    
-    const Sound = require('../../models/Sound');
-    /** @type {import("fluent-ffmpeg")} */
-    const ffmpeg = fastify.ffmpeg
-
-    fastify.post('/:id',
-        async function (request, reply) {
-            
-            const _id = fastify.toObjectId(request.params.id);
-            const sound = await Sound.findById(_id);
-            const {fileStream, file} = await sound.getFileStream(fastify)
-            fastify.log.info(file)
-            fastify.log.info(fileStream)
-
-            
-            fastify.log.info(`file->  ${file}`)
-            fastify.log.info(`fileStream is ${!Buffer.isBuffer(fileStream.buffer) ? 'not' : ''} a Buffer`)
-            fastify.log.info(`fileStream->  ${fileStream.buffer}`)
-
-            
-            /**
-             * @todo have the main upload route call this route
-             * @todo auto detect file types for images/audio 
-             */
-            //return;
-            
-
-            const outStream = await fastify.gridfsSounds.openUploadStream('compressed.mp3')
-
-            var command = 
-            ffmpeg(fileStream)
-            .inputFormat('mp3')
-            .audioBitrate(96)
-            .output(outStream)
-            .outputFormat('mp3')
+      const command
+            = ffmpeg(fileStream)
+              .inputFormat('mp3')
+              .audioBitrate(96);
         
-            fastify.log.info(`outputting to ${outStream}`)
-            
-            command.on('start', (cmdline) => fastify.log.info(cmdline))
-                .on('error', (err) => fastify.log.error(err))
-                .on('end', () => fastify.log.info('ffmpeg command succesful') )
-
-            await command.run()
-            
-            
-        })
+      command
+        .on('start', (cmdline) => fastify.log.info(cmdline))
+        .on('error', (err) => fastify.log.error(err))
+        .on('end', () => fastify.log.info('ffmpeg command succesful') );
 
 
-    fastify.post('/local', { preHandler: fastify.upload_local.single('sound') },
-        async function (request, reply) {
-            const data =  request.file
-            //fastify.log.info(`request.file.buffer is ${!Buffer.isBuffer(data.buffer) ? 'not' : ''} a Buffer`)
-            // fastify.log.info(`request.file.buffer ->  ${data.buffer }`)
-            // const stream = new Readable();
-            // stream._read = () => {}
-            //  stream.push(data.buffer)
-            //  stream.push(null)
-            fastify.log.info(`request.file is ${data}`)
-            const originalFilePath = data.path
-            var dirName = path.dirname(originalFilePath) + locale.sep
-            var fileName = path.basename(originalFilePath, path.extname(originalFilePath))
-            var newFileName = fileName + '-compressed' + path.extname(originalFilePath)
+      if (fastify.ffmpegStatic.path.includes('linux')) {
+        fastify.log.info('Dumb linux workaround...');
+        const dir = dirname(dirname(fileURLToPath(import.meta.url)))
+          .replace('routes', 'uploads');
+        const tempId = crypto.randomBytes(16).toString('hex');
+        const tempFilename = tempId + '.mp3';
+        const tempFilePath = dir + '/' + tempFilename;
+        fastify.log.info(`uploading compressed file to ${tempFilePath}...`);
+        command
+          .output(tempFilePath)
+          .outputFormat('mp3');
+
+        command.on('end', () => {
+          const tempFileStream = fs.createReadStream(tempFilePath);
+          tempFileStream.pipe(outStream);
+        });
+        outStream.on('finish', () => {
+          //fastify.log.info(`deleting temp file at: \n\t${tempFilePath}`);
+        });
+
+        await command.run();
+      } else {
+        command
+          .output(outStream)
+          .outputFormat('mp3');
+        fastify.log.info(`outputting to ${outStream}`);
             
-            var newFilePath = dirName + newFileName
+        await command.run();
+      }
+    });
+
+
+  fastify.post('/local', { preHandler: fastify.uploadLocal.single('sound') },
+    async function (request, reply) {
+      const data = request.file;
+      // fastify.log.info(`request.file.buffer is ${!Buffer.isBuffer(data.buffer) ? 'not' : ''} a Buffer`)
+      // fastify.log.info(`request.file.buffer ->  ${data.buffer }`)
+      // const stream = new Readable();
+      // stream._read = () => {}
+      //  stream.push(data.buffer)
+      //  stream.push(null)
+      fastify.log.info(`request.file is ${data}`);
+      const originalFilePath = data.path;
+      const dirName = path.dirname(originalFilePath) + locale.sep;
+      const fileName = path.basename(originalFilePath, path.extname(originalFilePath));
+      const newFileName = fileName + '-compressed' + path.extname(originalFilePath);
             
-            fastify.log.info(`trying to compress ${originalFilePath}`)
-            var command = 
-            ffmpeg(data.path)
-            //.inputFormat('mp3')
-            .audioBitrate(96)
-            .output(newFilePath)
-            .outputFormat('mp3')
+      const newFilePath = dirName + newFileName;
+            
+      fastify.log.info(`trying to compress ${originalFilePath}`);
+      const command
+            = ffmpeg(data.path)
+            // .inputFormat('mp3')
+              .audioBitrate(96)
+              .output(newFilePath)
+              .outputFormat('mp3');
         
-            fastify.log.info(`outputting to ${newFilePath}`)
+      fastify.log.info(`outputting to ${newFilePath}`);
             
-            command.on('start', (cmdline) => fastify.log.info(cmdline))
-                .on('error', (err) => fastify.log.error(err))
-                .on('end', () => fastify.log.info('ffmpeg command succesful'))
+      command.on('start', (cmdline) => fastify.log.info(cmdline))
+        .on('error', (err) => fastify.log.error(err))
+        .on('end', () => fastify.log.info('ffmpeg command succesful'));
 
-            command.run()
-            
-            
-        })
+      command.run();
+    });
 }
