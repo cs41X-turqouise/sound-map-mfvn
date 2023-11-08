@@ -41,6 +41,7 @@
     <SearchResultsModal
       v-if="showSearchResultsModal"
       :show="showSearchResultsModal"
+      :filteredFiles="filteredFiles"
       @close="showSearchResultsModal = false">
   </SearchResultsModal>
     <UploadModal
@@ -143,6 +144,7 @@ export default {
     },
     // I need this to show filtered files from the search modal
     async search (filteredFiles) {
+      this.filteredFiles = filteredFiles;
       this.showSearchModal = false;
       this.showSearchResultsModal = true;
     }

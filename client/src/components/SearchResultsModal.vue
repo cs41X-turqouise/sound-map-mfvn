@@ -2,7 +2,7 @@
   <CenterModal :show="show" @close="close">
     <h2>Search Results</h2>
     <ul id="popup-list" class="popup-list">
-      <li v-for="(marker, index) in fetchedFiles" :key="marker.data._id">
+      <li v-for="(marker, index) in paginatedFiles" :key="marker.data._id">
         <div class="file-info">
           <div>
             <h2>
@@ -10,6 +10,7 @@
                 {{ marker.data.metadata.title }}
               </b>
             </h2>
+            <span>{{ filteredFiles }}</span>
             <span class="distance">
               Distance: {{ clicked.latlng.distanceTo(marker._latlng).toFixed(2) }} m
             </span>
@@ -70,7 +71,7 @@ export default {
     // I am trying to get filteredFiles from the searchModal to here
     filteredFiles: {
       type: Map,
-      default: null,
+      default: new Map(),
     }
   },
   data () {
@@ -136,6 +137,19 @@ export default {
         }
       }
       return [...tags];
+    },
+    // For some reason, filteredFiles is undefined in this component and I don't know why
+    /*
+    paginatedFiles () {
+      const startIndex = (this.currentPage - 1) * this.perPage;
+      const endIndex = startIndex + this.perPage;
+      console.log('FilteredFiles:', filteredFiles);
+      const filteredFilesArray = Array.from(this.filteredFiles.values());
+      return filteredFilesArray.slice(startIndex, endIndex);
+    }, */
+    /** @returns {number} */
+    maxPage () {
+      return Math.ceil(this.filteredFiles.size / this.perPage);
     },
   },
 };
