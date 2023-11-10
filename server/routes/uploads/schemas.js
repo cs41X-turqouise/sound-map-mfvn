@@ -30,5 +30,6 @@ export const uploadSchema = {
     filename: { type: 'string' },
     contentType: { type: 'string' },
     metadata: metadataSchema,
+    user: { type: 'string', description: 'UserID as a MongoDB ObjectId' },
   }
 };
