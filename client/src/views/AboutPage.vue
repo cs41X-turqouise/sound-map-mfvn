@@ -14,6 +14,20 @@
           </v-card>
         </v-col>
       </v-row>
+      <v-row>
+        <v-col cols="6">
+          <!-- Link to FAQs page -->
+          <router-link to="/faqs">
+            <v-btn class="link-btn" text>FAQs</v-btn>
+          </router-link>
+        </v-col>
+        <v-col cols="6">
+          <!-- Link to Contact Us page -->
+          <router-link to="/contact">
+            <v-btn class="link-btn" text>Contact Us</v-btn>
+          </router-link>
+        </v-col>
+      </v-row>
     </v-container>
   </div>
 </template>
@@ -45,7 +59,7 @@ export default {
         },
         {
           title: "Want To Know More?",
-          content: "Here you can access our FAQ page and how to contact us!"
+          content: "Below you can access our FAQ page and how to contact us if you want to know more directly from us"
         }
       ]
     };
