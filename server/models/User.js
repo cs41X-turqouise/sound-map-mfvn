@@ -41,6 +41,16 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'sounds',
   }],
+  role: {
+    type: String,
+    enum: ['user', 'moderator', 'admin'],
+    default: 'user',
+  },
+  banned: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 export default mongoose.model('users', userSchema);
+
