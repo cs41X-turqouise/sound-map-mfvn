@@ -37,6 +37,20 @@ export default async function (fastify, options) {
       req.end();
     });
   };
+
+  fastify.get('/refresh', async function (request, reply) {
+    await request.session.regenerate();
+    await reply.generateCsrf();
+    return { message: 'Refreshed' };
+  });
+
+  fastify.get('/test', {
+    onRequest: fastify.csrfProtection,
+  }, async function (request, reply) {
+    fastify.log.info(request.body);
+    return { message: 'Hello world' };
+  });
+
   fastify.get('/google/callback', {
     schema: {
       tags: ['auth'],
@@ -59,7 +73,9 @@ export default async function (fastify, options) {
         }
 
         request.session.user = user;
-        reply.redirect('http://localhost:5173/');
+        await reply.generateCsrf();
+
+        return reply.redirect('http://localhost:5173/');
       } catch (err) {
         fastify.log.error(err);
         throw new Error('Internal Server Error');
@@ -79,8 +95,10 @@ export default async function (fastify, options) {
     },
     async handler (request, reply) {
       try {
-        request.session.destroy();
-        reply.send('Logged out');
+        await request.session.destroy();
+        reply.clearCookie('sid');
+
+        return reply.send('Logged out');
       } catch (err) {
         fastify.log.error(err);
         throw new Error('Internal Server Error');
