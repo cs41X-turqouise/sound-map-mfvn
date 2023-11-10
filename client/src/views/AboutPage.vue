@@ -29,7 +29,7 @@ export default {
         },
         {
           title: "Who Are We?",
-          content: ""
+          content: "We are a group of seniors at Old Dominion University creating a project for the local TideWater Environment. We are: Prestin B., Patrick M., Thomas R., Kori F., Christian W., Brandon B., Benjamin J., and our lead developer, Evan G. Together we are known as Team Turquiose"
         },
         {
           title: "Our Vision",
