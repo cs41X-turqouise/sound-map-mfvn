@@ -1,17 +1,43 @@
 import fp from 'fastify-plugin';
-import Session from '@fastify/session';
+// import fastifyCookie from '@fastify/cookie';
+import fastifySession from '@fastify/session';
+import fastifyCsrfProtection from '@fastify/csrf-protection';
+import MongoStore from 'connect-mongo';
 
+/**
+ * A session plugin for fastify.
+ * Requires the @fastify/cookie plugin.
+ * Enables usage of csrf protection.
+ * @see https://github.com/fastify/session
+ * @see https://github.com/fastify/fastify-cookie
+ * @see https://github.com/fastify/csrf-protection
+ */
 export default fp(async function (fastify, options) {
-  fastify.register(Session, {
-    secret: 'FMMpiVXBnTJEJQIuQTtObXE5aLgfa3Pkdsfg897',
+  // await fastify.register(fastifyCookie);
+  await fastify.register(fastifySession, {
+    secret: fastify.config.SESSION_SECRET || 'FMMpiVXBnTJEJQIuQTtObXE5aLgfa3Pkdsfg897',
+    saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
+      secure: fastify.config.NODE_ENV === 'production',
+      httpOnly: true,
     },
-    cookieName: 'user-session'
+    cookieName: 'sid',
+    expires: 1800000, // 30 minutes
+    store: MongoStore.create({
+      mongoUrl: fastify.config.MONGODB_URL,
+      // stringify: false, // can't be used due to conflict `Unsupported BSON version, bson types must be from bson 6.x.x`
+    })
   });
 
-  fastify.addHook('preHandler', (request, reply, done) => {
-    request.session.user = request.session.user || null;
-    done();
+  await fastify.register(fastifyCsrfProtection, {
+    sessionPlugin: '@fastify/session',
+    // sessionKey: 'session',
+    // cookieOpts: { signed: true },
+    // getToken: (req) => {
+    //   return req.headers['csrf-token'];
+    // },
+    // getUserInfo (req) {
+    //   return req.session.user;
+    // },
   });
 });
