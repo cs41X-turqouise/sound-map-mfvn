@@ -16,16 +16,12 @@
       </v-row>
       <v-row>
         <v-col cols="6">
-          <!-- Link to FAQs page -->
-          <router-link to="/faqs">
-            <v-btn class="link-btn" text>FAQs</v-btn>
-          </router-link>
+          <!-- Click to pull up FAQs page -->
+          <v-btn class="link-btn" text @click="navigateTo('/faqs')">FAQs</v-btn>
         </v-col>
         <v-col cols="6">
-          <!-- Link to Contact Us page -->
-          <router-link to="/contact">
-            <v-btn class="link-btn" text>Contact Us</v-btn>
-          </router-link>
+          <!-- Click to pull up Contact Us Page -->
+          <v-btn class="link-btn" text @click="navigateTo('/contact')">Contact Us</v-btn>
         </v-col>
       </v-row>
     </v-container>
