@@ -60,6 +60,12 @@ export default {
       ]
     };
   },
+  methods: {
+    // Allows the user to pull up a page
+    navigateTo(route) {
+      this.$router.push(route);
+    },
+  },
   components: {
     Faqs,
     ContactUs,
