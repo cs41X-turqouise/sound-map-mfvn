@@ -55,7 +55,7 @@ export default {
         },
         {
           title: "Want To Know More?",
-          content: "Below you can access our FAQ page and how to contact us if you want to know more directly from us"
+          content: "Below you can see the tabs for our FAQs page and our contact us page if you want to know more directly from us"
         }
       ]
     };
