@@ -63,7 +63,18 @@ export default {
         }
       ]
     };
-  }
+  },
+  components: {
+    Faqs,
+    ContactUs,
+  },
+  router: new VueRouter({
+    routes: [
+      { path: '/', component: AboutUs },
+      { path: '/faqs', component: Faqs }, // Route for FAQs page
+      { path: '/contact', component: ContactUs }, // Route for Contact Us page
+    ],
+  }),
 };
 </script>
 
