@@ -37,11 +37,11 @@ export default {
         },
         {
           title: "Description of the Interactive Sound Map",
-          content: ""
+          content: "The SoundMap is exactly what it sounds like. An interactive map that allows anyone who registers and upload markers on the map. These files may contain audio (sounds)or visuals (images). Using this, we can preserve the history of the region"
         },
         {
           title: "Problem Background",
-          content: "In the Chesapeake Bay region, rising sea levels present a range of critical issues, including erosion, flooding,saltwater contamination, and habitat destruction. These interconnected challenges demand a coordinated and timely response to protect both the environment and local communities."
+          content: "In the Chesapeake Bay region, rising sea levels present a range of critical issues, including erosion, flooding, saltwater contamination, and habitat destruction, and more intense storms to name a few. The soundmap will allow us to see these changes over-time."
         }
       ]
     };
