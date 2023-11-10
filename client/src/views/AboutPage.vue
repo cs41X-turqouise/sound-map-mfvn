@@ -36,12 +36,16 @@ export default {
           content: "Team Turquoise's primary goal is to combat climate change by creating a sound map to raise awareness about rising sea levels and related challenges in the Chesapeake Bay region. We believe that giving everyone a voice by aloowing those to upload their own images and sounds so that we can influence policy makers, and ultimately, change."
         },
         {
-          title: "Description of the Interactive Sound Map",
+          title: "Description Of The Interactive Sound Map",
           content: "The SoundMap is exactly what it sounds like. An interactive map that allows anyone who registers and upload markers on the map. These files may contain audio (sounds)or visuals (images). Using this, we can preserve the history of the region"
         },
         {
           title: "Problem Background",
           content: "In the Chesapeake Bay region, rising sea levels present a range of critical issues, including erosion, flooding, saltwater contamination, and habitat destruction, and more intense storms to name a few. The soundmap will allow us to see these changes over-time."
+        },
+        {
+          title: "Want To Know More?",
+          content: "Here you can access our FAQ page and how to contact us!"
         }
       ]
     };
