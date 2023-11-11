@@ -30,45 +30,45 @@
 
 <script>
 export default {
-  data() {
+  data () {
     return {
       sections: [
         {
-          title: "Introduction",
-          content: "Wecome to the SoundMap for a changing landscape. Here we have a developed a program that will, in time, preserve some of the history of the TideWater region. By collecting uploads of sounds, videos, and files by our registered users, we can not only preserve some of the history of the region, but also document the long-term effects of global climate change"
+          title: 'Introduction',
+          content: 'Wecome to the SoundMap for a changing landscape. Here we have a developed a program that will, in time, preserve some of the history of the TideWater region. By collecting uploads of sounds, videos, and files by our registered users, we can not only preserve some of the history of the region, but also document the long-term effects of global climate change'
         },
         {
-          title: "Who Are We?",
-          content: "We are a group of seniors at Old Dominion University creating a SoundMap for the local TideWater Environment. We are: Prestin B., Patrick M., Thomas R., Kori F., Christian W., Brandon B., Benjamin J., and our lead developer, Evan G. Together we are known as Team Turquiose"
+          title: 'Who Are We?',
+          content: 'We are a group of seniors at Old Dominion University creating a SoundMap for the local TideWater Environment. We are: Prestin B., Patrick M., Thomas R., Kori F., Christian W., Brandon B., Benjamin J., and our lead developer, Evan G. Together we are known as Team Turquiose'
         },
         {
-          title: "Our Vision",
-          content: "Team Turquoise's primary goal is to combat climate change by creating a sound map to raise awareness about rising sea levels and related challenges in the Chesapeake Bay region. We believe that giving everyone a voice by aloowing those to upload their own images and sounds so that we can influence policy makers, and ultimately, change."
+          title: 'Our Vision',
+          content: 'Team Turquoises primary goal is to combat climate change by creating a sound map to raise awareness about rising sea levels and related challenges in the Chesapeake Bay region. We believe that giving everyone a voice by aloowing those to upload their own images and sounds so that we can influence policy makers, and ultimately, change.'
         },
         {
-          title: "Description Of The Interactive Sound Map",
-          content: "The SoundMap is exactly what it sounds like. An interactive map that allows anyone who registers and upload markers on the map. These files may contain audio (sounds)or visuals (images). Using this, we can preserve the history of the region"
+          title: 'Description Of The Interactive Sound Map',
+          content: 'The SoundMap is exactly what it sounds like. An interactive map that allows anyone who registers and upload markers on the map. These files may contain audio (sounds) or visuals (images). Using this, we can preserve the history of the region'
         },
         {
-          title: "Problem Background",
-          content: "In the Chesapeake Bay region, rising sea levels present a range of critical issues, including erosion, flooding, saltwater contamination, and habitat destruction, and more intense storms to name a few. The soundmap will allow us to see these changes over-time."
+          title: 'Problem Background',
+          content: 'In the Chesapeake Bay region, rising sea levels present a range of critical issues, including erosion, flooding, saltwater contamination, and habitat destruction, and more intense storms to name a few. The soundmap will allow us to see these changes over-time.'
         },
         {
-          title: "Want To Know More?",
-          content: "Below you can see the tabs for our FAQs page and our contact us page if you want to know more directly from us"
+          title: 'Want To Know More?',
+          content: 'Below you can see the tabs for our FAQs page and our contact us page if you want to know more directly from us'
         }
       ]
     };
   },
   methods: {
     // Allows the user to pull up a page
-    navigateTo(route) {
+    navigateTo (route) {
       this.$router.push(route);
     },
   },
   components: {
-    FAQs,
-    ContactUs,
+    // FAQs,
+    // ContactUs,
   },
   router: new VueRouter({
     routes: [
