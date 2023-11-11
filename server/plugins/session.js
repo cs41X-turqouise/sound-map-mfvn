@@ -1,19 +1,16 @@
 import fp from 'fastify-plugin';
-// import fastifyCookie from '@fastify/cookie';
 import fastifySession from '@fastify/session';
 import fastifyCsrfProtection from '@fastify/csrf-protection';
 import MongoStore from 'connect-mongo';
 
 /**
  * A session plugin for fastify.
- * Requires the @fastify/cookie plugin.
  * Enables usage of csrf protection.
  * @see https://github.com/fastify/session
  * @see https://github.com/fastify/fastify-cookie
  * @see https://github.com/fastify/csrf-protection
  */
 export default fp(async function (fastify, options) {
-  // await fastify.register(fastifyCookie);
   await fastify.register(fastifySession, {
     secret: fastify.config.SESSION_SECRET || 'FMMpiVXBnTJEJQIuQTtObXE5aLgfa3Pkdsfg897',
     saveUninitialized: false,
@@ -40,4 +37,8 @@ export default fp(async function (fastify, options) {
     //   return req.session.user;
     // },
   });
+}, {
+  name: 'session',
+  // oauth plugin must be registered before session plugin due to it internally registers the @fastify/cookie plugin
+  dependencies: ['oauth'],
 });
