@@ -38,16 +38,43 @@ export default async function (fastify, options) {
     });
   };
 
-  fastify.get('/refresh', async function (request, reply) {
+  fastify.get('/refresh', {
+    onRequest: function (request, reply, done) {
+      if (!request.session.user) {
+        reply.code(403).send({ error: 'Unauthorized' });
+      } else if (request.cookies['xsrf-t'] !== request.session._csrf) {
+        reply.code(403).send({ error: 'Invalid CSRF token' });
+      } else {
+        done();
+      }
+    },
+  }, async function (request, reply) {
     await request.session.regenerate();
     await reply.generateCsrf();
+
+    reply.setCookie('xsrf-t', request.session._csrf, {
+      secure: fastify.config.NODE_ENV === 'production',
+      httpOnly: true,
+      sameSite: true,
+      path: '/',
+    });
     return { message: 'Refreshed' };
   });
 
-  fastify.get('/test', {
-    onRequest: fastify.csrfProtection,
+  fastify.post('/test', {
+    // preHandler: fastify.csrfProtection,
+    onRequest: function (request, reply, done) {
+      if (!request.session.user) {
+        reply.code(403).send({ error: 'Unauthorized' });
+      } else if (request.cookies['xsrf-t'] !== request.session._csrf) {
+        reply.code(403).send({ error: 'Invalid CSRF token' });
+      } else {
+        done();
+      }
+    },
   }, async function (request, reply) {
-    fastify.log.info(request.body);
+    fastify.log.info(request.session._csrf);
+    fastify.log.info(request.headers);
     return { message: 'Hello world' };
   });
 
@@ -75,6 +102,13 @@ export default async function (fastify, options) {
         request.session.user = user;
         await reply.generateCsrf();
 
+        reply.setCookie('xsrf-t', request.session._csrf, {
+          secure: fastify.config.NODE_ENV === 'production',
+          httpOnly: true,
+          sameSite: true,
+          path: '/',
+        });
+
         return reply.redirect('http://localhost:5173/');
       } catch (err) {
         fastify.log.error(err);
@@ -97,6 +131,8 @@ export default async function (fastify, options) {
       try {
         await request.session.destroy();
         reply.clearCookie('sid');
+        reply.clearCookie('xsrf-t');
+        reply.clearCookie('oauth2-redirect-state');
 
         return reply.send('Logged out');
       } catch (err) {
