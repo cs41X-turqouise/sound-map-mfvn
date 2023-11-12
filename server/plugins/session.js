@@ -37,6 +37,13 @@ export default fp(async function (fastify, options) {
       const csrf = request.unsignCookie(request.cookies['xsrf-t']);
       return csrf.value;
     },
+    getUserInfo: (request) => {
+      /** @type {string} */
+      const fullname = request.session.get('user').fullname.replace(/\s/g, '');
+      /** @type {string} */
+      const _id = request.session.get('user')._id.toString();
+      return fullname + _id;
+    },
   });
 }, {
   name: 'session',

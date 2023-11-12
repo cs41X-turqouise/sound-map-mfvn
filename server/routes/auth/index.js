@@ -51,7 +51,7 @@ export default async function (fastify, options) {
     },
   }, async function (request, reply) {
     await request.session.regenerate();
-    await reply.generateCsrf();
+    await reply.generateCsrf({ userInfo: request.session.user.fullname + request.session.user._id });
 
     reply.setCookie('xsrf-t', request.session._csrf, {
       secure: fastify.config.NODE_ENV === 'production',
@@ -64,20 +64,18 @@ export default async function (fastify, options) {
   });
 
   fastify.post('/test', {
-    // preHandler: fastify.csrfProtection,
-    onRequest: function (request, reply, done) {
-      const csrf = request.unsignCookie(request.cookies['xsrf-t']);
-      if (!request.session.user) {
-        reply.code(403).send({ error: 'Unauthorized' });
-      } else if (!csrf.valid || csrf.value !== request.session._csrf) {
-        reply.code(403).send({ error: 'Invalid CSRF token' });
-      } else {
-        done();
-      }
-    },
+    onRequest: fastify.csrfProtection,
+    // onRequest: function (request, reply, done) {
+    //   const csrf = request.unsignCookie(request.cookies['xsrf-t']);
+    //   if (!request.session.user) {
+    //     reply.code(403).send({ error: 'Unauthorized' });
+    //   } else if (!csrf.valid || csrf.value !== request.session._csrf) {
+    //     reply.code(403).send({ error: 'Invalid CSRF token' });
+    //   } else {
+    //     done();
+    //   }
+    // },
   }, async function (request, reply) {
-    fastify.log.info(request.session._csrf);
-    fastify.log.info(request.headers);
     return { message: 'Hello world' };
   });
 
@@ -103,7 +101,7 @@ export default async function (fastify, options) {
         }
 
         request.session.user = user;
-        await reply.generateCsrf();
+        await reply.generateCsrf({ userInfo: user.fullname.replace(/\s/g, '') + user._id.toString() });
 
         reply.setCookie('xsrf-t', request.session._csrf, {
           secure: fastify.config.NODE_ENV === 'production',
