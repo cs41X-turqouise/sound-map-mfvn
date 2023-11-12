@@ -57,6 +57,7 @@ export default async function (fastify, options) {
       secure: fastify.config.NODE_ENV === 'production',
       httpOnly: true,
       sameSite: true,
+      signed: true,
       path: '/',
     });
     return { message: 'Refreshed' };
@@ -108,8 +109,8 @@ export default async function (fastify, options) {
           secure: fastify.config.NODE_ENV === 'production',
           httpOnly: true,
           sameSite: true,
-          path: '/',
           signed: true,
+          path: '/',
         });
 
         return reply.redirect('http://localhost:5173/');
