@@ -2,35 +2,33 @@
   <CenterModal :show="show" @close="close">
     <h2>Search Results</h2>
     <ul id="popup-list" class="popup-list">
-      <li v-for="(marker, index) in paginatedFiles" :key="marker.data._id">
+      <li v-for="(file, index) in paginatedFiles" :key="file._id">
         <div class="file-info">
           <div>
             <h2>
               <b class="name">
-                {{ marker.data.metadata.title }}
+                {{ file.title }}
               </b>
             </h2>
-            <span>{{ filteredFiles }}</span>
-            <span class="distance">
-              Distance: {{ clicked.latlng.distanceTo(marker._latlng).toFixed(2) }} m
-            </span>
+            <span>{{ this.filteredFiles }}</span>
+
             <br>
             <span class="date">
-              Date: {{ new Date(marker.data.uploadDate).toLocaleDateString() }}
+              Date: {{ new Date(file.uploadDate).toLocaleDateString() }}
             </span><br>
-            <span class="description" v-if="marker.data.metadata.description">
-              Description: <p>{{ marker.data.metadata.description }}</p>
+            <span class="description" v-if="file.description">
+              Description: <p>{{ file.description }}</p>
             </span><br>
-            <v-chip v-for="(tag, index) of marker.data.metadata.tags" :key="index">
+            <v-chip v-for="(tag, index) of file.tags" :key="index">
               {{ tag }}
             </v-chip>
           </div>
           <v-carousel
-            v-if="!!marker.data.images && marker.data.images.length"
+            v-if="!!file.images && file.images.length"
             show-arrows="hover"
             :style="{ width: '350px', height: '150px' }">
             <v-carousel-item
-              v-for="(image, index) in marker.data.images"
+              v-for="(image, index) in file.images"
               :key="index"
               :src="urls.get(image) || fetchImage(image)"
               cover>
@@ -39,14 +37,14 @@
         </div>
         <div class="sound-bar" :style="{ backgroundColor: colors[index] }">
           <audio
-            v-if="urls.has(marker.data._id)"
+            v-if="urls.has(file._id)"
             class="audio"
-            :ref="`audio-${marker.data._id}`"
-            @playing="playing(marker)"
+            :ref="`audio-${file._id}`"
+            @playing="playing(file)"
             controls>
-            <source :src="urls.get(marker.data._id)" :type="`${marker.data.contentType}`">
+            <source :src="urls.get(file._id)" :type="`${file.contentType}`">
           </audio>
-          <v-btn v-else @click="fetchAudio(marker.data)">Play</v-btn>
+          <v-btn v-else @click="fetchAudio(file)">Play</v-btn>
         </div>
       </li>
       <v-pagination class="pagination" v-model="currentPage" :length="maxPage"></v-pagination>
@@ -68,7 +66,6 @@ export default {
       type: Boolean,
       default: false,
     },
-    // I am trying to get filteredFiles from the searchModal to here
     filteredFiles: {
       type: Map,
       default: new Map(),
@@ -81,7 +78,7 @@ export default {
       /** @type {HTMLAudioElement} */
       currentAudio: null,
       currentPage: 1,
-      perPage: 4,
+      perPage: 2,
       colors: ['red', 'green', 'blue', 'purple'],
     };
   },
@@ -117,12 +114,12 @@ export default {
           return objectUrl;
         });
     },
-    playing (marker) {
+    playing (file) {
       if (this.currentAudio) {
         this.currentAudio.pause();
       }
-      this.currentAudio = this.$refs[`audio-${marker.data._id}`][0];
-      this.$emit('focusMarker', marker);
+      this.currentAudio = this.$refs[`audio-${file._id}`][0];
+      this.$emit('focusFile', file);
     },
   },
   computed: {
@@ -138,15 +135,13 @@ export default {
       }
       return [...tags];
     },
-    // For some reason, filteredFiles is undefined in this component and I don't know why
-    /*
     paginatedFiles () {
       const startIndex = (this.currentPage - 1) * this.perPage;
       const endIndex = startIndex + this.perPage;
-      console.log('FilteredFiles:', filteredFiles);
+      console.log('FilteredFiles:', this.filteredFiles);
       const filteredFilesArray = Array.from(this.filteredFiles.values());
       return filteredFilesArray.slice(startIndex, endIndex);
-    }, */
+    },
     /** @returns {number} */
     maxPage () {
       return Math.ceil(this.filteredFiles.size / this.perPage);
