@@ -32,7 +32,11 @@ export default fp(async function (fastify, options) {
 
   await fastify.register(fastifyCsrfProtection, {
     sessionPlugin: '@fastify/session',
-    cookieOpts: { signed: true },
+    // cookieOpts: { signed: true },
+    getToken: (request) => {
+      const csrf = request.unsignCookie(request.cookies['xsrf-t']);
+      return csrf.value;
+    },
   });
 }, {
   name: 'session',
