@@ -40,9 +40,10 @@ export default async function (fastify, options) {
 
   fastify.get('/refresh', {
     onRequest: function (request, reply, done) {
+      const csrf = request.unsignCookie(request.cookies['xsrf-t']);
       if (!request.session.user) {
         reply.code(403).send({ error: 'Unauthorized' });
-      } else if (request.cookies['xsrf-t'] !== request.session._csrf) {
+      } else if (!csrf.valid || csrf.value !== request.session._csrf) {
         reply.code(403).send({ error: 'Invalid CSRF token' });
       } else {
         done();
@@ -64,9 +65,10 @@ export default async function (fastify, options) {
   fastify.post('/test', {
     // preHandler: fastify.csrfProtection,
     onRequest: function (request, reply, done) {
+      const csrf = request.unsignCookie(request.cookies['xsrf-t']);
       if (!request.session.user) {
         reply.code(403).send({ error: 'Unauthorized' });
-      } else if (request.cookies['xsrf-t'] !== request.session._csrf) {
+      } else if (!csrf.valid || csrf.value !== request.session._csrf) {
         reply.code(403).send({ error: 'Invalid CSRF token' });
       } else {
         done();
@@ -107,6 +109,7 @@ export default async function (fastify, options) {
           httpOnly: true,
           sameSite: true,
           path: '/',
+          signed: true,
         });
 
         return reply.redirect('http://localhost:5173/');

@@ -1,4 +1,5 @@
 import fp from 'fastify-plugin';
+import fastifyCookie from '@fastify/cookie';
 import fastifySession from '@fastify/session';
 import fastifyCsrfProtection from '@fastify/csrf-protection';
 import MongoStore from 'connect-mongo';
@@ -11,6 +12,9 @@ import MongoStore from 'connect-mongo';
  * @see https://github.com/fastify/csrf-protection
  */
 export default fp(async function (fastify, options) {
+  await fastify.register(fastifyCookie, {
+    secret: fastify.config.COOKIE_SECRET || 'FMMpiVXBnTJEJQIuQTtObXE5aLgfa3Pkdsfg897',
+  });
   await fastify.register(fastifySession, {
     secret: fastify.config.SESSION_SECRET || 'FMMpiVXBnTJEJQIuQTtObXE5aLgfa3Pkdsfg897',
     saveUninitialized: false,
@@ -28,17 +32,9 @@ export default fp(async function (fastify, options) {
 
   await fastify.register(fastifyCsrfProtection, {
     sessionPlugin: '@fastify/session',
-    // sessionKey: 'session',
-    // cookieOpts: { signed: true },
-    // getToken: (req) => {
-    //   return req.headers['csrf-token'];
-    // },
-    // getUserInfo (req) {
-    //   return req.session.user;
-    // },
+    cookieOpts: { signed: true },
   });
 }, {
   name: 'session',
-  // oauth plugin must be registered before session plugin due to it internally registers the @fastify/cookie plugin
-  dependencies: ['oauth'],
+  // dependencies: [],
 });
