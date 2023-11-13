@@ -48,6 +48,9 @@ import L from 'leaflet';
 import SidePanel from './SidePanel.vue';
 import CloseButton from './CloseButton.vue';
 import MainPlayer from './MainPlayer.vue';
+import { ref } from 'vue';
+
+
 
 const CoordinatesControl = L.Control.extend({
   onAdd: function (map) {
@@ -72,7 +75,7 @@ export default {
     SidePanel,
     CloseButton,
     MainPlayer
-},
+  },
   data () {
     return {
       mapId: 'leaflet-map',
@@ -101,6 +104,16 @@ export default {
       showPanel: false,
       showModal: false,
       highlight: false,
+      currentMarkerId: ref(null),
+      audioUrls: new Map(),
+    };
+  },
+
+  provide () {
+    return {
+      currentMarkerId: this.currentMarkerId,
+      setCurrentMarkerId: this.setCurrentMarkerId,
+      audioUrls: this.audioUrls
     };
   },
   setup () {
@@ -224,6 +237,9 @@ export default {
       marker.data = file;
       return marker;
     },
+    setCurrentMarkerId (id) {
+      currentMarkerId.value = id;
+    }
   },
   created () {
     this.$watch(() => this.store.state.files, (newValue, oldValue) => {
