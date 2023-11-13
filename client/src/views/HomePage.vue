@@ -24,7 +24,9 @@
           @click="logout">
           Log Out
         </v-btn>
-        <v-btn id="admin-btn" v-if="$store.state.user && $store.state.user.isAdmin" @click="goToAdminPage">
+        <v-btn
+         id="admin-btn"
+         v-if="$store.state.user && $store.state.user.isAdmin" @click="goToAdminPage">
           Admin
         </v-btn>
         <!-- Figure out why v-avatar and v-img cause this to break -->
