@@ -38,6 +38,7 @@
       </div>
     </Transition>
   </div>
+  <MainPlayer></MainPlayer>
 </template>
 
 <script>
@@ -46,6 +47,7 @@ import { useStore } from 'vuex';
 import L from 'leaflet';
 import SidePanel from './SidePanel.vue';
 import CloseButton from './CloseButton.vue';
+import MainPlayer from './MainPlayer.vue';
 
 const CoordinatesControl = L.Control.extend({
   onAdd: function (map) {
@@ -69,7 +71,8 @@ export default {
   components: {
     SidePanel,
     CloseButton,
-  },
+    MainPlayer
+},
   data () {
     return {
       mapId: 'leaflet-map',
