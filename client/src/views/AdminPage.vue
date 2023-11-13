@@ -123,7 +123,7 @@ export default {
     deleteUpload (upload) {
       Api().delete(`uploads/${upload._id}`)
         .then(() => {
-          const index = this.selectedUser.uploads.findIndex(u => u._id === upload._id);
+          const index = this.selectedUser.uploads.findIndex((u) => u._id === upload._id);
           if (index !== -1) {
             this.selectedUser.uploads.splice(index, 1);
           }
