@@ -24,6 +24,9 @@
           @click="logout">
           Log Out
         </v-btn>
+        <v-btn id="admin-btn" v-if="$store.state.user && $store.state.user.isAdmin" @click="goToAdminPage">
+          Admin
+        </v-btn>
         <!-- Figure out why v-avatar and v-img cause this to break -->
         <!-- <img id="user-avatar"
           src="../assets/default-avatar.png"
@@ -116,6 +119,9 @@ export default {
         console.log(error);
       });
     },
+    goToAdminPage () {
+      window.location.href = 'http://localhost:3000/auth/google';
+    },
     /**
      * @async
      * @param {EventTarget} form
@@ -166,5 +172,9 @@ export default {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 9999;
+}
+
+#admin-btn {
+  margin-left: 10px; /* If this needs to be changed, let me know */
 }
 </style>
