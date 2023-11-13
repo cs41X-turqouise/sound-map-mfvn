@@ -178,4 +178,45 @@ export default async function (fastify, options) {
       fastify.log.error(err);
     }
   });
+  // Update user role
+  fastify.patch('/:id/role', { }, async function (request, reply) {
+    try {
+      const userId = request.params.id;
+      const newRole = request.body.role; // Expect 'moderator' or 'admin'
+  
+      // Validate input
+      if (!newRole || (newRole !== 'moderator' && newRole !== 'admin')) {
+        return reply.code(400).send({ error: 'Invalid role specified' });
+      }
+  
+      // Update user role
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { role: newRole },
+        { new: true, runValidators: true }
+      );
+  
+      // Handle case where user does not exist
+      if (!updatedUser) {
+        return reply.code(404).send({ error: 'User not found' });
+      }
+  
+      // Return the updated user
+      reply.code(200).send(updatedUser);
+    } catch (error) {
+      request.log.error(error); // Log the error for server-side inspection
+      // Reply with a server error
+      reply.code(500).send({ error: 'Internal Server Error' });
+    }
+  });
+  
+
+  // Ban a user
+  fastify.patch('/:id/ban', { }, async function (request, reply) {
+    const userId = request.params.id;
+    const adminId = request.session.user._id; // ID of the admin performing the ban
+  
+    const updatedUser = await User.findByIdAndUpdate(userId, { banned: true, bannedBy: adminId }, { new: true });
+    return updatedUser;
+  });
 }
