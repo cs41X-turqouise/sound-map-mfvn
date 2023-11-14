@@ -102,6 +102,9 @@
         <button @click="toggleBan(selectedUser, !selectedUser.banned)">
           {{ !selectedUser.banned ? 'Ban' : 'Unban' }} User
         </button>
+        <button @click="deleteUser(selectedUser)">
+          Delete User
+        </button>
       </div>
     </div>
   </div>
@@ -233,6 +236,19 @@ export default {
         }
       } catch (error) {
         console.error(error);
+      }
+    },
+    /** @param {UserSchema} user */
+    async deleteUser (user) {
+      try {
+        await Api().delete(`users/${user._id}`);
+        const index = this.users.findIndex((u) => u._id === user._id);
+        if (index !== -1) {
+          this.users.splice(index, 1);
+        }
+        this.selectedUser = { uploads: [] };
+      } catch (err) {
+        console.error(err);
       }
     },
   },
