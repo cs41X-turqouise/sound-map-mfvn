@@ -182,24 +182,22 @@ export default {
         });
     },
     /** @param {UploadSchema} upload */
-    playMedia (upload) {
+    async playMedia (upload) {
       this.activeMedia.type = upload.contentType;
-      if (this.urls.has(upload._id)) {
-        this.activeMedia.url = this.urls.get(upload._id);
-      } else {
-        Api().get(`uploads/${upload._id}`, { responseType: 'blob' })
-          .then((response) => {
-            console.log(response.data);
-            const objectUrl = URL.createObjectURL(response.data);
-            this.urls.set(upload._id, objectUrl);
-            this.activeMedia.url = objectUrl;
-          })
-          .catch((error) => {
-            console.error(error);
-          });
-      }
+      await Api().get(`uploads/${upload._id}`, { responseType: 'blob' })
+        .then((response) => {
+          const objectUrl = URL.createObjectURL(response.data);
+          this.urls.set(upload._id, objectUrl);
+          this.activeMedia.url = objectUrl;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+
+      const audioPlayer = this.$refs["audio-player"];
+      audioPlayer.play();
     },
-    /**
+   /**
      * @param {UserSchema} user
      * @param {'user' | 'moderator'} newRole
      */
