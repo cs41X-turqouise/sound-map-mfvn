@@ -230,20 +230,39 @@ export default async function (fastify, options) {
       fastify.log.error(err);
     }
   });
+
   // Update user role
-  fastify.patch('/:id/role', { }, async function (request, reply) {
-    try {
-      const userId = request.params.id;
-      const newRole = request.body.role; // Expect 'moderator' or 'admin'
-  
-      // Validate input
-      if (!newRole || (newRole !== 'moderator' && newRole !== 'admin')) {
-        return reply.code(400).send({ error: 'Invalid role specified' });
+  fastify.patch('/:id/role', {
+    schema: {
+      tags: ['users'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'MongoDB ObjectId' }
+        }
+      },
+      body: {
+        type: 'object',
+        properties: {
+          role: {
+            type: 'string',
+            enum: ['moderator', 'admin', 'user'],
+          },
+        }
+      },
+      response: {
+        200: userSchema
       }
+    }
+  }, async function (request, reply) {
+    try {
+      const _id = fastify.toObjectId(request.params.id);
+      if (!_id) return reply.code(400).send(new Error('Invalid ID'));
+      const newRole = request.body.role; // Expect 'moderator' or 'admin'
   
       // Update user role
       const updatedUser = await User.findByIdAndUpdate(
-        userId,
+        _id,
         { role: newRole },
         { new: true, runValidators: true }
       );
@@ -261,14 +280,17 @@ export default async function (fastify, options) {
       reply.code(500).send({ error: 'Internal Server Error' });
     }
   });
-  
 
   // Ban a user
   fastify.patch('/:id/ban', { }, async function (request, reply) {
-    const userId = request.params.id;
+    const userId = fastify.toObjectId(request.params.id);
+    if (!userId) return reply.code(400).send(new Error('Invalid ID'));
     const adminId = request.session.user._id; // ID of the admin performing the ban
   
-    const updatedUser = await User.findByIdAndUpdate(userId, { banned: true, bannedBy: adminId }, { new: true });
+    const updatedUser = await User.findByIdAndUpdate(userId, {
+      banned: true,
+      bannedBy: adminId
+    }, { new: true });
     return updatedUser;
   });
 }
