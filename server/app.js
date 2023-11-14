@@ -18,7 +18,7 @@ export default async function (fastify, opts) {
     data: process.env,
     schema: {
       type: 'object',
-      required: ['PORT', 'MONGODB_URL', 'JWT_SECRET', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'],
+      required: ['PORT', 'MONGODB_URL', 'JWT_SECRET', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'ADMINS'],
       properties: {
         PORT: {
           type: 'number',
@@ -40,6 +40,10 @@ export default async function (fastify, opts) {
           type: 'string',
           default: '155453cr37'
         },
+        ADMINS: {
+          type: 'string',
+          default: ''
+        }
       },
     },
     // will read .env in root folder
@@ -49,6 +53,9 @@ export default async function (fastify, opts) {
     }
   };
   await fastify.register(FastifyEnv, envOptions);
+  
+  // convert ADMINS to array
+  fastify.config.ADMINS = fastify.config.ADMINS.split(',').map((admin) => admin.trim());
 
   // ~~~ Do not touch the following lines ~~~ //
   // loads all plugins defined in plugins

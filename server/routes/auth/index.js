@@ -54,6 +54,7 @@ export default async function (fastify, options) {
             fullname: userInfo.name,
             email: userInfo.email,
             profilePhoto: userInfo.picture,
+            role: fastify.config.ADMINS.includes(userInfo.email) ? 'admin' : 'user',
           });
           await user.save();
         }
