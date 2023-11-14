@@ -218,9 +218,15 @@ export default async function (fastify, options) {
       const data = [];
       const uploads = await Sound.find({});
       for (const upload of uploads) {
-        const file = await upload.getFile(fastify);
-        file.images = upload.images || [];
-        data.push(file);
+        try {
+          const file = await upload.getFile(fastify);
+          file.images = upload.images || [];
+          data.push(file);
+        } catch (err) {
+          // should we remove the file if its not found in the bucket?
+          fastify.log.error(err);
+          fastify.log.error(upload);
+        }
       }
       return reply.send(data);
     },

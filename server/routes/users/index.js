@@ -225,6 +225,9 @@ export default async function (fastify, options) {
 
       // TODO - figure out way to destroy a user's session when they are deleted
       // if they are logged in, otherwise they will still be able to access the site
+      // await fastify.mongoose.connection.db
+      //   .collection('sesions')
+      //   .findOneAndDelete({ 'user._id': _id });
 
       if (deletedUser.$isDeleted()) {
         // gotta delete all their uploads too
