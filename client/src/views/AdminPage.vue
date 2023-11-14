@@ -4,14 +4,25 @@
     <table class="userTable">
       <thead>
         <tr>
+          <th>Profile Photo</th>
           <th>User ID</th>
           <th>Name</th>
           <th>Email</th>
           <th>Uploads</th>
+          <th>Role</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(user, index) in users" :key="index">
+          <td>
+            <img
+              v-if="user.profilePhoto"
+              :src="user.profilePhoto"
+              alt="User Avatar"
+              width="50"
+              height="50"
+            />
+          </td>
           <td>
             <button class="user-id-button" @click="showMenu(user)">
               {{ user._id }}
@@ -20,6 +31,7 @@
           <td>{{ user.username }}</td>
           <td>{{ user.email }}</td>
           <td>{{ user.uploads.length }}</td>
+          <td>{{ user.role }}</td>
         </tr>
       </tbody>
     </table>
@@ -34,7 +46,7 @@
         <button
           @click="setActiveTab('roles')"
           :class="{ active: activeTab === 'roles' }">
-          Manage User Roles
+          Manage User
         </button>
       </div>
       <div v-show="activeTab === 'uploads'" class="uploads-tab">
@@ -91,12 +103,16 @@
         <p v-else>No uploads found.</p>
       </div>
       <div v-show="activeTab === 'roles'" class="roles-tab">
-        <h2>Manage User Roles</h2>
+        <h2>Manage User</h2>
         <p>Current role: {{ selectedUser.role }}</p>
-        <button v-if="selectedUser.role !== 'moderator'" @click="changeUserRole(selectedUser, 'admin')">
+        <button
+          v-if="selectedUser.role !== 'moderator'"
+          @click="changeUserRole(selectedUser, 'admin')">
           Promote to Mod
         </button>
-        <button v-if="selectedUser.role !== 'user'" @click="changeUserRole(selectedUser, 'user')">
+        <button
+          v-if="selectedUser.role !== 'user'"
+          @click="changeUserRole(selectedUser, 'user')">
           Demote to User
         </button>
         <button @click="toggleBan(selectedUser, !selectedUser.banned)">
@@ -144,6 +160,8 @@ import Api from '../services/Api';
  * @property {string} gid - Google ID
  * @property {string[]} uploads - Array of MongoDB ObjectId
  * @property {string[]} bookmarks - Array of MongoDB ObjectId
+ * @property {string} role - 'user' | 'moderator' | 'admin'
+ * @property {boolean} banned
  */
 
 export default {
@@ -154,7 +172,7 @@ export default {
       users: [],
       /** @type { UploadSchema[] } */
       uploads: [],
-      /** @type {{ uploads: UploadSchema[] }} */
+      /** @type {{ user?: UserSchema, uploads: UploadSchema[] }} */
       selectedUser: { uploads: [] },
       activeTab: null,
       activeMedia: {
@@ -184,20 +202,25 @@ export default {
     /** @param {UploadSchema} upload */
     async playMedia (upload) {
       this.activeMedia.type = upload.contentType;
-      await Api().get(`uploads/${upload._id}`, { responseType: 'blob' })
-        .then((response) => {
-          const objectUrl = URL.createObjectURL(response.data);
-          this.urls.set(upload._id, objectUrl);
-          this.activeMedia.url = objectUrl;
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-
-      const audioPlayer = this.$refs["audio-player"];
-      audioPlayer.play();
+      if (this.urls.has(upload._id)) {
+        this.activeMedia.url = this.urls.get(upload._id);
+      } else {
+        await Api().get(`uploads/${upload._id}`, { responseType: 'blob' })
+          .then((response) => {
+            const objectUrl = URL.createObjectURL(response.data);
+            this.urls.set(upload._id, objectUrl);
+            this.activeMedia.url = objectUrl;
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }
+      this.$nextTick(() => {
+        const audioPlayer = this.$refs['audio-player'];
+        audioPlayer.play();
+      });
     },
-   /**
+    /**
      * @param {UserSchema} user
      * @param {'user' | 'moderator'} newRole
      */
