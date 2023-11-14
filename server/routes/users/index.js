@@ -1,5 +1,7 @@
 import User from '../../models/User.js';
+import Sound from '../../models/Sound.js';
 import { userSchema } from './schemas.js';
+import { uploadSchema } from '../uploads/schemas.js';
 
 /**
  * Routes for handling CRUD (Create, Read, Update, and Delete) operations on users
@@ -89,6 +91,56 @@ export default async function (fastify, options) {
     }
   }, async function (request, reply) {
     return null;
+  });
+
+  /**
+   * Get all files uploaded by a specific user
+   */
+  fastify.get('/:userId/uploads', {
+    preHandler: [],
+    schema: {
+      tags: ['uploads'],
+      params: {
+        type: 'object',
+        properties: {
+          userId: { type: 'string', description: 'MongoDB ObjectId of the user' },
+        },
+      },
+      response: {
+        200: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              ...uploadSchema.properties,
+              images: {
+                type: 'array',
+                items: { type: 'string', description: 'MongoDB ObjectId' }
+              },
+            },
+          },
+        },
+      },
+    },
+    async handler (request, reply) {
+      try {
+        const data = [];
+        const userId = request.params.userId;
+        const userObjectId = fastify.toObjectId(userId);
+        if (!userObjectId) return reply.code(400).send(new Error('Invalid ID'));
+
+        const uploads = await Sound.find({ user: userObjectId });
+        for (const upload of uploads) {
+          const file = await upload.getFile(fastify);
+          file.images = upload.images || [];
+          data.push(file);
+        }
+        return reply.send(data);
+      } catch (error) {
+        fastify.log.error(error);
+        reply.code(500).send('Internal Server Error');
+      }
+    },
   });
 
   /**

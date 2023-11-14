@@ -84,50 +84,6 @@ export default async function (fastify, options) {
       }
     }
   );
-
-
-  /**
- * Get all files uploaded by a specific user
- */
-  fastify.get('/user/:userId/uploads', {
-    preHandler: [],
-    schema: {
-      tags: ['uploads'],
-      params: {
-        type: 'object',
-        properties: {
-          userId: { type: 'string', description: 'MongoDB ObjectId of the user' },
-        },
-      },
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            sounds: {
-              type: 'array',
-              items: uploadSchema,
-            },
-            images: {
-              type: 'array',
-              items: uploadSchema,
-            },
-          },
-        },
-      },
-    },
-    async handler(request, reply) {
-      const userId = request.params.userId;
-      try {
-        const userObjectId = fastify.toObjectId(userId);
-        const userSounds = await Sound.find({ user: userObjectId }).exec();
-        const userImages = await Image.find({ user: userObjectId }).exec();
-        reply.send({ sounds: userSounds, images: userImages });
-      } catch (error) {
-        fastify.log.error(error);
-        reply.code(500).send('Internal Server Error');
-      }
-    },
-  });
   
   /**
    * Does not work
