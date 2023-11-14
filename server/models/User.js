@@ -5,10 +5,16 @@ import mongoose from 'mongoose';
  * Mongoose schema for user accounts.
  *
  * @typedef {Object} User
+ * @property {string} _id - The MongoDB ObjectId of the user.
  * @property {string} username - The username of the user.
+ * @property {string} fullname - The full name of the user.
  * @property {string} email - The email address of the user.
+ * @property {string} gid - The Google ID of the user.
+ * @property {string} profilePhoto - The URL of the user's profile photo.
  * @property {mongoose.Schema.Types.ObjectId[]} uploads - An array of IDs of the user's uploaded files.
  * @property {mongoose.Schema.Types.ObjectId[]} bookmarks - An array of IDs of the user's bookmarked files.
+ * @property {string} role - The role of the user. Can be 'user', 'moderator', or 'admin'.
+ * @property {boolean} banned - Whether or not the user is banned.
  */
 const userSchema = new mongoose.Schema({
   username: {
@@ -45,6 +51,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['user', 'moderator', 'admin'],
     default: 'user',
+    lowercase: true,
   },
   banned: {
     type: Boolean,
