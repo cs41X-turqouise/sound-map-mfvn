@@ -99,8 +99,9 @@
         <button v-if="selectedUser.role !== 'user'" @click="changeUserRole(selectedUser, 'user')">
           Demote to User
         </button>
-        <button v-if="!selectedUser.banned" @click="banUser(selectedUser)">Ban User</button>
-        <button v-else @click="unbanUser(selectedUser)">Unban User</button>
+        <button @click="toggleBan(selectedUser, !selectedUser.banned)">
+          {{ !selectedUser.banned ? 'Ban' : 'Unban' }} User
+        </button>
       </div>
     </div>
   </div>
@@ -161,6 +162,9 @@ export default {
     };
   },
   methods: {
+    setActiveTab (tab) {
+      this.activeTab = tab;
+    },
     /** @param {UserSchema} user */
     showMenu (user) {
       this.selectedUser = { ...user, uploads: [] };
@@ -192,35 +196,29 @@ export default {
           });
       }
     },
-    changeUserRole (user, newRole) {
-      Api().put(`users/${user._id}/role`, { role: newRole })
-        .then(() => {
-          user.role = newRole;
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+    /**
+     * @param {UserSchema} user
+     * @param {'user' | 'moderator'} newRole
+     */
+    async changeUserRole (user, newRole) {
+      try {
+        await Api().patch(`users/${user._id}/role`, { role: newRole });
+        user.role = newRole;
+      } catch (error) {
+        console.error(error);
+      }
     },
-    banUser (user) {
-      Api().put(`users/${user._id}/ban`)
-        .then(() => {
-          user.banned = true;
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    },
-    setActiveTab (tab) {
-      this.activeTab = tab;
-    },
-    unbanUser (user) {
-      Api().put(`users/${user._id}/unban`)
-        .then(() => {
-          user.banned = false;
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+    /**
+     * @param {UserSchema} user
+     * @param {boolean} [ban]
+     */
+    async toggleBan (user, ban = true) {
+      try {
+        await Api().patch(`users/${user._id}/ban`, { ban });
+        user.banned = ban;
+      } catch (err) {
+        console.error(err);
+      }
     },
     /**
      * @param {UploadSchema} upload

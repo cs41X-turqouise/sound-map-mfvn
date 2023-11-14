@@ -282,13 +282,33 @@ export default async function (fastify, options) {
   });
 
   // Ban a user
-  fastify.patch('/:id/ban', { }, async function (request, reply) {
+  fastify.patch('/:id/ban', {
+    schema: {
+      tags: ['users'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'MongoDB ObjectId' }
+        }
+      },
+      body: {
+        type: 'object',
+        required: ['ban'],
+        properties: {
+          ban: { type: 'boolean', description: 'true to ban, false to unban' },
+        }
+      },
+      response: {
+        200: userSchema
+      }
+    }
+  }, async function (request, reply) {
     const userId = fastify.toObjectId(request.params.id);
     if (!userId) return reply.code(400).send(new Error('Invalid ID'));
     const adminId = request.session.user._id; // ID of the admin performing the ban
   
     const updatedUser = await User.findByIdAndUpdate(userId, {
-      banned: true,
+      banned: request.body.ban,
       bannedBy: adminId
     }, { new: true });
     return updatedUser;
