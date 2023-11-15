@@ -39,16 +39,7 @@ export default async function (fastify, options) {
   };
 
   fastify.get('/refresh', {
-    onRequest: function (request, reply, done) {
-      const csrf = request.unsignCookie(request.cookies['xsrf-t']);
-      if (!request.session.user) {
-        reply.code(403).send({ error: 'Unauthorized' });
-      } else if (!csrf.valid || csrf.value !== request.session._csrf) {
-        reply.code(403).send({ error: 'Invalid CSRF token' });
-      } else {
-        done();
-      }
-    },
+    onRequest: fastify.csrfCheck,
   }, async function (request, reply) {
     await request.session.regenerate();
     await reply.generateCsrf({ userInfo: request.session.user.fullname + request.session.user._id });
@@ -64,17 +55,7 @@ export default async function (fastify, options) {
   });
 
   fastify.post('/test', {
-    onRequest: fastify.csrfProtection,
-    // onRequest: function (request, reply, done) {
-    //   const csrf = request.unsignCookie(request.cookies['xsrf-t']);
-    //   if (!request.session.user) {
-    //     reply.code(403).send({ error: 'Unauthorized' });
-    //   } else if (!csrf.valid || csrf.value !== request.session._csrf) {
-    //     reply.code(403).send({ error: 'Invalid CSRF token' });
-    //   } else {
-    //     done();
-    //   }
-    // },
+    onRequest: fastify.csrfCheck,
   }, async function (request, reply) {
     return { message: 'Hello world' };
   });

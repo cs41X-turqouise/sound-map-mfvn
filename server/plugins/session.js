@@ -45,6 +45,18 @@ export default fp(async function (fastify, options) {
       return fullname + _id;
     },
   });
+
+  /** Hacky workaround because `fastify.crsfProtection still isn't working */
+  fastify.decorate('csrfCheck', async function (request, reply, done) {
+    const csrf = request.unsignCookie(request.cookies['xsrf-t']);
+    if (!request.session.get('user')) {
+      reply.code(403).send({ error: 'Unauthorized' });
+    } else if (!csrf.valid || csrf.value !== request.session.get('_csrf')) {
+      reply.code(403).send({ error: 'Invalid CSRF token' });
+    } else {
+      done();
+    }
+  });
 }, {
   name: 'session',
   // dependencies: [],
