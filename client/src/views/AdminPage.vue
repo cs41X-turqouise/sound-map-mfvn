@@ -61,6 +61,7 @@
               <th>File Id</th>
               <th>File Name</th>
               <th>File Type</th>
+              <th>Image(s)</th>
               <th>Upload Date</th>
               <th>Title</th>
               <th>Description</th>
@@ -80,6 +81,21 @@
               <td><span>{{ upload._id }}</span></td>
               <td><span>{{ upload.filename }}</span></td>
               <td><span>{{ upload.contentType }}</span></td>
+              <td v-if="upload.images.length > 0">
+                <v-carousel
+                  :style="{ height: '100px' }"
+                  hide-delimiters
+                  cycle
+                  :interval="2500"
+                  :show-arrows="false">
+                  <v-carousel-item
+                    v-for="(image, imageIndex) in upload.images"
+                    :key="imageIndex"
+                    :src="urls.get(image) || fetchImage(image)">
+                  </v-carousel-item>
+                </v-carousel>
+              </td>
+              <td v-if="upload.images.length === 0"><span>None</span></td>
               <td><span>{{ new Date(upload.uploadDate).toLocaleDateString() }}</span></td>
               <td><span>{{ upload.metadata.title }}</span></td>
               <td><span>{{ upload.metadata.description }}</span></td>
@@ -219,6 +235,17 @@ export default {
         const audioPlayer = this.$refs['audio-player'];
         audioPlayer.play();
       });
+    },
+    async fetchImage (id) {
+      fetch(`http://localhost:3000/uploads/image/${id}`)
+        .then((response) => {
+          return response.blob();
+        })
+        .then((blob) => {
+          const objectUrl = URL.createObjectURL(blob);
+          this.urls.set(id, objectUrl);
+          return objectUrl;
+        });
     },
     /**
      * @param {UserSchema} user
