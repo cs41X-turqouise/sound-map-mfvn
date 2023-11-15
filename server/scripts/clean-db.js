@@ -27,6 +27,7 @@ async function cleanDatabase () {
     await Image.deleteMany({});
     await soundBucket.drop();
     await imageBucket.drop();
+    await mongoose.connection.db.dropCollection('sessions');
 
     console.log('Deleted all documents');
   } catch (err) {
