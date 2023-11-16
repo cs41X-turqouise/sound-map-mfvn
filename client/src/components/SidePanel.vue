@@ -4,36 +4,46 @@
     id="sidebar"
     class="sidebar"
     @click.stop>
-    <!-- <section id="heading">
-      <CloseButton @close="close" />
-    </section> -->
-    <ul id="popup-list" class="popup-list">
-      <li v-for="(marker, index) in paginatedMarkers" :key="marker.data._id">
+    <div id="popup-grid" class="popup-grid">
+      <v-card v-for="(marker, index) in paginatedMarkers" :key="marker.data._id" elevation-19>
         <div class="file-info">
           <div>
-            <!-- <span>ID: {{ marker.data._id }}</span><br> -->
-            <h2>
-              <b class="name">
-                {{ marker.data.metadata.title }}
-              </b>
+            <h2 class="title">
+              <v-btn size="x-small" flat icon="mdi-flag" @click="report(marker)">
+                <v-icon color="red">mdi-flag</v-icon>
+              </v-btn>
+              <b>{{ marker.data.metadata.title }}</b>
             </h2>
             <div v-if="marker.data.metadata.geodata">
-              <p>
-                {{ JSON.parse(marker.data.metadata.geodata).formatted }}
-              </p>
+              <p>{{ JSON.parse(marker.data.metadata.geodata).formatted }}</p>
             </div>
-            <span>
-              Lat: {{ Number(marker.data.metadata.latitude).toFixed(4) }}
-              Lng: {{ Number(marker.data.metadata.longitude).toFixed(4) }}
-              <br>
-            </span>
-            <span class="distance">
-              Distance: {{ clicked.latlng.distanceTo(marker._latlng).toFixed(2) }} m
-            </span>
-            <br>
-            <span class="date">
-              Date: {{ new Date(marker.data.uploadDate).toLocaleDateString() }}
-            </span><br>
+            <div class="info-row">
+              <div class="info-column">
+                <span>
+                  Lat: {{ Number(marker.data.metadata.latitude).toFixed(4) }}&deg;
+                  Lng: {{ Number(marker.data.metadata.longitude).toFixed(4) }}&deg;
+                  <br>
+                </span>
+                <span class="distance">
+                  Distance: {{ clicked.latlng.distanceTo(marker._latlng).toFixed(2) }} m
+                </span>
+                <br>
+                <span class="date">
+                  Date: {{ new Date(marker.data.uploadDate).toLocaleDateString() }}
+                </span><br>
+              </div>
+              <v-carousel
+                v-if="!!marker.data.images && marker.data.images.length"
+                show-arrows="hover"
+                :style="{ width: '200px', height: '100px' }">
+                <v-carousel-item
+                  v-for="(image, index) in marker.data.images"
+                  :key="index"
+                  :src="urls.get(image) || fetchImage(image)"
+                  cover>
+                </v-carousel-item>
+              </v-carousel>
+            </div>
             <span class="description" v-if="marker.data.metadata.description">
               Description: <p>{{ marker.data.metadata.description }}</p>
             </span><br>
@@ -41,17 +51,6 @@
               {{ tag }}
             </v-chip>
           </div>
-          <v-carousel
-            v-if="!!marker.data.images && marker.data.images.length"
-            show-arrows="hover"
-            :style="{ width: '350px', height: '150px' }">
-            <v-carousel-item
-              v-for="(image, index) in marker.data.images"
-              :key="index"
-              :src="urls.get(image) || fetchImage(image)"
-              cover>
-            </v-carousel-item>
-          </v-carousel>
         </div>
         <div class="sound-bar" :style="{ backgroundColor: colors[index] }">
           <audio
@@ -62,24 +61,20 @@
             controls>
             <source :src="urls.get(marker.data._id)" :type="`${marker.data.contentType}`">
           </audio>
-          <v-btn v-else @click="fetchAudio(marker.data)">Play</v-btn>
+          <v-btn v-else @click="fetchAudio(marker.data)" flat>Play</v-btn>
         </div>
-      </li>
-    </ul>
+      </v-card>
+    </div>
     <v-pagination class="pagination" v-model="currentPage" :length="maxPage" style="margin-top: auto;"></v-pagination>
   </div>
 </template>
 
 <script>
-// import { divIcon } from 'leaflet';
+import Api from '../services/Api';
 import { circle } from 'leaflet';
-// import CloseButton from './CloseButton.vue';
 
 export default {
   name: 'SidePanel',
-  components: {
-    // CloseButton,
-  },
   props: {
     markers: {
       type: Array,
@@ -108,28 +103,20 @@ export default {
       this.$emit('close');
     },
     async fetchAudio (marker) {
-      fetch(`http://localhost:3000/uploads/${marker._id}`)
-        .then((response) => {
-          return response.blob();
-        })
-        .then((blob) => {
-          const objectUrl = URL.createObjectURL(blob);
-          this.urls.set(marker._id, objectUrl);
-          this.$nextTick(() => {
-            this.$refs[`audio-${marker._id}`][0].play();
-          });
+      await Api().get(`uploads/${marker._id}`, { responseType: 'blob' }).then((response) => {
+        const objectUrl = URL.createObjectURL(response.data);
+        this.urls.set(marker._id, objectUrl);
+        this.$nextTick(() => {
+          this.$refs[`audio-${marker._id}`][0].play();
         });
+      });
     },
     async fetchImage (id) {
-      fetch(`http://localhost:3000/uploads/image/${id}`)
-        .then((response) => {
-          return response.blob();
-        })
-        .then((blob) => {
-          const objectUrl = URL.createObjectURL(blob);
-          this.urls.set(id, objectUrl);
-          return objectUrl;
-        });
+      await Api().get(`uploads/image/${id}`, { responseType: 'blob' }).then((response) => {
+        const objectUrl = URL.createObjectURL(response.data);
+        this.urls.set(id, objectUrl);
+        return objectUrl;
+      });
     },
     playing (marker) {
       const newAudio = this.$refs[`audio-${marker.data._id}`][0];
@@ -139,6 +126,16 @@ export default {
       }
       this.currentAudio = newAudio;
       this.$emit('focusMarker', marker);
+    },
+    report (marker) {
+      // TODO: report marker to moderators
+      // placeholder for now - need to do custom dialog box so users can fill out reason for report
+      if (confirm('Are you sure you want to report this content?')) {
+        // placeholder for now - need to implement report endpoint
+        // Api().post(`uploads/report/${marker.data._id}`).then((response) => {
+        //   console.log(response);
+        // });
+      }
     },
   },
   computed: {
@@ -213,7 +210,7 @@ export default {
   left: 0;
   z-index: 9999;
   background-color: #f9f9f9;
-  width: 400px;
+  width: 410px;
   min-width: 200px;
   height: 100%;
   overflow: hidden;
@@ -228,25 +225,17 @@ export default {
   height: 40px;
 }
 
-h3 {
-  /* TODO: Change this font */
-  position: absolute;
-  margin: 0;
-  padding: 10px 10px;
-  left: 0;
+.title {
+  width: 100%;
 }
 
-.popup-list {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
+.info-row {
+  display: flex;
+  flex-direction: row;
 }
 
-.popup-list li {
-  padding: 8px 16px;
-  text-decoration: none;
-  display: block;
-  border-bottom: 1px solid #ddd;
+.info-column {
+  flex: 1;
 }
 
 .file-info {
@@ -255,7 +244,13 @@ h3 {
   text-align: left;
 }
 
-.popup-list li:hover {
+.popup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1em;
+  padding: 1em;
+}
+.popup-grid .file-info:hover {
   background-color: aliceblue;
 }
 
