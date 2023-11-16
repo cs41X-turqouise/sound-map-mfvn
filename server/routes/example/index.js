@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Example route handlers.
  * @param {import("fastify").FastifyInstance} fastify
