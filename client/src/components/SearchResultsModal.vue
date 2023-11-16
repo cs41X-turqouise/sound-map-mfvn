@@ -10,8 +10,6 @@
                 {{ file.title }}
               </b>
             </h2>
-            <span>{{ this.filteredFiles }}</span>
-
             <br>
             <span class="date">
               Date: {{ new Date(file.uploadDate).toLocaleDateString() }}
@@ -78,7 +76,7 @@ export default {
       /** @type {HTMLAudioElement} */
       currentAudio: null,
       currentPage: 1,
-      perPage: 2,
+      perPage: 4,
       colors: ['red', 'green', 'blue', 'purple'],
     };
   },
