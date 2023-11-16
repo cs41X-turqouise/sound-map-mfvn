@@ -12,6 +12,15 @@
     </v-toolbar>
     <main style="height: 100vh; background-color: beige;">
       <v-container>
+        <CenterModal v-if="showModal" :show="showModal" @close="cancelEditUpload">
+          <h1>Editing Mode</h1>
+          <v-form>
+            <v-text-field v-model="editableFields.title" label="Title"></v-text-field>
+            <v-text-field v-model="editableFields.description" label="Description"></v-text-field>
+            <v-btn @click="saveChanges">Save</v-btn>
+            <v-btn @click="cancelEditUpload">Cancel</v-btn>
+          </v-form>
+        </CenterModal>
         <v-row>
           <v-col cols="6">
             <div id="profile">
@@ -38,61 +47,61 @@
           </v-col>
           <v-col cols="6">
             <div class="profile-content">
-              <h3>Uploaded Content</h3>
-              <ul id="uploaded-content-list">
-                <li v-for="(item, index) in uploadedContent" :key="index" style="border: 2px solid black;">
-                  <div class="list-item-container">
-                  <!-- Edit and Delete buttons For Uploaded Content -->
-                  <div v-if="editingItemIndex !== index" class="button-container">
-                    <v-btn x-small @click="editUpload(index)" class="edit-button">
-                      <v-icon x-small>mdi-pencil</v-icon>
-                    </v-btn>
-                    <v-btn x-small @click="deleteUpload(index)" class="delete-button">
-                      <v-icon x-small>mdi-delete</v-icon>
-                    </v-btn>
-                  </div>
-                  <!-- Edit Fields -->
-                  <div v-else>
-                    <v-text-field v-model="tempTitle" label="Title"></v-text-field>
-                    <v-text-field v-model="tempDescription" label="Description"></v-text-field>
-                    <v-btn @click="saveChanges">Save</v-btn>
-                    <v-btn @click="cancelEdit">Cancel</v-btn>
-                  </div>
-                </div>
-
-                <div class="file-info" v-if="editingItemIndex !== index">
-                      <!-- <span>ID: {{ item._id }}</span><br> -->
-                      <h4>
-                        <b class="name">
-                          {{ item.metadata.title }}
-                        </b>
-                      </h4>
-                      <span class="distance">
-                        Lat: {{ item.metadata.latitude }}<br>
-                        Lng: {{ item.metadata.longitude }}<br>
-                      </span>
-                      <span class="date">
-                        Date: {{ new Date(item.uploadDate).toLocaleDateString() }}
-                      </span><br>
-                      <span class="description" v-if="item.metadata.description">
-                        Description: <p>{{ item.metadata.description }}</p>
-                      </span><br>
-                      <v-chip v-for="(tag, index) of item.metadata.tags" :key="index">
-                        {{ tag }}
-                      </v-chip>
-                    </div>
-                </li>
-              </ul>
+              <h2>Uploaded Content</h2>
+              <audio class="audio" controls :key="activeMedia.url" ref="audio-player">
+                <source :src="activeMedia.url" :type="activeMedia.type">
+              </audio>
+              <v-row v-for="(item, index) in uploadedContent" :key="index">
+                <v-col style="width: 400px;">
+                  <v-card>
+                    <v-card-item align="left" justify="center">
+                      <v-card-title>
+                        {{ item.metadata.title }}
+                      </v-card-title>
+                      <v-card-subtitle>
+                        <span>
+                          Lat: {{ Number(item.metadata.latitude).toFixed(4) }}
+                          Lng: {{ Number(item.metadata.longitude).toFixed(4) }}
+                          <br>
+                        </span>
+                        <span class="date">
+                          Date: {{ new Date(item.uploadDate).toLocaleDateString() }}
+                        </span><br>
+                        <span class="description" v-if="item.metadata.description">
+                          Description: <p>{{ item.metadata.description }}</p>
+                        </span><br>
+                        <v-chip v-for="(tag, index) of item.metadata.tags" :key="index">
+                          {{ tag }}
+                        </v-chip>
+                      </v-card-subtitle>
+                      <v-carousel
+                        v-if="!!item.images && item.images.length"
+                        show-arrows="hover"
+                        :style="{ width: '350px', height: '150px' }">
+                        <v-carousel-item
+                          v-for="(image, index) in item.images"
+                          :key="index"
+                          :src="urls.get(image) || fetchImage(image)"
+                          cover>
+                        </v-carousel-item>
+                      </v-carousel>
+                    </v-card-item>
+                    <v-card-actions>
+                      <v-btn x-small @click="playMedia(item)">
+                        <v-icon x-small>mdi-play</v-icon> Play
+                      </v-btn>
+                      <v-btn x-small @click="editUpload(item)">
+                        <v-icon x-small>mdi-pencil</v-icon> Edit
+                      </v-btn>
+                      <v-btn x-small @click="deleteUpload(item)">
+                        <v-icon x-small>mdi-delete</v-icon> Delete
+                      </v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-col>
+              </v-row>
             </div>
           </v-col>
-          <!-- <v-col cols="5">
-            <div class="profile-content">
-              <h3>Bookmarked Content</h3>
-              <ul id="bookmarked-content-list">
-                <li v-for="(item, index) in bookmarkedContent" :key="index">{{ item }}</li>
-              </ul>
-            </div>
-          </v-col> -->
         </v-row>
       </v-container>
     </main>
@@ -102,9 +111,13 @@
 <script>
 import { useStore } from 'vuex';
 import Api from '../services/Api';
+import CenterModal from '../components/CenterModal.vue';
 
 export default {
   name: 'ProfilePage',
+  components: {
+    CenterModal,
+  },
   setup () {
     const store = useStore();
     console.log(store.state.user);
@@ -112,15 +125,19 @@ export default {
   },
   data () {
     return {
+      urls: new Map(),
+      activeMedia: {
+        type: null,
+        url: null,
+      },
       editMode: false,
       username: '',
-      bookmarkedContent: ['Item 1', 'Item 2', 'Item 3'],
-      soundFile: '',
-      audioSrc: '',
-      audioType: '',
-      editingItemIndex: null, // Index of the item being edited
-      tempTitle: '', // Temporary storage for title
-      tempDescription: '' // Temporary storage for description
+      showModal: false,
+      selectedItem: null,
+      editableFields: {
+        title: '',
+        description: '',
+      },
     };
   },
   computed: {
@@ -141,48 +158,45 @@ export default {
      */
     /** @return {Array<FileData>} */
     uploadedContent () {
+      /** @type {Array<FileData>} */
       const files = this.store.state.user.uploads.map((file) => {
         return this.store.state.files.get(file);
+      }).filter((file) => {
+        return !!file;
       });
       return files;
     },
   },
   methods: {
-    getSound () {
-      fetch(`http://localhost:3000/uploads/${this.soundFile}`)
-        .then((response) => {
-          this.audioType = response.headers.get('Content-Type');
-          return response.blob();
-        })
-        .then((blob) => {
-          console.log(blob);
-          const objectUrl = URL.createObjectURL(blob);
-          this.audioSrc = objectUrl;
-          this.$refs.audio.innerHTML = `<source src="${objectUrl}" type="${this.audioType}">`;
-        });
+    async fetchImage (id) {
+      await Api().get(`uploads/image/${id}`, { responseType: 'blob' }).then((response) => {
+        const objectUrl = URL.createObjectURL(response.data);
+        this.urls.set(id, objectUrl);
+        return objectUrl;
+      }).catch((error) => {
+        console.log(error);
+      });
     },
-    getSounds () {
-      fetch(`http://localhost:3000/uploads/`)
-        .then((response) => {
-          return response.json();
-        })
-        .then((data) => {
-          console.log(data);
-          for (const item of data) {
-            const { buffer, file } = item;
-            const blob = new Blob([buffer.data], { type: file.contentType });
-            console.log(blob);
-            const objectUrl = URL.createObjectURL(blob);
-            const audio = document.createElement('audio');
-            audio.controls = true;
-            audio.preload = 'auto';
-            audio.innerHTML = `<source src="${objectUrl}" type="${file.contentType}">`;
-            audio.addEventListener('ended', () => {
-              URL.revokeObjectURL(objectUrl);
-            });
-            this.$refs.sounddiv.appendChild(audio);
-          }
-        });
+    /** @param {UploadSchema} upload */
+    async playMedia (upload) {
+      this.activeMedia.type = upload.contentType;
+      if (this.urls.has(upload._id)) {
+        this.activeMedia.url = this.urls.get(upload._id);
+      } else {
+        await Api().get(`uploads/${upload._id}`, { responseType: 'blob' })
+          .then((response) => {
+            const objectUrl = URL.createObjectURL(response.data);
+            this.urls.set(upload._id, objectUrl);
+            this.activeMedia.url = objectUrl;
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }
+      this.$nextTick(() => {
+        const audioPlayer = this.$refs['audio-player'];
+        audioPlayer.play();
+      });
     },
     cancelEdit () {
       this.username = this.store.state.user.username;
@@ -196,28 +210,39 @@ export default {
         console.log(error);
       });
     },
-    editUpload (index) {
-      this.editingItemIndex = index;
-      this.tempTitle = this.uploadedContent[index].metadata.title;
-      this.tempDescription = this.uploadedContent[index].metadata.description;
+    /** @param {UploadSchema} upload */
+    editUpload (upload) {
+      this.selectedItem = upload;
+      this.editableFields.title = upload.metadata.title;
+      this.editableFields.description = upload.metadata.description;
+      this.showModal = true;
     },
-
-    saveChanges () {
-      if (this.editingItemIndex !== null) {
-        this.uploadedContent[this.editingItemIndex].metadata.title = this.tempTitle;
-        this.uploadedContent[this.editingItemIndex].metadata.description = this.tempDescription;
-        this.editingItemIndex = null;
-      }
-    },
-
     cancelEditUpload () {
-      this.editingItemIndex = null;
+      this.selectedItem = null;
+      this.editableFields.title = '';
+      this.editableFields.description = '';
+      this.showModal = false;
     },
-
-    deleteUpload (index) {
+    saveChanges () {
+      this.showModal = false;
+      Api().patch(`uploads/metadata/${this.selectedItem._id}`, {
+        title: this.editableFields.title,
+        description: this.editableFields.description,
+      }).then((response) => {
+        this.store.dispatch('updateFile', response.data);
+      }).catch((error) => {
+        console.log(error);
+      });
+    },
+    /** @param {UploadSchema} upload */
+    async deleteUpload (upload) {
       if (confirm('Are you sure you want to delete this upload?')) {
-        this.uploadedContent.splice(index, 1);
-        // Add an API call ?
+        try {
+          await Api().delete(`uploads/sound/${upload._id}`);
+          this.store.dispatch('deleteFile', upload._id);
+        } catch {
+          console.log(error);
+        }
       }
     }
   },
