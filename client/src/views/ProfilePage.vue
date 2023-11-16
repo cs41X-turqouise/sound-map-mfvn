@@ -288,13 +288,13 @@ header a:hover {
 
 .edit-button {
   left: 0;
-  color: rgba(2, 2, 99, 0.678);
+  color: blue;
 }
 
 .delete-button {
   left: 65px;
   /* Adjust as necessary */
-  color: rgb(139, 9, 9);
+  color: red;
 }
 
 /* #uploaded-content-list,
