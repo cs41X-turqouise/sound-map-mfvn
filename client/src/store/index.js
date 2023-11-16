@@ -53,7 +53,7 @@ export default createStore({
       newFiles.set(file._id, file);
       state.files = newFiles;
     },
-    removeFile (state, file) {
+    deleteFile (state, file) {
       const newFiles = new Map(state.files.entries());
       newFiles.delete(file._id);
       state.files = newFiles;
@@ -78,8 +78,8 @@ export default createStore({
     updateFile ({ commit }, file) {
       commit('updateFile', file);
     },
-    removeFile ({ commit }, file) {
-      commit('removeFile', file);
+    deleteFile ({ commit }, file) {
+      commit('deleteFile', file);
     },
   }
 });
