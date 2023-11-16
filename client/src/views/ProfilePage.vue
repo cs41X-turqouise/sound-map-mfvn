@@ -32,9 +32,6 @@
                   <v-btn v-if="editMode" color="red" @click="cancelEdit">
                     Cancel
                   </v-btn>
-                  <v-btn color="red" @click="deleteProfile">
-                   Delete Upload
-                  </v-btn>
                 </div>
               </div>
             </div>
@@ -44,9 +41,27 @@
               <h3>Uploaded Content</h3>
               <ul id="uploaded-content-list">
                 <li v-for="(item, index) in uploadedContent" :key="index" style="border: 2px solid black;">
-                  <div class="file-info">
-                    <div>
-                      <span>ID: {{ item._id }}</span><br>
+                  <div class="list-item-container">
+                  <!-- Edit and Delete buttons For Uploaded Content -->
+                  <div v-if="editingItemIndex !== index" class="button-container">
+                    <v-btn x-small @click="editUpload(index)" class="edit-button">
+                      <v-icon x-small>mdi-pencil</v-icon>
+                    </v-btn>
+                    <v-btn x-small @click="deleteUpload(index)" class="delete-button">
+                      <v-icon x-small>mdi-delete</v-icon>
+                    </v-btn>
+                  </div>
+                  <!-- Edit Fields -->
+                  <div v-else>
+                    <v-text-field v-model="tempTitle" label="Title"></v-text-field>
+                    <v-text-field v-model="tempDescription" label="Description"></v-text-field>
+                    <v-btn @click="saveChanges">Save</v-btn>
+                    <v-btn @click="cancelEdit">Cancel</v-btn>
+                  </div>
+                </div>
+
+                <div class="file-info" v-if="editingItemIndex !== index">
+                      <!-- <span>ID: {{ item._id }}</span><br> -->
                       <h4>
                         <b class="name">
                           {{ item.metadata.title }}
@@ -66,23 +81,6 @@
                         {{ tag }}
                       </v-chip>
                     </div>
-                     <!-- Edit Mode -->
-                    <div v-if="editMode">
-                    <v-text-field v-model="item.metadata.title" label="Title"></v-text-field>
-                    <v-text-field v-model="item.metadata.description" label="Description"></v-text-field>
-                     </div>
-                    <!-- <v-carousel
-                      v-if="!!item.images && item.images.length"
-                      show-arrows="hover"
-                      :style="{ width: '350px', height: '150px' }">
-                      <v-carousel-item
-                        v-for="(image, index) in item.images"
-                        :key="index"
-                        :src="urls.get(image) || fetchImage(image)"
-                        cover>
-                      </v-carousel-item>
-                    </v-carousel> -->
-                  </div>
                 </li>
               </ul>
             </div>
@@ -120,6 +118,9 @@ export default {
       soundFile: '',
       audioSrc: '',
       audioType: '',
+      editingItemIndex: null, // Index of the item being edited
+      tempTitle: '', // Temporary storage for title
+      tempDescription: '' // Temporary storage for description
     };
   },
   computed: {
@@ -195,6 +196,30 @@ export default {
         console.log(error);
       });
     },
+    editUpload (index) {
+      this.editingItemIndex = index;
+      this.tempTitle = this.uploadedContent[index].metadata.title;
+      this.tempDescription = this.uploadedContent[index].metadata.description;
+    },
+
+    saveChanges () {
+      if (this.editingItemIndex !== null) {
+        this.uploadedContent[this.editingItemIndex].metadata.title = this.tempTitle;
+        this.uploadedContent[this.editingItemIndex].metadata.description = this.tempDescription;
+        this.editingItemIndex = null;
+      }
+    },
+
+    cancelEditUpload () {
+      this.editingItemIndex = null;
+    },
+
+    deleteUpload (index) {
+      if (confirm('Are you sure you want to delete this upload?')) {
+        this.uploadedContent.splice(index, 1);
+        // Add an API call ?
+      }
+    }
   },
   created () {
     this.username = this.store.state.user.username;
@@ -242,15 +267,37 @@ header a:hover {
   border-radius: 50%;
   margin-bottom: 10px;
 }*/
-
 .profile-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: left;
 }
-/*
-#uploaded-content-list,
+
+.list-item-container {
+  position: relative;
+}
+
+.edit-button,
+.delete-button {
+  position: absolute;
+  top: 0;
+  z-index: 0;
+  /* Ensure the buttons are on top */
+}
+
+.edit-button {
+  left: 0;
+  color: rgba(2, 2, 99, 0.678);
+}
+
+.delete-button {
+  left: 65px;
+  /* Adjust as necessary */
+  color: rgb(139, 9, 9);
+}
+
+/* #uploaded-content-list,
 #bookmarked-content-list {
   list-style: none;
   padding: 0;
@@ -259,6 +306,6 @@ header a:hover {
 
 #uploaded-content-list li,
 #bookmarked-content-list li {
-  margin-bottom: 10px;
-} */
+  margin-bottom: 10px; */
+/* } */
 </style>
