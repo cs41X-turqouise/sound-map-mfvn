@@ -94,13 +94,17 @@ export default {
       /** @type {HTMLAudioElement} */
       currentAudio: null,
       currentPage: 1,
-      perPage: 4,
+      perPage: Math.max(1, Math.floor(window.innerHeight / 400)),
       colors: ['red', 'green', 'blue', 'purple'],
     };
   },
   methods: {
     close () {
       this.$emit('close');
+    },
+    updatePerPage () {
+      this.perPage = Math.max(1, Math.floor(window.innerHeight / 400));
+      this.currentPage = 1;
     },
     async fetchAudio (marker) {
       await Api().get(`uploads/${marker._id}`, { responseType: 'blob' }).then((response) => {
@@ -177,6 +181,7 @@ export default {
     },
   },
   mounted () {
+    window.addEventListener('resize', this.updatePerPage);
     this.paginatedMarkers.forEach((marker, index) => {
       const color = this.colors[index];
       const circleMarker = circle(marker._latlng, {
@@ -189,6 +194,7 @@ export default {
     });
   },
   beforeUnmount () {
+    window.removeEventListener('resize', this.updatePerPage);
     this.paginatedMarkers.forEach((marker) => {
       if (this.circles.has(marker)) {
         this.circles.get(marker).remove();
