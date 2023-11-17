@@ -1,10 +1,26 @@
 <template>
   <v-footer app>
-    <p>
-      <span @click="nav()">
-        &copy; 2023 Sound Map for a Changing Landscape
-      </span>
-    </p>
+    <v-spacer></v-spacer>
+    <div>
+      <p>
+        <span id="copyright" @click="nav()">
+          &copy; 2023 Sound Map for a Changing Landscape
+        </span>
+      </p>
+    </div>
+    <v-spacer></v-spacer>
+    <div>
+      <v-btn icon flat density="comfortable" @click="openGithub">
+        <v-tooltip
+          activator="parent"
+          location="start"
+          style="z-index: 9999;"
+        >
+        View on Github
+        </v-tooltip>
+        <v-icon>mdi-github</v-icon>
+      </v-btn>
+    </div>
   </v-footer>
 </template>
 
@@ -19,11 +35,13 @@ export default {
         name: page,
       });
     },
+    openGithub: function () {
+      window.open('https://github.com/cs41X-turqouise/sound-map-mfvn/tree/master', '_blank');
+    },
   }
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .v-footer {
   width: 100%;
@@ -32,6 +50,11 @@ export default {
   background-color: #00bcd4;
   text-align: center;
   justify-content: center;
+}
+@media (max-width: 420px) {
+  .v-footer p {
+    font-size: 12px;
+  }
 }
 span {
   cursor: pointer;
