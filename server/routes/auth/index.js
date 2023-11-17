@@ -37,6 +37,29 @@ export default async function (fastify, options) {
       req.end();
     });
   };
+
+  fastify.get('/refresh', {
+    onRequest: fastify.csrfCheck,
+  }, async function (request, reply) {
+    await request.session.regenerate();
+    await reply.generateCsrf({ userInfo: request.session.user.fullname + request.session.user._id });
+
+    reply.setCookie('xsrf-t', request.session._csrf, {
+      secure: fastify.config.NODE_ENV === 'production',
+      httpOnly: true,
+      sameSite: true,
+      signed: true,
+      path: '/',
+    });
+    return { message: 'Refreshed' };
+  });
+
+  fastify.post('/test', {
+    onRequest: fastify.csrfCheck,
+  }, async function (request, reply) {
+    return reply.send('Hello world');
+  });
+
   fastify.get('/google/callback', {
     schema: {
       tags: ['auth'],
@@ -59,7 +82,17 @@ export default async function (fastify, options) {
         }
 
         request.session.user = user;
-        reply.redirect('http://localhost:5173/');
+        await reply.generateCsrf({ userInfo: user.fullname.replace(/\s/g, '') + user._id.toString() });
+
+        reply.setCookie('xsrf-t', request.session._csrf, {
+          secure: fastify.config.NODE_ENV === 'production',
+          httpOnly: true,
+          sameSite: true,
+          signed: true,
+          path: '/',
+        });
+
+        return reply.redirect('http://localhost:5173/');
       } catch (err) {
         fastify.log.error(err);
         throw new Error('Internal Server Error');
@@ -79,8 +112,12 @@ export default async function (fastify, options) {
     },
     async handler (request, reply) {
       try {
-        request.session.destroy();
-        reply.send('Logged out');
+        await request.session.destroy();
+        reply.clearCookie('sid');
+        reply.clearCookie('xsrf-t');
+        reply.clearCookie('oauth2-redirect-state');
+
+        return reply.send('Logged out');
       } catch (err) {
         fastify.log.error(err);
         throw new Error('Internal Server Error');
