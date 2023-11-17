@@ -57,7 +57,7 @@ export default async function (fastify, options) {
   fastify.post('/test', {
     onRequest: fastify.csrfCheck,
   }, async function (request, reply) {
-    return { message: 'Hello world' };
+    return reply.send('Hello world');
   });
 
   fastify.get('/google/callback', {

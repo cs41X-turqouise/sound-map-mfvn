@@ -28,7 +28,7 @@ export default fp(async function (fastify, options) {
       mongoUrl: fastify.config.MONGODB_URL,
       autoRemove: 'native',
       crypto: {
-        secret: fastify.config.MONGODSTORE_SECRET || 'FMMpiVXBnTJEJQIuQTtObXE5aLgfa3Pkdsfg897',
+        secret: fastify.config.MONGOSTORE_SECRET || 'FMMpiVXBnTJEJQIuQTtObXE5aLgfa3Pkdsfg897',
       },
       // stringify: false, // can't be used due to conflict `Unsupported BSON version, bson types must be from bson 6.x.x`
     })
@@ -51,12 +51,12 @@ export default fp(async function (fastify, options) {
   });
 
   /** Hacky workaround because `fastify.crsfProtection still isn't working */
-  fastify.decorate('csrfCheck', async function (request, reply, done) {
+  fastify.decorate('csrfCheck', function (request, reply, done) {
     const csrf = request.unsignCookie(request.cookies['xsrf-t']);
     if (!request.session.get('user')) {
-      reply.code(403).send({ error: 'Unauthorized' });
+      return reply.code(403).send(new Error('Unauthorized'));
     } else if (!csrf.valid || csrf.value !== request.session.get('_csrf')) {
-      reply.code(403).send({ error: 'Invalid CSRF token' });
+      return reply.code(403).send(new Error('Invalid CSRF token'));
     } else {
       done();
     }
