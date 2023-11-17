@@ -4,12 +4,23 @@
     id="sidebar"
     class="sidebar"
     @click.stop>
+    <ReportModal
+      v-if="reportMarker"
+      :marker="reportMarker"
+      :show="!!reportMarker"
+      @close="reportMarker = null"
+      @report="report">
+    </ReportModal>
     <div id="popup-grid" class="popup-grid">
       <v-card v-for="(marker, index) in paginatedMarkers" :key="marker.data._id" elevation-19>
         <div class="file-info">
           <div>
             <h2 class="title">
-              <v-btn v-if="store.state.user" size="x-small" flat icon="mdi-flag" @click="report(marker)">
+              <v-btn v-if="store.state.user"
+                flat
+                size="x-small"
+                icon="mdi-flag"
+                @click="reportMarker = marker.data">
                 <v-tooltip
                   activator="parent"
                   location="end"
@@ -80,9 +91,13 @@
 import Api from '../services/Api';
 import { circle } from 'leaflet';
 import { useStore } from 'vuex';
+import ReportModal from './ReportModal.vue';
 
 export default {
   name: 'SidePanel',
+  components: {
+    ReportModal,
+  },
   props: {
     markers: {
       type: Array,
@@ -108,6 +123,7 @@ export default {
       currentPage: 1,
       perPage: Math.max(1, Math.floor(window.innerHeight / 400)),
       colors: ['red', 'green', 'blue', 'purple'],
+      reportMarker: null,
     };
   },
   methods: {
@@ -143,12 +159,12 @@ export default {
       this.currentAudio = newAudio;
       this.$emit('focusMarker', marker);
     },
-    report (marker) {
+    report (marker, reason) {
       // TODO: report marker to moderators
       // placeholder for now - need to do custom dialog box so users can fill out reason for report
       if (confirm('Are you sure you want to report this content?')) {
         // placeholder for now - need to implement report endpoint
-        // Api().post(`uploads/report/${marker.data._id}`).then((response) => {
+        // Api().post(`uploads/report/${marker._id}`).then((response) => {
         //   console.log(response);
         // });
       }
