@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import HomePage from './views/HomePage.vue';
 import ProfilePage from './views/ProfilePage.vue';
 import AboutPage from './views/AboutPage.vue';
+import { useStore } from 'vuex';
 
 export default createRouter({
   mode: 'history',
@@ -21,6 +22,14 @@ export default createRouter({
       path: '/profile',
       name: 'ProfilePage',
       component: ProfilePage,
+      beforeEnter: (to, from, next) => {
+        const store = useStore();
+        if (store.state.user) {
+          next();
+        } else {
+          next(false);
+        }
+      },
     },
     {
       path: '/:pathMatch(.*)*',

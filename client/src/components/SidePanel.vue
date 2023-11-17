@@ -4,9 +4,9 @@
     id="sidebar"
     class="sidebar"
     @click.stop>
-    <section id="heading">
+    <!-- <section id="heading">
       <CloseButton @close="close" />
-    </section>
+    </section> -->
     <ul id="popup-list" class="popup-list">
       <li v-for="(marker, index) in paginatedMarkers" :key="marker.data._id">
         <div class="file-info">
@@ -17,6 +17,16 @@
                 {{ marker.data.metadata.title }}
               </b>
             </h2>
+            <div v-if="marker.data.metadata.geodata">
+              <p>
+                {{ JSON.parse(marker.data.metadata.geodata).formatted }}
+              </p>
+            </div>
+            <span>
+              Lat: {{ Number(marker.data.metadata.latitude).toFixed(4) }}
+              Lng: {{ Number(marker.data.metadata.longitude).toFixed(4) }}
+              <br>
+            </span>
             <span class="distance">
               Distance: {{ clicked.latlng.distanceTo(marker._latlng).toFixed(2) }} m
             </span>
@@ -55,20 +65,20 @@
           <v-btn v-else @click="fetchAudio(marker.data)">Play</v-btn>
         </div>
       </li>
-      <v-pagination class="pagination" v-model="currentPage" :length="maxPage"></v-pagination>
     </ul>
+    <v-pagination class="pagination" v-model="currentPage" :length="maxPage" style="margin-top: auto;"></v-pagination>
   </div>
 </template>
 
 <script>
 // import { divIcon } from 'leaflet';
 import { circle } from 'leaflet';
-import CloseButton from './CloseButton.vue';
+// import CloseButton from './CloseButton.vue';
 
 export default {
   name: 'SidePanel',
   components: {
-    CloseButton,
+    // CloseButton,
   },
   props: {
     markers: {
@@ -122,10 +132,12 @@ export default {
         });
     },
     playing (marker) {
+      const newAudio = this.$refs[`audio-${marker.data._id}`][0];
       if (this.currentAudio) {
+        if (this.currentAudio === newAudio) return;
         this.currentAudio.pause();
       }
-      this.currentAudio = this.$refs[`audio-${marker.data._id}`][0];
+      this.currentAudio = newAudio;
       this.$emit('focusMarker', marker);
     },
   },
@@ -194,6 +206,8 @@ export default {
 <style scoped>
 .sidebar {
   position: absolute;
+  display: flex;
+  flex-direction: column;
   top: 0;
   bottom: 0;
   left: 0;
@@ -201,11 +215,12 @@ export default {
   background-color: #f9f9f9;
   width: 400px;
   min-width: 200px;
-  height: auto;
+  height: 100%;
   overflow: hidden;
   overflow-y: auto;
   transition: height 0.5s ease;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.25);
+  /* padding: 1em; */
 }
 
 #heading {
