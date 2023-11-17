@@ -18,14 +18,18 @@ export default fp(async function (fastify, options) {
   await fastify.register(fastifySession, {
     secret: fastify.config.SESSION_SECRET || 'FMMpiVXBnTJEJQIuQTtObXE5aLgfa3Pkdsfg897',
     saveUninitialized: false,
+    cookieName: 'sid',
     cookie: {
       secure: fastify.config.NODE_ENV === 'production',
       httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
     },
-    cookieName: 'sid',
-    expires: 1800000, // 30 minutes
     store: MongoStore.create({
       mongoUrl: fastify.config.MONGODB_URL,
+      autoRemove: 'native',
+      crypto: {
+        secret: fastify.config.MONGODSTORE_SECRET || 'FMMpiVXBnTJEJQIuQTtObXE5aLgfa3Pkdsfg897',
+      },
       // stringify: false, // can't be used due to conflict `Unsupported BSON version, bson types must be from bson 6.x.x`
     })
   });
