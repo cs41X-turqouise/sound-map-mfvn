@@ -3,23 +3,23 @@
     <h2>Search Results</h2>
     <ul id="popup-list" class="popup-list">
       <li v-for="(file, index) in paginatedFiles" :key="file._id">
-        <div class="file-info">
+        <div class="file-info" style="overflow-y:scroll;">
           <div>
             <h2>
               <b class="name">
-                {{ file.title }}
+                {{ file.metadata.title }}
               </b>
             </h2>
+            <v-card flat>
+              <v-card-content>Date: {{ new Date(file.uploadDate).toLocaleDateString() }}</v-card-content>
+              <br>
+              <v-card-content>Description: {{ file.metadata.description }}</v-card-content>
+              <br>
+              <v-chip v-for="(tag, index) of file.metadata.tags" :key="index">
+                {{ tag }}
+              </v-chip>
+            </v-card>
             <br>
-            <span class="date">
-              Date: {{ new Date(file.uploadDate).toLocaleDateString() }}
-            </span><br>
-            <span class="description" v-if="file.description">
-              Description: <p>{{ file.description }}</p>
-            </span><br>
-            <v-chip v-for="(tag, index) of file.tags" :key="index">
-              {{ tag }}
-            </v-chip>
           </div>
           <v-carousel
             v-if="!!file.images && file.images.length"
@@ -76,7 +76,7 @@ export default {
       /** @type {HTMLAudioElement} */
       currentAudio: null,
       currentPage: 1,
-      perPage: 4,
+      perPage: 2,
       colors: ['red', 'green', 'blue', 'purple'],
     };
   },
