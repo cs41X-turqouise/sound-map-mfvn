@@ -44,7 +44,7 @@
       :show="showSearchResultsModal"
       :filteredFiles="filteredFiles"
       @close="showSearchResultsModal = false">
-  </SearchResultsModal>
+    </SearchResultsModal>
     <UploadModal
       v-if="showUploadModal"
       :show="showUploadModal"
@@ -53,8 +53,9 @@
     </UploadModal>
     <UserMenu :user="user" :show="showUserMenu" />
     <LeafletMap
-        @openUploadModal="showUploadModal = true"
-        @closeUploadModal="showUploadModal = false"/>
+      @openUploadModal="showUploadModal = true"
+      @closeUploadModal="showUploadModal = false">
+    </LeafletMap>
   </div>
 </template>
 

@@ -259,5 +259,36 @@ export default {
 }
 .leaflet-control-layers-list {
   text-align: left;
+  flex: 1;
+}
+.leaflet-control-attribution, .leaflet-control-scale-line {
+  padding: 0px 15px 0px 0px;
+}
+.click-modal {
+  position: absolute;
+  top: 1em;
+  right: 2em;
+  min-width: 150px;
+  padding: 0.5em;
+  text-align: left;
+  z-index: 9999;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+@keyframes highlight {
+  0% { background-color: white; }
+  50% { background-color: yellow; }
+  100% { background-color: white; }
+}
+
+.highlight {
+  animation: highlight 0.5s;
 }
 </style>
