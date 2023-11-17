@@ -9,7 +9,14 @@
         <div class="file-info">
           <div>
             <h2 class="title">
-              <v-btn size="x-small" flat icon="mdi-flag" @click="report(marker)">
+              <v-btn v-if="store.state.user" size="x-small" flat icon="mdi-flag" @click="report(marker)">
+                <v-tooltip
+                  activator="parent"
+                  location="end"
+                  style="z-index: 9999;"
+                >
+                Report
+                </v-tooltip>
                 <v-icon color="red">mdi-flag</v-icon>
               </v-btn>
               <b>{{ marker.data.metadata.title }}</b>
@@ -72,6 +79,7 @@
 <script>
 import Api from '../services/Api';
 import { circle } from 'leaflet';
+import { useStore } from 'vuex';
 
 export default {
   name: 'SidePanel',
@@ -86,6 +94,10 @@ export default {
     },
     /** @type {{ lat: number, lng: number }} */
     clicked: null,
+  },
+  setup () {
+    const store = useStore();
+    return { store };
   },
   data () {
     return {
