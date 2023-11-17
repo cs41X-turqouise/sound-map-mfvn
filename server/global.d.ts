@@ -1,5 +1,5 @@
 /* eslint-ignore */
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, HookHandlerDoneFunction } from 'fastify';
 import { Mongoose } from 'mongoose';
 import { GridFSBucket } from 'mongodb';
 import { Multer } from 'multer';
@@ -16,6 +16,8 @@ declare module 'fastify' {
     gridfsSounds: GridFSBucket;
     gridfsImages: GridFSBucket;
     upload: Multer;
+    /** Workaround because `fastify.crsfProtection still isn't working */
+    csrfCheck: (req: FastifyRequest, res: FastifyReply, next: HookHandlerDoneFunction) => void;
     config: {
       PORT: number;
       MONGODB_URL: string;
