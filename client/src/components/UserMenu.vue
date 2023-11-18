@@ -1,4 +1,79 @@
 <template>
+  <div class="d-flex justify-space-around">
+    <v-btn
+          v-if="!$store.state.user"
+          flat
+          @click="loginWithGoogle">
+          Sign in with Google
+        </v-btn>
+    <v-menu
+        v-if="$store.state.user">
+        <template v-slot:activator="{ props }">
+          <v-btn
+            color= "Black"
+            v-bind="props"
+          >
+            User Menu
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item
+            v-for="(item, index) in items"
+            :key="index"
+            :value="index"
+            @click="handleItemClick(item)"
+          >
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+
+
+    </div>
+  </template>
+
+<script>
+import Api from '../services/Api';
+
+export default {
+  name: 'DropDownMenu',
+  data: () => ({
+    items: [
+      { title: 'Profile', path: '/profile', action: 'goToProfilePage' },
+      { title: 'Admin', path: '/admin', action: 'goToAdminPage' },
+      { title: 'Logout', path: 'auth/logout', action: 'logout' },
+    ],
+  }),
+  methods: {
+    handleItemClick (item) {
+      if (typeof this[item.action] === 'function') {
+        this[item.action]();
+      }
+    },
+    loginWithGoogle () {
+      window.location.href = 'http://localhost:3000/auth/google';
+    },
+    logout () {
+      console.log('Logging out');
+      this.$store.dispatch('setToken', null);
+      this.$store.dispatch('setUser', null);
+      Api().post('auth/logout').catch((error) => {
+        if (error.message == 'User not logged in') {
+          return;
+        }
+        console.log(error);
+      });
+    },
+    goToAdminPage () {
+      window.location.href = 'http://localhost:5173/admin';
+    },
+  }
+};
+
+
+</script>
+
+<!-- <template>
   <div class="user-menu" v-if="show">
     <ul class="popup-list">
       <span>Hello {{ user || "Guest" }}</span>
@@ -82,4 +157,4 @@ ul {
 .popup-list li:hover {
   background-color: #f1f1f1;
 }
-</style>
+</style> -->
