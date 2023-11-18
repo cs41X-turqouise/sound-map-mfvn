@@ -12,9 +12,10 @@
     "start": "fastify start -l info app.js",
     "dev": "fastify start -w -l info -P app.js",
     "pretest": "npm run lint",
-    "lint": "eslint --fix ./**/*.js",
+    "lint": "eslint .",
     "clean-db": "node ./scripts/clean-db.js",
-    "seed-db": "node ./scripts/seed-db.js"
+    "seed-db": "node ./scripts/seed-db.js",
+    "prepare": "cd .. && husky install sound-map-mfvn/server/.husky"
   },
   "husky": {
     "hooks": {
