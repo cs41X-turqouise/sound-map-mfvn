@@ -7,7 +7,7 @@ export const reportSchema = {
   type: 'object',
   properties: {
     _id: { type: 'string', description: 'MongoDB ObjectId' },
-    userId: { type: 'string', description: 'MongoDB ObjectId' },
+    reporter: { type: 'string', description: 'MongoDB ObjectId' },
     fileId: { type: 'string', description: 'MongoDB ObjectId' },
     reason: {
       type: 'string',
@@ -15,5 +15,6 @@ export const reportSchema = {
       minLength: 1,
       maxLength: 1000,
     },
+    date: { type: 'string', format: 'date-time' },
   },
 };

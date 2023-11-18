@@ -24,9 +24,9 @@ export default async function (fastify, options) {
       },
       body: {
         type: 'object',
-        required: ['userId', 'reason'],
+        required: ['reporter', 'reason'],
         properties: {
-          userId: { type: 'string', description: 'MongoDB ObjectId of the user' },
+          reporter: { type: 'string', description: 'MongoDB ObjectId of the user' },
           reason: {
             type: 'string',
             description: 'Reason for reporting the file',
@@ -43,15 +43,15 @@ export default async function (fastify, options) {
       try {
         const _id = fastify.toObjectId(request.params.id);
         if (!_id) return reply.code(400).send(new Error('Invalid ID'));
-        const userId = fastify.toObjectId(request.body.userId);
-        if (!userId) return reply.code(400).send(new Error('Invalid User ID'));
+        const reporter = fastify.toObjectId(request.body.reporter);
+        if (!reporter) return reply.code(400).send(new Error('Invalid User ID'));
         const reason = request.body.reason;
 
         const file = await Sound.findById(_id);
         if (!file) return reply.code(404).send(new Error('File not found'));
 
         const report = new Reports({
-          userId,
+          reporter,
           fileId: _id,
           reason,
         });
@@ -74,15 +74,7 @@ export default async function (fastify, options) {
       response: {
         200: {
           type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              _id: { type: 'string', description: 'MongoDB ObjectId' },
-              userId: { type: 'string', description: 'MongoDB ObjectId' },
-              fileId: { type: 'string', description: 'MongoDB ObjectId' },
-              reason: { type: 'string' },
-            },
-          },
+          items: reportSchema,
         },
       },
     },
@@ -105,15 +97,7 @@ export default async function (fastify, options) {
         },
       },
       response: {
-        200: {
-          type: 'object',
-          properties: {
-            _id: { type: 'string', description: 'MongoDB ObjectId' },
-            userId: { type: 'string', description: 'MongoDB ObjectId' },
-            fileId: { type: 'string', description: 'MongoDB ObjectId' },
-            reason: { type: 'string' },
-          },
-        },
+        200: reportSchema,
       },
     },
     async handler (request, reply) {
