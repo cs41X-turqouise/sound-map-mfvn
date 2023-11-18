@@ -12,18 +12,7 @@
         Welcome {{ $store.state.user.username }}
       </v-toolbar-title>
       <v-toolbar-items style="padding: 0 10px;">
-      <UserMenu :user="user" :show="showUserMenu" />
-        <v-btn
-         id="admin-btn"
-         v-if="$store.state.user && $store.state.user.isAdmin" @click="goToAdminPage">
-          Admin
-        </v-btn>
-        <!-- Figure out why v-avatar and v-img cause this to break -->
-        <!-- <img id="user-avatar"
-          src="../assets/default-avatar.png"
-          alt="User Avatar"
-          @click="showUserMenu = !showUserMenu"
-        /> -->
+        <UserMenu :user="user" :show="showUserMenu" />
       </v-toolbar-items>
     </v-toolbar>
     <div v-if="showSearchModal || showUploadModal" class="overlay"></div>
@@ -39,8 +28,8 @@
       @upload="upload">
     </UploadModal>
     <LeafletMap
-        @openUploadModal="showUploadModal = true"
-        @closeUploadModal="showUploadModal = false"/>
+      @openUploadModal="showUploadModal = true"
+      @closeUploadModal="showUploadModal = false"/>
   </div>
 </template>
 

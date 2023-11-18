@@ -16,7 +16,8 @@
         <div class="file-info">
           <div>
             <h2 class="title">
-              <v-btn v-if="store.state.user"
+              <v-btn
+                v-if="store.state.user"
                 flat
                 size="x-small"
                 icon="mdi-flag"
@@ -26,7 +27,7 @@
                   location="end"
                   style="z-index: 9999;"
                 >
-                Report
+                  Report
                 </v-tooltip>
                 <v-icon color="red">mdi-flag</v-icon>
               </v-btn>
