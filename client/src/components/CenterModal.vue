@@ -1,6 +1,6 @@
 <template>
   <div class="modal" v-if="show">
-    <div class="modal-content">
+    <div class="modal-content" :style="modalStyle">
       <CloseButton @close="close" />
       <slot></slot>
     </div>
@@ -15,6 +15,10 @@ export default {
     show: {
       type: Boolean,
       required: true,
+    },
+    modalStyle: {
+      type: Object,
+      default: () => ({}),
     },
   },
   components: {
