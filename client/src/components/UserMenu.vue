@@ -22,14 +22,23 @@
         <v-list-item
           v-if="['admin', 'moderator'].includes(store.state.user?.role)"
           @click="nav($route.path === '/admin' ? '/' : '/admin')">
+          <template v-slot:prepend>
+            <v-icon :icon="$route.path === '/admin' ? 'mdi-home' : 'mdi-shield-crown'"></v-icon>
+          </template>
           <v-list-item-title>{{ $route.path === '/admin' ? 'Home' : 'Admin' }}</v-list-item-title>
         </v-list-item>
         <v-list-item
           @click="nav('/profile')">
+          <template v-slot:prepend>
+            <v-icon icon="mdi-account"></v-icon>
+          </template>
           <v-list-item-title>Profile</v-list-item-title>
         </v-list-item>
         <v-list-item
           @click="logout">
+          <template v-slot:prepend>
+            <v-icon icon="mdi-logout"></v-icon>
+          </template>
           <v-list-item-title>Logout</v-list-item-title>
         </v-list-item>
       </v-list>
