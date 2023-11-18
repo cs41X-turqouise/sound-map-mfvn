@@ -21,8 +21,8 @@
       <v-list>
         <v-list-item
           v-if="['admin', 'moderator'].includes(store.state.user?.role)"
-          @click="nav('/admin')">
-          <v-list-item-title>Admin</v-list-item-title>
+          @click="nav($route.path === '/admin' ? '/' : '/admin')">
+          <v-list-item-title>{{ $route.path === '/admin' ? 'Home' : 'Admin' }}</v-list-item-title>
         </v-list-item>
         <v-list-item
           @click="nav('/profile')">
@@ -65,6 +65,7 @@ export default {
         }
         console.log(error);
       });
+      this.router.push({ path: '/' });
     },
   }
 };
