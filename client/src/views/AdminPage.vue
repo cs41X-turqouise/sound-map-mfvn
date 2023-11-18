@@ -20,6 +20,7 @@
         </v-tooltip>
         <v-btn color="info" icon="mdi-email-outline" @click="viewReports = true"></v-btn>
       </v-badge>
+      <UserMenu></UserMenu>
     </v-toolbar>
     <CenterModal
       :show="viewReports"
@@ -167,8 +168,8 @@
               <td><span>{{ new Date(upload.uploadDate).toLocaleDateString() }}</span></td>
               <td><span>{{ upload.metadata.title }}</span></td>
               <td><span>{{ upload.metadata.description }}</span></td>
-              <td><span>{{ upload.metadata.latitude }}</span></td>
-              <td><span>{{ upload.metadata.longitude }}</span></td>
+              <td><span>{{ upload.metadata.latitude }}&deg;</span></td>
+              <td><span>{{ upload.metadata.longitude }}&deg;</span></td>
               <td><span>{{ upload.metadata.tags.join(', ') }}</span></td>
               <td>
                 <span>
@@ -183,30 +184,37 @@
       <div v-show="activeTab === 'roles'" class="roles-tab">
         <h2>Manage User</h2>
         <p>Current role: {{ selectedUser.role }}</p>
-        <button
-          v-if="selectedUser.role !== 'moderator'"
-          @click="changeUserRole(selectedUser, 'admin')">
+        <v-btn
+          v-if="selectedUser.role === 'user'"
+          @click="changeUserRole(selectedUser, 'moderator')">
           Promote to Mod
-        </button>
-        <button
+        </v-btn>
+        <v-btn
+          v-else-if="selectedUser.role === 'moderator' && store.state.user.role === 'admin'"
+          @click="changeUserRole(selectedUser, 'admin')">
+          Promote to Admin
+        </v-btn>
+        <v-btn
           v-if="selectedUser.role !== 'user'"
           @click="changeUserRole(selectedUser, 'user')">
           Demote to User
-        </button>
-        <button @click="toggleBan(selectedUser, !selectedUser.banned)">
+        </v-btn>
+        <v-btn @click="toggleBan(selectedUser, !selectedUser.banned)">
           {{ !selectedUser.banned ? 'Ban' : 'Unban' }} User
-        </button>
-        <button @click="deleteUser(selectedUser)">
+        </v-btn>
+        <v-btn @click="deleteUser(selectedUser)">
           Delete User
-        </button>
+        </v-btn>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { useStore } from 'vuex';
 import Api from '../services/Api';
 import CenterModal from '../components/CenterModal.vue';
+import UserMenu from '../components/UserMenu.vue';
 
 /**
  * @typedef {Object} MetadataSchema
@@ -248,6 +256,11 @@ export default {
   name: 'AdminPage',
   components: {
     CenterModal,
+    UserMenu,
+  },
+  setup () {
+    const store = useStore();
+    return { store };
   },
   data () {
     return {
@@ -324,7 +337,11 @@ export default {
     async changeUserRole (user, newRole) {
       try {
         await Api().patch(`users/${user._id}/role`, { role: newRole });
-        user.role = newRole;
+        const _user = this.users.find((u) => u._id === user._id);
+        if (_user) {
+          user.role = newRole;
+          _user.role = newRole;
+        }
       } catch (error) {
         console.error(error);
       }
