@@ -27,6 +27,7 @@ export default createStore({
      */
     /** @type {Map<number, FileData>} */
     files: new Map(),
+    userMenuClicked: false,
   },
   mutations: {
     setToken (state, token) {
@@ -58,6 +59,9 @@ export default createStore({
       newFiles.delete(file._id);
       state.files = newFiles;
     },
+    userMenuClicked (state, clicked) {
+      state.userMenuClicked = clicked;
+    },
   },
   actions: {
     setToken ({ commit }, token) {
@@ -80,6 +84,9 @@ export default createStore({
     },
     removeFile ({ commit }, file) {
       commit('removeFile', file);
+    },
+    userMenuClicked ({ commit }, clicked) {
+      commit('userMenuClicked', clicked);
     },
   }
 });

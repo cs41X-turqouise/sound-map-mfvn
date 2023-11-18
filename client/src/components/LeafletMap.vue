@@ -70,6 +70,10 @@ export default {
     SidePanel,
     CloseButton,
   },
+  setup () {
+    const store = useStore();
+    return { store };
+  },
   data () {
     return {
       mapId: 'leaflet-map',
@@ -100,9 +104,10 @@ export default {
       highlight: false,
     };
   },
-  setup () {
-    const store = useStore();
-    return { store };
+  computed: {
+    userMenuClicked () {
+      return this.store.state.userMenuClicked;
+    }
   },
   methods: {
     initMap () {
@@ -220,6 +225,13 @@ export default {
       `);
       marker.data = file;
       return marker;
+    },
+  },
+  watch: {
+    userMenuClicked (newValue, oldValue) {
+      if (newValue) {
+        this.showModal = false;
+      }
     },
   },
   created () {

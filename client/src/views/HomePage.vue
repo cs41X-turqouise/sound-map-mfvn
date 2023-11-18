@@ -12,7 +12,7 @@
         Welcome {{ $store.state.user.username }}
       </v-toolbar-title>
       <v-toolbar-items style="padding: 0 10px;">
-        <UserMenu :user="user" :show="showUserMenu" />
+        <UserMenu />
       </v-toolbar-items>
     </v-toolbar>
     <div v-if="showSearchModal || showUploadModal" class="overlay"></div>
