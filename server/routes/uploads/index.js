@@ -73,14 +73,15 @@ export default async function (fastify, options) {
           user: userId,
           _id: fastify.toObjectId(sound.id),
         });
-        request.session.user.uploads.push(upload._id);
+        const user = await User.findById(userId).exec();
+        user.uploads.push(upload._id);
 
-        await request.session.user.save();
+        await user.save();
         await upload.save();
         sound.images = images;
         sound._id = upload._id;
 
-        reply.code(201).send(sound);
+        return reply.code(201).send(sound);
       }
     }
   );
