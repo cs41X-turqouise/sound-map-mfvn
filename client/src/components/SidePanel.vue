@@ -162,9 +162,9 @@ export default {
     },
     report (marker, reason) {
       if (confirm('Are you sure you want to report this content?')) {
-        Api().post(`uploads/report/${marker._id}`, { reason, userId: this.store.state.user._id }).then((response) => {
+        Api().post(`reports/${marker._id}`, { reason, userId: this.store.state.user._id }).then((response) => {
           console.log(response);
-          reportMarker = null;
+          this.reportMarker = null;
         });
       }
     },

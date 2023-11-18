@@ -1,7 +1,6 @@
 import User from '../../models/User.js';
 import Sound from '../../models/Sound.js';
 import Image from '../../models/Image.js';
-import Reports from '../../models/Reports.js';
 import { uploadSchema } from './schemas.js';
 import { userSchema } from '../users/schemas.js';
 
@@ -85,61 +84,6 @@ export default async function (fastify, options) {
       }
     }
   );
-
-  /**
-   * Handle user reporting a file
-   */
-  fastify.post('/report/:id', {
-    schema: {
-      tags: ['uploads'],
-      params: {
-        type: 'object',
-        properties: {
-          id: { type: 'string', description: 'MongoDB ObjectId' },
-        },
-      },
-      body: {
-        type: 'object',
-        required: ['userId', 'reason'],
-        properties: {
-          userId: { type: 'string', description: 'MongoDB ObjectId of the user' },
-          reason: {
-            type: 'string',
-            description: 'Reason for reporting the file',
-            minLength: 1,
-            maxLength: 1000,
-          },
-        },
-      },
-      response: {
-        200: uploadSchema,
-      },
-    },
-    async handler (request, reply) {
-      try {
-        const _id = fastify.toObjectId(request.params.id);
-        if (!_id) return reply.code(400).send(new Error('Invalid ID'));
-        const userId = fastify.toObjectId(request.body.userId);
-        if (!userId) return reply.code(400).send(new Error('Invalid User ID'));
-        const reason = request.body.reason;
-
-        const file = await Sound.findById(_id);
-        if (!file) return reply.code(404).send(new Error('File not found'));
-
-        const report = new Reports({
-          userId,
-          fileId: _id,
-          reason,
-        });
-
-        await report.save();
-        return file;
-      } catch (err) {
-        fastify.log.error(err);
-        throw new Error('Internal Server Error');
-      }
-    },
-  });
   
   /**
    * Does not work
