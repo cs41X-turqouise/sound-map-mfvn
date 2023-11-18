@@ -12,18 +12,7 @@
         Welcome {{ $store.state.user.username }}
       </v-toolbar-title>
       <v-toolbar-items style="padding: 0 10px;">
-        <v-btn
-          v-if="!$store.state.user"
-          flat
-          @click="loginWithGoogle">
-          Sign in with Google
-        </v-btn>
-        <v-btn
-          v-if="$store.state.user"
-          flat
-          @click="logout">
-          Log Out
-        </v-btn>
+      <UserMenu :user="user" :show="showUserMenu" />
         <v-btn
          id="admin-btn"
          v-if="$store.state.user && $store.state.user.isAdmin" @click="goToAdminPage">
@@ -49,7 +38,6 @@
       @close="showUploadModal = false"
       @upload="upload">
     </UploadModal>
-    <UserMenu :user="user" :show="showUserMenu" />
     <LeafletMap
         @openUploadModal="showUploadModal = true"
         @closeUploadModal="showUploadModal = false"/>
@@ -108,22 +96,6 @@ export default {
     }
   },
   methods: {
-    loginWithGoogle () {
-      window.location.href = 'http://localhost:3000/auth/google';
-    },
-    logout () {
-      this.$store.dispatch('setToken', null);
-      this.$store.dispatch('setUser', null);
-      Api().post('auth/logout').catch((error) => {
-        if (error.message == 'User not logged in') {
-          return;
-        }
-        console.log(error);
-      });
-    },
-    goToAdminPage () {
-      window.location.href = 'http://localhost:3000/auth/google';
-    },
     /**
      * @async
      * @param {EventTarget} form
