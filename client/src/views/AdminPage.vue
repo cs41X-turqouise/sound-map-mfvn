@@ -1,5 +1,19 @@
 <template>
   <div class="AdminPage">
+    <v-toolbar >
+      <v-spacer></v-spacer>
+      <v-text-field
+        v-model="search"
+        append-icon="mdi-magnify"
+        label="Search"
+        single-line
+        hide-details
+      ></v-text-field>
+      <v-spacer></v-spacer>
+      <v-badge left color="primary" :content="reports.length" style="padding-right: 10px;">
+        <v-btn color="info" icon="mdi-email-outline"></v-btn>
+      </v-badge>
+    </v-toolbar>
     <h1>Users</h1>
     <table class="userTable">
       <thead>
@@ -196,6 +210,8 @@ export default {
         url: null,
       },
       urls: new Map(),
+      search: '',
+      reports: [],
     };
   },
   methods: {
@@ -309,18 +325,24 @@ export default {
       this.users = response.data;
       console.log(this.users);
     });
+    Api().get('reports/').then((response) => {
+      this.reports = response.data;
+      console.log(this.reports);
+    });
   },
 };
 </script>
 
 <style>
 .AdminPage {
-  max-width: 800px;
-  margin: 0 auto;
+  /* max-width: 800px; */
+  /* margin: 0 auto; */
   padding: 20px;
 }
 .userTable {
   width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
   border-collapse: collapse;
   margin-top: 20px;
   background-color: #fff;
@@ -373,6 +395,8 @@ userTable td {
   border-radius: 5px;
 }
 .roles-tab {
+  margin: 0 auto;
+  max-width: 800px;
   margin-top: 20px;
   padding: 10px;
   background-color: #f5f5f5;
