@@ -65,24 +65,8 @@ export default {
     close () {
       this.$emit('close');
     },
-    sanitizeInput (input) {
-      const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        '\'': '&#039;'
-      };
-      return input.replace(/[&<>"']/g, function (m) {
-        return map[m];
-      });
-    },
     report () {
-      const sanitizedReportReason = this.sanitizeInput(this.reportReason);
-      if (sanitizedReportReason === '') {
-        return;
-      }
-      this.$emit('report', this.marker, sanitizedReportReason);
+      this.$emit('report', this.marker, this.reportReason);
     },
   },
 };
