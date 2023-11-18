@@ -161,13 +161,11 @@ export default {
       this.$emit('focusMarker', marker);
     },
     report (marker, reason) {
-      // TODO: report marker to moderators
-      // placeholder for now - need to do custom dialog box so users can fill out reason for report
       if (confirm('Are you sure you want to report this content?')) {
-        // placeholder for now - need to implement report endpoint
-        // Api().post(`uploads/report/${marker._id}`).then((response) => {
-        //   console.log(response);
-        // });
+        Api().post(`uploads/report/${marker._id}`, { reason, userId: this.store.state.user._id }).then((response) => {
+          console.log(response);
+          reportMarker = null;
+        });
       }
     },
   },
