@@ -11,9 +11,50 @@
       ></v-text-field>
       <v-spacer></v-spacer>
       <v-badge left color="primary" :content="reports.length" style="padding-right: 10px;">
-        <v-btn color="info" icon="mdi-email-outline"></v-btn>
+        <v-tooltip
+          activator="parent"
+          location="start"
+          style="z-index: 9999;"
+        >
+          View Reports
+        </v-tooltip>
+        <v-btn color="info" icon="mdi-email-outline" @click="viewReports = true"></v-btn>
       </v-badge>
     </v-toolbar>
+    <CenterModal
+      :show="viewReports"
+      :modalStyle="{ 'width': 'fit-content', 'max-width': 'none' }"
+      @close="viewReports = false"
+    >
+      <h1>Reports</h1>
+      <v-table v-if="reports.length">
+        <thead>
+          <tr>
+            <th>Actions</th>
+            <th>Report ID</th>
+            <th>Reporter</th>
+            <th>Reported Artifact</th>
+            <!-- <th>Reported User</th> -->
+            <th>Reason</th>
+            <th>Report Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(report, index) in reports" :key="index">
+            <td>
+              <v-btn @click="deleteReport(report)">Delete</v-btn>
+            </td>
+            <td><span>{{ report._id }}</span></td>
+            <td><span>{{ users.find((u) => u._id === report.reporter)?.username }}</span></td>
+            <td><span>{{ report.fileId }}</span></td>
+            <!-- <td><span>{{ report.reportedUser.username }}</span></td> -->
+            <td><span>{{ report.reason }}</span></td>
+            <td><span>{{ new Date(report.date).toLocaleDateString() }}</span></td>
+          </tr>
+        </tbody>
+      </v-table>
+      <p v-else>No reports found.</p>
+    </CenterModal>
     <h1>Users</h1>
     <table class="userTable">
       <thead>
@@ -158,6 +199,7 @@
 
 <script>
 import Api from '../services/Api';
+import CenterModal from '../components/CenterModal.vue';
 
 /**
  * @typedef {Object} MetadataSchema
@@ -196,6 +238,9 @@ import Api from '../services/Api';
 
 export default {
   name: 'AdminPage',
+  components: {
+    CenterModal,
+  },
   data () {
     return {
       /** @type { UserSchema[] } */
@@ -212,6 +257,7 @@ export default {
       urls: new Map(),
       search: '',
       reports: [],
+      viewReports: false,
     };
   },
   methods: {
@@ -315,6 +361,18 @@ export default {
         console.error(err);
       }
     },
+    /** @param {ReportSchema} report */
+    async deleteReport (report) {
+      try {
+        await Api().delete(`reports/${report._id}`);
+        const index = this.reports.findIndex((r) => r._id === report._id);
+        if (index !== -1) {
+          this.reports.splice(index, 1);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    },
   },
   beforeCreate () {
     Api().get('uploads/filedata/all').then((response) => {
@@ -333,7 +391,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .AdminPage {
   /* max-width: 800px; */
   /* margin: 0 auto; */
