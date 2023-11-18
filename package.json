@@ -1,0 +1,16 @@
+{
+  "name": "sound-map-mfvn",
+  "version": "1.0.0",
+  "description": "We are a team of 8 in ODU's CS411W class, our names are:",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky install"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "husky": "^8.0.0"
+  }
+}

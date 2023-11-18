@@ -12,7 +12,7 @@
     "start": "fastify start -l info app.js",
     "dev": "fastify start -w -l info -P app.js",
     "pretest": "npm run lint",
-    "lint": "eslint .",
+    "lint": "eslint . --fix",
     "clean-db": "node ./scripts/clean-db.js",
     "seed-db": "node ./scripts/seed-db.js",
     "prepare": "cd .. && husky install sound-map-mfvn/server/.husky"
@@ -53,7 +53,7 @@
     "@istanbuljs/esm-loader-hook": "^0.2.0",
     "eslint": "^8.52.0",
     "eslint-config-google": "^0.14.0",
-    "husky": "^8.0.3",
+    "husky": "^8.0.0",
     "tap": "^18.5.2"
   },
   "tap": {

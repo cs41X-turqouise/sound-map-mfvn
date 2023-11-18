@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Lint server code
+cd server
+npm run lint
+cd ..
+
+# Lint client code
+cd client
+npm run lint
+cd ..
