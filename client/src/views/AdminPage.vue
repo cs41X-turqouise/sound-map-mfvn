@@ -138,19 +138,32 @@
               <td><span>{{ upload.contentType }}</span></td>
               <td v-if="upload.images.length > 0">
                 <v-carousel
-                  :style="{ height: '100px' }"
+                  :style="{ width: '200px', height: '150px' }"
                   hide-delimiters
-                  cycle
-                  :interval="2500"
-                  :show-arrows="false">
+                  :show-arrows="upload.images.length > 1 ? 'hover' : false">
                   <v-carousel-item
                     v-for="(image, imageIndex) in upload.images"
                     :key="imageIndex"
                     :src="urls.get(image) || fetchImage(image)">
+                    <v-btn
+                      icon
+                      density="comfortable"
+                      size="small"
+                      style="position: absolute; top: 0; right: 0;"
+                      @click="deleteImage(image)">
+                      <v-tooltip
+                        activator="parent"
+                        location="start"
+                        style="z-index: 9999;"
+                      >
+                        Delete Image
+                      </v-tooltip>
+                      <v-icon>mdi-delete</v-icon>
+                    </v-btn>
                   </v-carousel-item>
                 </v-carousel>
               </td>
-              <td v-if="upload.images.length === 0"><span>None</span></td>
+              <td v-else><span>None</span></td>
               <td><span>{{ new Date(upload.uploadDate).toLocaleDateString() }}</span></td>
               <td><span>{{ upload.metadata.title }}</span></td>
               <td><span>{{ upload.metadata.description }}</span></td>
@@ -162,12 +175,6 @@
                   {{ upload.metadata.geodata ? JSON.parse(upload.metadata.geodata).formatted : '' }}
                 </span>
               </td>
-              <!-- <td>
-                <div>
-                  <img v-if="upload.type === 'image'" :src="upload.url"
-                    alt="upload.filename" width="100" height="100" />
-                </div>
-              </td> -->
             </tr>
           </tbody>
         </v-table>
@@ -221,6 +228,7 @@ import CenterModal from '../components/CenterModal.vue';
  * @property {string} contentType
  * @property {MetadataSchema} metadata
  * @property {string} user - UserID as a MongoDB ObjectId
+ * @property {string[]} images - Array of MongoDB ObjectId
  */
 
 /**
@@ -335,14 +343,30 @@ export default {
     },
     /**
      * @param {UploadSchema} upload
-     * @param {'sound' | 'image'} [type]
-     * */
-    async deleteUpload (upload, type = 'sound') {
+     */
+    async deleteUpload (upload) {
       try {
-        const deleted = await Api().delete(`uploads/${type}/${upload._id}`);
+        const deleted = await Api().delete(`uploads/sound/${upload._id}`);
         const index = this.selectedUser.uploads.findIndex((u) => u._id === deleted.data._id);
         if (index !== -1) {
           this.selectedUser.uploads.splice(index, 1);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    /**
+     * @param {string} image
+     */
+    async deleteImage (image) {
+      try {
+        const deleted = await Api().delete(`uploads/image/${image}`);
+        const upload = this.selectedUser.uploads.find((u) => u.images.includes(deleted.data._id));
+        if (upload) {
+          const index = upload.images.findIndex((i) => i === deleted.data._id);
+          if (index !== -1) {
+            upload.images.splice(index, 1);
+          }
         }
       } catch (error) {
         console.error(error);
