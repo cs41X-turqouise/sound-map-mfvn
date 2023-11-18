@@ -27,7 +27,7 @@ export default createRouter({
         if (store.state.user) {
           next();
         } else {
-          next(false);
+          next('/');
         }
       },
     },

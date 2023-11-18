@@ -46,6 +46,7 @@ export default createStore({
       // ugh, this is a hack to get around the fact that Vue can't detect changes to Maps
       const newFiles = new Map(state.files.entries());
       newFiles.set(file._id, file);
+      state.user.uploads.push(file._id);
       state.files = newFiles;
     },
     updateFile (state, file) {
@@ -53,9 +54,13 @@ export default createStore({
       newFiles.set(file._id, file);
       state.files = newFiles;
     },
-    deleteFile (state, file) {
+    deleteFile (state, fileId) {
       const newFiles = new Map(state.files.entries());
-      newFiles.delete(file._id);
+      newFiles.delete(fileId);
+      const index = state.user.uploads.indexOf(fileId);
+      if (index > -1) {
+        state.user.uploads.splice(index, 1);
+      }
       state.files = newFiles;
     },
   },
