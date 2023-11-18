@@ -9,13 +9,29 @@
           v-model="reportReason"
           label="Reason for reporting"
           rows="3"
+          clearable
+          counter
           required
+          :rules="[
+            (v) => !!v || 'Reason is required',
+            (v) => v.length >= 25 || 'Reason must be at least 25 characters',
+            (v) => v.length <= 1000 || 'Reason must be less than 1000 characters'
+          ]"
         ></v-textarea>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="blue darken-1" text @click="close">Close</v-btn>
-        <v-btn color="blue darken-1" text @click="report">Save</v-btn>
+        <v-btn color="blue darken-1" text @click="close">
+          Close
+        </v-btn>
+        <v-btn
+          text
+          color="blue darken-1"
+          @click="report"
+          :disabled="!reportReason || reportReason.length < 25 || reportReason.length >= 1000"
+        >
+          Save
+        </v-btn>
       </v-card-actions>
     </v-card>
   </CenterModal>
