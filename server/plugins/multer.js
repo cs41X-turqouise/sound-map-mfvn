@@ -9,8 +9,8 @@ export default fp(async function (fastify, options) {
     url: fastify.config.MONGODB_URL,
     // db: fastify.mongoose.connection.db,
     /**
-     * @param {Request} req     
-     * @param {import("@thebguy/multer-gridfs-storage").GridFile} file  
+     * @param {Request} req
+     * @param {import("@thebguy/multer-gridfs-storage").GridFile} file
      */
     file: (req, file) => {
       return new Promise((resolve, reject) => {
