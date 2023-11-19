@@ -17,7 +17,7 @@
         >
           View Reports
         </v-tooltip>
-        <v-btn color="info" icon="mdi-email-outline" @click="viewReports = true"></v-btn>
+        <v-btn color="info" icon="mdi-email-outline" @click="viewReports = !viewReports"></v-btn>
       </v-badge>
       <UserMenu></UserMenu>
     </v-toolbar>
@@ -183,7 +183,9 @@
             <tr v-for="(upload, uploadIndex) in selectedUser.uploads" :key="uploadIndex" :ref="`tr-${upload._id}`">
               <td>
                 <v-btn @click="playMedia(upload)">Play</v-btn>
-                <v-btn @click="setEdit(upload)">Edit</v-btn>
+                <v-btn @click="setEdit(upload)">
+                  Edit{{ edit.selected?._id === upload._id ? 'ing' : '' }}
+                </v-btn>
                 <v-btn @click="deleteUpload(upload)">Delete</v-btn>
               </td>
               <td><span>{{ upload._id }}</span></td>
@@ -541,6 +543,10 @@ export default {
       try {
         const deleted = await Api().delete(`uploads/sound/${upload._id}`);
         const index = this.selectedUser.uploads.findIndex((u) => u._id === deleted.data._id);
+        if (this.edit.selected?._id === deleted.data._id) {
+          this.edit.selected = null;
+          this.edit.new = null;
+        }
         if (index !== -1) {
           this.selectedUser.uploads.splice(index, 1);
         }
