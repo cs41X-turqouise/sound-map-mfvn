@@ -129,6 +129,28 @@
         </button>
       </div>
       <div v-show="activeTab === 'uploads'" class="uploads-tab">
+        <CenterModal :show="!!edit.selected" @close="edit.selected = null">
+          <ItemCard :item="edit.selected" :urls="urls" @addUrl="(el) => urls.set(el.id, el.objectUrl)">
+          </ItemCard>
+          <v-form @submit.prevent="edit.selected = null">
+            <v-text-field
+              v-model="edit.new.metadata.title"
+              label="Title"
+              required
+            ></v-text-field>
+            <v-textarea
+              v-model="edit.new.metadata.description"
+              label="Description"
+              required
+            ></v-textarea>
+            <v-text-field
+              v-model="edit.new.metadata.tags"
+              label="Tags"
+              required
+            ></v-text-field>
+            <v-btn type="submit" name="submit" value="Submit">Submit</v-btn>
+          </v-form>
+        </CenterModal>
         <h2>Uploaded Files</h2>
         <audio class="audio" controls :key="activeMedia.url" ref="audio-player">
           <source :src="activeMedia.url" :type="activeMedia.type">
@@ -154,7 +176,7 @@
             <tr v-for="(upload, uploadIndex) in selectedUser.uploads" :key="uploadIndex" :ref="`tr-${upload._id}`">
               <td>
                 <v-btn @click="playMedia(upload)">Play</v-btn>
-                <v-btn>Edit</v-btn>
+                <v-btn @click="setEdit(upload)">Edit</v-btn>
                 <v-btn @click="deleteUpload(upload)">Delete</v-btn>
               </td>
               <td><span>{{ upload._id }}</span></td>
@@ -238,6 +260,7 @@ import { useStore } from 'vuex';
 import Api from '../services/Api';
 import CenterModal from '../components/CenterModal.vue';
 import UserMenu from '../components/UserMenu.vue';
+import ItemCard from '../components/ItemCard.vue';
 
 /**
  * @typedef {Object} MetadataSchema
@@ -280,6 +303,7 @@ export default {
   components: {
     CenterModal,
     UserMenu,
+    ItemCard,
   },
   setup () {
     const store = useStore();
@@ -317,6 +341,10 @@ export default {
         order: 'asc',
         sorted: false,
       },
+      edit: {
+        selected: null,
+        new: null,
+      }
     };
   },
   computed: {
@@ -340,6 +368,10 @@ export default {
   methods: {
     setActiveTab (tab) {
       this.activeTab = tab;
+    },
+    setEdit (upload) {
+      this.edit.selected = upload;
+      this.edit.new = { ...upload };
     },
     sortUsersBy (val) {
       if (this.usersSortBy.key === val) {
@@ -551,8 +583,6 @@ export default {
 
 <style scoped>
 .AdminPage {
-  /* max-width: 800px; */
-  /* margin: 0 auto; */
   padding: 20px;
 }
 .userTable {
