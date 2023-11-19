@@ -129,10 +129,10 @@
         </button>
       </div>
       <div v-show="activeTab === 'uploads'" class="uploads-tab">
-        <CenterModal :show="!!edit.selected" @close="edit.selected = null">
+        <CenterModal :show="!!edit.selected" @close="closeEdit">
           <ItemCard :item="edit.selected" :urls="urls" @addUrl="(el) => urls.set(el.id, el.objectUrl)">
           </ItemCard>
-          <v-form @submit.prevent="edit.selected = null">
+          <v-form @submit.prevent="saveEdit">
             <v-text-field
               v-model="edit.new.metadata.title"
               label="Title"
@@ -148,7 +148,14 @@
               label="Tags"
               required
             ></v-text-field>
-            <v-btn type="submit" name="submit" value="Submit">Submit</v-btn>
+            <v-btn
+              type="submit"
+              name="submit"
+              value="Submit"
+              color="info"
+            >
+              Save
+            </v-btn>
           </v-form>
         </CenterModal>
         <h2>Uploaded Files</h2>
@@ -292,7 +299,7 @@ import ItemCard from '../components/ItemCard.vue';
  * @property {string} fullname
  * @property {string} email - Email format
  * @property {string} gid - Google ID
- * @property {string[]} uploads - Array of MongoDB ObjectId
+ * @property {string[] | UploadSchema[]} uploads - Array of MongoDB ObjectId or UploadSchema
  * @property {string[]} bookmarks - Array of MongoDB ObjectId
  * @property {string} role - 'user' | 'moderator' | 'admin'
  * @property {boolean} banned
@@ -370,8 +377,27 @@ export default {
       this.activeTab = tab;
     },
     setEdit (upload) {
-      this.edit.selected = upload;
-      this.edit.new = { ...upload };
+      this.edit.selected = JSON.parse(JSON.stringify(upload));
+      this.edit.new = JSON.parse(JSON.stringify(upload));
+    },
+    closeEdit () {
+      this.edit.selected = null;
+      this.edit.new = null;
+    },
+    saveEdit () {
+      Api().patch(`uploads/metadata/${this.edit.selected._id}`, { ...this.edit.new.metadata })
+        .then((response) => {
+          const index = this.selectedUser.uploads.findIndex((u) => u._id === response.data._id);
+          console.log(index, response.data);
+          if (index !== -1) {
+            this.selectedUser.uploads[index].metadata = response.data.metadata;
+          }
+          this.edit.selected = null;
+          this.edit.new = null;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     },
     sortUsersBy (val) {
       if (this.usersSortBy.key === val) {
