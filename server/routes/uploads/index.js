@@ -425,10 +425,11 @@ export default async function (fastify, options) {
               metadata: metadata,
             },
           },
-          { returnOriginal: false }
+          { returnDocument: 'after', returnNewDocument: true }
         );
+        fastify.log.info(file);
 
-        return file;
+        return file.value;
       } catch (err) {
         fastify.log.error(err);
         throw new Error('Internal Server Error');
