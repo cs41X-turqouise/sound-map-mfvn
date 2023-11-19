@@ -4,7 +4,7 @@
       <v-text-field
         v-model="search"
         append-icon="mdi-magnify"
-        label="Search"
+        label="Search for Users"
         single-line
         hide-details
       ></v-text-field>
@@ -25,7 +25,7 @@
       :show="viewReports"
       style="top: 0; transform: translate(-50%, 0); font-size: small;"
       :modalStyle="{ 'width': 'fit-content', 'max-width': 'none' }"
-      @close="viewReports = false"
+      @close="closeReport"
     >
       <h2>Reports</h2>
       <div v-if="reports.length">
@@ -181,7 +181,12 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(upload, uploadIndex) in selectedUser.uploads" :key="uploadIndex" :ref="`tr-${upload._id}`">
+            <tr
+              v-for="(upload, uploadIndex) in selectedUser.uploads"
+              :key="uploadIndex"
+              :ref="`tr-${upload._id}`"
+              :class="{ 'highlight': upload._id === selectedReport?.fileId }"
+            >
               <td>
                 <v-btn @click="playMedia(upload)">Play</v-btn>
                 <v-btn @click="setEdit(upload)">
@@ -343,6 +348,8 @@ export default {
       uploads: [],
       /** @type { UserSchema } */
       selectedUser: { uploads: [] },
+      /** @type { ReportSchema } */
+      selectedReport: null,
       activeTab: null,
       activeMedia: {
         type: null,
@@ -369,12 +376,22 @@ export default {
   },
   computed: {
     maxUserPage () {
-      return Math.ceil(this.users.length / this.usersPerPage);
+      return Math.ceil(this.filteredUsers.length / this.usersPerPage);
     },
     paginatedUsers () {
       const start = (this.currentUserPage - 1) * this.usersPerPage;
       const end = start + this.usersPerPage;
-      return this.users.slice(start, end);
+      return this.filteredUsers.slice(start, end);
+    },
+    filteredUsers () {
+      if (!this.search) return this.users;
+      return this.users.filter((user) =>
+        user.fullname.toLowerCase().includes(this.search.toLowerCase())
+        || user.username.toLowerCase().includes(this.search.toLowerCase())
+        || user.email.toLowerCase().includes(this.search.toLowerCase())
+        || user.uploads.length.toString().includes(this.search)
+        || user.role.toLowerCase().includes(this.search.toLowerCase())
+      );
     },
     maxReportsPage () {
       return Math.ceil(this.reports.length / this.reportsPerPage);
@@ -412,6 +429,10 @@ export default {
         .catch((error) => {
           console.error(error);
         });
+    },
+    closeReport () {
+      this.selectedReport = null;
+      this.viewReports = false;
     },
     /** @param {string} val */
     sortUsersBy (val) {
@@ -472,6 +493,7 @@ export default {
         const uploads = await Api().get(`users/${this.selectedUser._id}/uploads`);
         this.selectedUser.uploads = uploads.data;
         this.activeTab = 'uploads';
+        this.selectedReport = report;
         this.$nextTick(() => {
           this.$refs[`tr-${report.fileId}`][0].scrollIntoView();
         });
@@ -595,6 +617,11 @@ export default {
       } catch (err) {
         console.error(err);
       }
+    },
+  },
+  watch: {
+    search () {
+      this.currentUserPage = 1;
     },
   },
   /**
@@ -729,5 +756,8 @@ userTable td {
 }
 .clickable:hover {
   background-color: #e3f2fd;
+}
+.highlight {
+  background-color: #d1eaff;
 }
 </style>
