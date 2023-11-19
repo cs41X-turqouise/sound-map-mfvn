@@ -29,33 +29,41 @@
       @close="viewReports = false"
     >
       <h1>Reports</h1>
-      <v-table v-if="reports.length">
-        <thead>
-          <tr>
-            <th>Actions</th>
-            <th>Report ID</th>
-            <th>Reporter</th>
-            <th>Reported Artifact</th>
-            <th>Reported Artifact Owner</th>
-            <th>Reason</th>
-            <th>Report Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(report, index) in reports" :key="index">
-            <td>
-              <v-btn size="small" width="100px" @click="viewUpload(report)">View Upload</v-btn>
-              <v-btn size="small" width="100px" @click="deleteReport(report)">Delete</v-btn>
-            </td>
-            <td><span>{{ report._id }}</span></td>
-            <td><span>{{ users.find((u) => u._id === report.reporter)?.username }}</span></td>
-            <td><span>{{ report.fileId }}</span></td>
-            <td><span>{{ users.find((u) => u.uploads.find((f) => f._id === report.fileId))?.username }}</span></td>
-            <td><span>{{ report.reason }}</span></td>
-            <td><span>{{ new Date(report.date).toLocaleDateString() }}</span></td>
-          </tr>
-        </tbody>
-      </v-table>
+      <div v-if="reports.length">
+        <v-table >
+          <thead>
+            <tr>
+              <th>Actions</th>
+              <th>Report ID</th>
+              <th>Reporter</th>
+              <th>Reported Artifact</th>
+              <th>Reported Artifact Owner</th>
+              <th>Reason</th>
+              <th>Report Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(report, index) in paginatedReports" :key="index">
+              <td>
+                <v-btn size="small" width="100px" @click="viewUpload(report)">View Upload</v-btn>
+                <v-btn size="small" width="100px" @click="deleteReport(report)">Delete</v-btn>
+              </td>
+              <td><span>{{ report._id }}</span></td>
+              <td><span>{{ users.find((u) => u._id === report.reporter)?.username }}</span></td>
+              <td><span>{{ report.fileId }}</span></td>
+              <td><span>{{ users.find((u) => u.uploads.find((f) => f._id === report.fileId))?.username }}</span></td>
+              <td><span>{{ report.reason }}</span></td>
+              <td><span>{{ new Date(report.date).toLocaleDateString() }}</span></td>
+            </tr>
+          </tbody>
+        </v-table>
+        <v-pagination
+          class="pagination"
+          v-model="currentReportsPage"
+          :length="maxReportsPage"
+          style="margin-top: auto;">
+        </v-pagination>
+      </div>
       <p v-else>No reports found.</p>
     </CenterModal>
     <h1>Users</h1>
@@ -71,7 +79,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(user, index) in users" :key="index">
+        <tr v-for="(user, index) in paginatedUsers" :key="index">
           <td>
             <img
               v-if="user.profilePhoto"
@@ -93,6 +101,12 @@
         </tr>
       </tbody>
     </table>
+    <v-pagination
+      class="pagination"
+      v-model="currentUserPage"
+      :length="maxUserPage"
+      style="margin-top: auto;">
+    </v-pagination>
     <div v-if="selectedUser?.username">
       <h2 :class="{ 'flash-black': flash }">{{ selectedUser.username }}'s Details</h2>
       <div class="tabs">
@@ -130,7 +144,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(upload, uploadIndex) in selectedUser.uploads" :key="uploadIndex">
+            <tr v-for="(upload, uploadIndex) in selectedUser.uploads" :key="uploadIndex" :ref="`tr-${upload._id}`">
               <td>
                 <v-btn @click="playMedia(upload)">Play</v-btn>
                 <v-btn>Edit</v-btn>
@@ -281,7 +295,29 @@ export default {
       search: '',
       reports: [],
       viewReports: false,
+      currentUserPage: 1,
+      usersPerPage: 10,
+      currentReportsPage: 1,
+      reportsPerPage: 3,
     };
+  },
+  computed: {
+    maxUserPage () {
+      return Math.ceil(this.users.length / this.usersPerPage);
+    },
+    paginatedUsers () {
+      const start = (this.currentUserPage - 1) * this.usersPerPage;
+      const end = start + this.usersPerPage;
+      return this.users.slice(start, end);
+    },
+    maxReportsPage () {
+      return Math.ceil(this.reports.length / this.reportsPerPage);
+    },
+    paginatedReports () {
+      const start = (this.currentReportsPage - 1) * this.reportsPerPage;
+      const end = start + this.reportsPerPage;
+      return this.reports.slice(start, end);
+    },
   },
   methods: {
     setActiveTab (tab) {
@@ -309,6 +345,9 @@ export default {
         .then((response) => {
           this.selectedUser.uploads = response.data.filter((u) => u._id === report.fileId);
           this.activeTab = 'uploads';
+          this.$nextTick(() => {
+            this.$refs[`tr-${report.fileId}`][0].scrollIntoView();
+          });
         })
         .catch((error) => {
           console.error(error);
