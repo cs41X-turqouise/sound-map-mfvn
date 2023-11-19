@@ -13,7 +13,7 @@
         <v-btn
           color= "Black"
           v-bind="props"
-          @click="store.dispatch('userMenuClicked', !store.state.userMenuClicked)"
+          @click="menuClicked"
         >
           User Menu
         </v-btn>
@@ -61,6 +61,17 @@ export default {
   methods: {
     nav (path) {
       this.router.push({ path });
+    },
+    menuClicked () {
+      // only do this from the home page - as this is to fix the menu covering the dropdown menu
+      if (this.$route.path !== '/') {
+        if (this.store.state.userMenuClicked) {
+          // incase the value hadn't been updated when we left the home page
+          this.store.dispatch('userMenuClicked', false);
+        }
+        return;
+      }
+      this.store.dispatch('userMenuClicked', !this.store.state.userMenuClicked);
     },
     loginWithGoogle () {
       window.location.href = 'http://localhost:3000/auth/google';
