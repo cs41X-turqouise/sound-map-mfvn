@@ -78,7 +78,7 @@ export default {
       /** @type {HTMLAudioElement} */
       currentAudio: null,
       currentPage: 1,
-      perPage: 2,
+      perPage: 4,
       colors: ['red', 'green', 'blue', 'purple'],
     };
   },
