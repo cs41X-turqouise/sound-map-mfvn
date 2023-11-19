@@ -24,11 +24,11 @@
     </v-toolbar>
     <CenterModal
       :show="viewReports"
-      style="top: 0; transform: translate(-50%, 0);"
+      style="top: 0; transform: translate(-50%, 0); font-size: small;"
       :modalStyle="{ 'width': 'fit-content', 'max-width': 'none' }"
       @close="viewReports = false"
     >
-      <h1>Reports</h1>
+      <h2>Reports</h2>
       <div v-if="reports.length">
         <v-table >
           <thead>
@@ -72,10 +72,30 @@
         <tr>
           <th>Profile Photo</th>
           <th>User ID</th>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Uploads</th>
-          <th>Role</th>
+          <th @click="sortUsersBy('username')" class="clickable">
+            Name
+            <v-icon v-if="usersSortBy.key === 'username'" size="x-small">
+              {{ usersSortBy.order === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
+            </v-icon>
+          </th>
+          <th @click="sortUsersBy('email')" class="clickable">
+            Email
+            <v-icon v-if="usersSortBy.key === 'email'" size="x-small">
+              {{ usersSortBy.order === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
+            </v-icon>
+          </th>
+          <th @click="sortUsersBy('uploads.length')" class="clickable">
+            Uploads
+            <v-icon v-if="usersSortBy.key === 'uploads.length'" size="x-small">
+              {{ usersSortBy.order === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
+            </v-icon>
+          </th>
+          <th @click="sortUsersBy('role')" class="clickable">
+            Role
+            <v-icon v-if="usersSortBy.key === 'role'" size="x-small">
+              {{ usersSortBy.order === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
+            </v-icon>
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -299,6 +319,11 @@ export default {
       usersPerPage: 10,
       currentReportsPage: 1,
       reportsPerPage: 3,
+      usersSortBy: {
+        key: '',
+        order: 'asc',
+        sorted: false,
+      },
     };
   },
   computed: {
@@ -322,6 +347,40 @@ export default {
   methods: {
     setActiveTab (tab) {
       this.activeTab = tab;
+    },
+    sortUsersBy (val) {
+      if (this.usersSortBy.key === val) {
+        this.usersSortBy.order = this.usersSortBy.order === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.usersSortBy.key = val;
+        this.usersSortBy.order = 'asc';
+      }
+      const key = this.usersSortBy.key;
+      const order = this.usersSortBy.order;
+      const sorted = this.usersSortBy.sorted;
+      if (val.includes('.')) {
+        const [obj, prop] = val.split('.');
+        this.users.sort((a, b) => {
+          if (a[obj][prop] < b[obj][prop]) {
+            return order === 'asc' ? -1 : 1;
+          }
+          if (a[obj][prop] > b[obj][prop]) {
+            return order === 'asc' ? 1 : -1;
+          }
+          return 0;
+        });
+      } else {
+        this.users.sort((a, b) => {
+          if (a[key] < b[key]) {
+            return order === 'asc' ? -1 : 1;
+          }
+          if (a[key] > b[key]) {
+            return order === 'asc' ? 1 : -1;
+          }
+          return 0;
+        });
+      }
+      this.usersSortBy.sorted = !sorted;
     },
     /** @param {UserSchema} user */
     showMenu (user) {
@@ -510,6 +569,7 @@ export default {
   border-collapse: collapse;
   margin-top: 20px;
   background-color: #fff;
+  text-align: center;
 }
 .userTable th,
 userTable td {
@@ -519,6 +579,18 @@ userTable td {
 }
 .userTable th {
   background-color: #f2f2f2;
+}
+/* .userTable tr:nth-child(4n), .userTable tr:nth-child(4n-1) {
+  background-color: #f2f2f2;
+}
+.userTable tr:nth-child(4n-2), .userTable tr:nth-child(4n-3) {
+  background-color: #e6e6e6;
+} */
+.userTable tr:nth-child(2n) {
+  background-color: #f2f2f2;
+}
+.userTable tr:nth-child(2n - 1) {
+  background-color: #e6e6e6;
 }
 .userTable td span {
   display: block;
@@ -557,6 +629,7 @@ userTable td {
   padding: 10px;
   background-color: #f5f5f5;
   border-radius: 5px;
+  font-size: small;
 }
 .roles-tab {
   margin: 0 auto;
@@ -568,5 +641,11 @@ userTable td {
 }
 .roles-tab button {
   margin-right: 10px;
+}
+.clickable {
+  cursor: pointer;
+}
+.clickable:hover {
+  background-color: #e3f2fd;
 }
 </style>
