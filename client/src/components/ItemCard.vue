@@ -25,7 +25,8 @@
       </v-card-subtitle>
       <v-carousel
         v-if="!!item.images && item.images.length"
-        show-arrows="hover"
+        :hide-delimiters="item.images.length > 1 ? false : true"
+        :show-arrows="item.images.length > 1 ? 'hover' : false"
         :style="{ width: '350px', height: '150px' }">
         <v-carousel-item
           v-for="(image, index) in item.images"
