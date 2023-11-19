@@ -24,6 +24,7 @@
     </v-toolbar>
     <CenterModal
       :show="viewReports"
+      style="top: 0; transform: translate(-50%, 0);"
       :modalStyle="{ 'width': 'fit-content', 'max-width': 'none' }"
       @close="viewReports = false"
     >
@@ -35,7 +36,7 @@
             <th>Report ID</th>
             <th>Reporter</th>
             <th>Reported Artifact</th>
-            <!-- <th>Reported User</th> -->
+            <th>Reported Artifact Owner</th>
             <th>Reason</th>
             <th>Report Date</th>
           </tr>
@@ -43,12 +44,13 @@
         <tbody>
           <tr v-for="(report, index) in reports" :key="index">
             <td>
-              <v-btn @click="deleteReport(report)">Delete</v-btn>
+              <v-btn size="small" width="100px" @click="viewUpload(report)">View Upload</v-btn>
+              <v-btn size="small" width="100px" @click="deleteReport(report)">Delete</v-btn>
             </td>
             <td><span>{{ report._id }}</span></td>
             <td><span>{{ users.find((u) => u._id === report.reporter)?.username }}</span></td>
             <td><span>{{ report.fileId }}</span></td>
-            <!-- <td><span>{{ report.reportedUser.username }}</span></td> -->
+            <td><span>{{ users.find((u) => u.uploads.find((f) => f._id === report.fileId))?.username }}</span></td>
             <td><span>{{ report.reason }}</span></td>
             <td><span>{{ new Date(report.date).toLocaleDateString() }}</span></td>
           </tr>
@@ -268,7 +270,7 @@ export default {
       users: [],
       /** @type { UploadSchema[] } */
       uploads: [],
-      /** @type {{ user?: UserSchema, uploads: UploadSchema[] }} */
+      /** @type { UserSchema } */
       selectedUser: { uploads: [] },
       activeTab: null,
       activeMedia: {
@@ -298,6 +300,20 @@ export default {
           console.error(error);
         });
     },
+    viewUpload (report) {
+      this.selectedUser = {
+        ...this.users.find((u) => u.uploads.find((f) => f._id === report.fileId)),
+        uploads: []
+      };
+      Api().get(`users/${this.selectedUser._id}/uploads`)
+        .then((response) => {
+          this.selectedUser.uploads = response.data.filter((u) => u._id === report.fileId);
+          this.activeTab = 'uploads';
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
     /** @param {UploadSchema} upload */
     async playMedia (upload) {
       this.activeMedia.type = upload.contentType;
@@ -320,14 +336,14 @@ export default {
       });
     },
     async fetchImage (id) {
-      fetch(`http://localhost:3000/uploads/image/${id}`)
+      await Api().get(`uploads/image/${id}`, { responseType: 'blob' })
         .then((response) => {
-          return response.blob();
-        })
-        .then((blob) => {
-          const objectUrl = URL.createObjectURL(blob);
+          const objectUrl = URL.createObjectURL(response.data);
           this.urls.set(id, objectUrl);
           return objectUrl;
+        })
+        .catch((error) => {
+          console.error(error);
         });
     },
     /**
@@ -415,7 +431,17 @@ export default {
       }
     },
   },
-  beforeCreate () {
+  async beforeCreate () {
+    if (!this.store.state.user) {
+      await Api().get('users/self').then((response) => {
+        this.store.dispatch('setUser', response.data);
+      }).catch((error) => {
+        console.log(error);
+      });
+      if (!this.store.state.user || this.store.state.user.role === 'user') {
+        this.$router.push({ path: '/' });
+      }
+    }
     Api().get('uploads/filedata/all').then((response) => {
       this.uploads = response.data;
       console.log(this.uploads);
