@@ -1,9 +1,10 @@
 <template>
   <CenterModal :show="show" @close="close">
     <h2>Search Results</h2>
+    <v-card>
     <ul id="popup-list" class="popup-list">
       <li v-for="(file, index) in paginatedFiles" :key="file._id">
-        <div class="file-info" style="overflow-y:scroll;">
+        <div class="file-info" style="overflow-y:auto;">
           <div>
             <h2>
               <b class="name">
@@ -47,6 +48,7 @@
       </li>
       <v-pagination class="pagination" v-model="currentPage" :length="maxPage"></v-pagination>
     </ul>
+  </v-card>
   </CenterModal>
 </template>
 

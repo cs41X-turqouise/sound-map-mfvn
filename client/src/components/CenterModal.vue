@@ -51,5 +51,6 @@ export default {
   border: 1px solid #888;
   width: 50vw;
   max-width: 600px;
+  max-height: 90vh;
 }
 </style>
