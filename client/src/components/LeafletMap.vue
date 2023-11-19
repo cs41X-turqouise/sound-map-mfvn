@@ -26,7 +26,7 @@
               {{ showPanel ? 'Hide' : 'Show'}} Panel
             </v-btn>
             <v-btn
-              v-if="$store.state.user"
+              v-if="store.state.user && !store.state.user.banned"
               color="info"
               size="small"
               density="comfortable"

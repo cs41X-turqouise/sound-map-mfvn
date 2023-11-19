@@ -17,7 +17,7 @@
           <div>
             <h2 class="title">
               <v-btn
-                v-if="store.state.user"
+                v-if="store.state.user && !store.state.user.banned"
                 flat
                 size="x-small"
                 icon="mdi-flag"
