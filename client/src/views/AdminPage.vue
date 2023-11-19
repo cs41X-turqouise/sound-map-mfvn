@@ -1,7 +1,6 @@
 <template>
   <div class="AdminPage">
     <v-toolbar >
-      <v-spacer></v-spacer>
       <v-text-field
         v-model="search"
         append-icon="mdi-magnify"
@@ -66,7 +65,6 @@
       </div>
       <p v-else>No reports found.</p>
     </CenterModal>
-    <h1>Users</h1>
     <table class="userTable">
       <thead>
         <tr>
@@ -115,7 +113,9 @@
       style="margin-top: auto;">
     </v-pagination>
     <div v-if="selectedUser?.username">
-      <h2 :class="{ 'flash-black': flash }">{{ selectedUser.username }}'s Details</h2>
+      <h2 ref="selectedUser">
+        {{ selectedUser.username }}'s Details
+      </h2>
       <div class="tabs">
         <button
           @click="setActiveTab('uploads')"
@@ -305,6 +305,15 @@ import ItemCard from '../components/ItemCard.vue';
  * @property {boolean} banned
  */
 
+/**
+ * @typedef {Object} ReportSchema
+ * @property {string} _id - The MongoDB ObjectId of the document.
+ * @property {string} reporter - The MongoDB ObjectId of the user who created the report.
+ * @property {string} fileId - The MongoDB ObjectId of the upload being reported.
+ * @property {string} reason - The reason for the report.
+ * @property {Date} date - The date the report was created.
+ */
+
 export default {
   name: 'AdminPage',
   components: {
@@ -351,7 +360,7 @@ export default {
       edit: {
         selected: null,
         new: null,
-      }
+      },
     };
   },
   computed: {
@@ -373,9 +382,11 @@ export default {
     },
   },
   methods: {
+    /** @param {'uploads' | 'roles'} tab */
     setActiveTab (tab) {
       this.activeTab = tab;
     },
+    /** @param {UploadSchema} upload */
     setEdit (upload) {
       this.edit.selected = JSON.parse(JSON.stringify(upload));
       this.edit.new = JSON.parse(JSON.stringify(upload));
@@ -388,7 +399,6 @@ export default {
       Api().patch(`uploads/metadata/${this.edit.selected._id}`, { ...this.edit.new.metadata })
         .then((response) => {
           const index = this.selectedUser.uploads.findIndex((u) => u._id === response.data._id);
-          console.log(index, response.data);
           if (index !== -1) {
             this.selectedUser.uploads[index].metadata = response.data.metadata;
           }
@@ -399,6 +409,7 @@ export default {
           console.error(error);
         });
     },
+    /** @param {string} val */
     sortUsersBy (val) {
       if (this.usersSortBy.key === val) {
         this.usersSortBy.order = this.usersSortBy.order === 'asc' ? 'desc' : 'asc';
@@ -434,34 +445,35 @@ export default {
       this.usersSortBy.sorted = !sorted;
     },
     /** @param {UserSchema} user */
-    showMenu (user) {
+    async showMenu (user) {
       this.selectedUser = { ...user, uploads: [] };
-      console.log(this.selectedUser);
-      Api().get(`users/${user._id}/uploads`)
-        .then((response) => {
-          this.selectedUser.uploads = response.data;
-          this.activeTab = 'uploads';
-        })
-        .catch((error) => {
-          console.error(error);
+      try {
+        const uploads = await Api().get(`users/${user._id}/uploads`);
+        this.selectedUser.uploads = uploads.data;
+        this.activeTab = 'uploads';
+        this.$nextTick(() => {
+          this.$refs['selectedUser'].scrollIntoView();
         });
+      } catch (error) {
+        console.error(error);
+      }
     },
-    viewUpload (report) {
-      this.selectedUser = {
-        ...this.users.find((u) => u.uploads.find((f) => f._id === report.fileId)),
-        uploads: []
-      };
-      Api().get(`users/${this.selectedUser._id}/uploads`)
-        .then((response) => {
-          this.selectedUser.uploads = response.data.filter((u) => u._id === report.fileId);
-          this.activeTab = 'uploads';
-          this.$nextTick(() => {
-            this.$refs[`tr-${report.fileId}`][0].scrollIntoView();
-          });
-        })
-        .catch((error) => {
-          console.error(error);
+    /** @param {ReportSchema} report */
+    async viewUpload (report) {
+      try {
+        this.selectedUser = {
+          ...this.users.find((u) => u.uploads.find((f) => f._id === report.fileId)),
+          uploads: []
+        };
+        const uploads = await Api().get(`users/${this.selectedUser._id}/uploads`);
+        this.selectedUser.uploads = uploads.data;
+        this.activeTab = 'uploads';
+        this.$nextTick(() => {
+          this.$refs[`tr-${report.fileId}`][0].scrollIntoView();
         });
+      } catch (error) {
+        console.error(error);
+      }
     },
     /** @param {UploadSchema} upload */
     async playMedia (upload) {
@@ -484,6 +496,7 @@ export default {
         audioPlayer.play();
       });
     },
+    /** @param {string} id  */
     async fetchImage (id) {
       await Api().get(`uploads/image/${id}`, { responseType: 'blob' })
         .then((response) => {
@@ -523,9 +536,7 @@ export default {
         console.error(err);
       }
     },
-    /**
-     * @param {UploadSchema} upload
-     */
+    /** @param {UploadSchema} upload */
     async deleteUpload (upload) {
       try {
         const deleted = await Api().delete(`uploads/sound/${upload._id}`);
@@ -537,9 +548,7 @@ export default {
         console.error(error);
       }
     },
-    /**
-     * @param {string} image
-     */
+    /** @param {string} image */
     async deleteImage (image) {
       try {
         const deleted = await Api().delete(`uploads/image/${image}`);
@@ -580,6 +589,9 @@ export default {
       }
     },
   },
+  /**
+   * Lifecycle hook
+   */
   async beforeCreate () {
     if (!this.store.state.user) {
       await Api().get('users/self').then((response) => {
