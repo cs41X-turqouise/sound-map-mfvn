@@ -3,6 +3,7 @@ import Sound from '../../models/Sound.js';
 import Image from '../../models/Image.js';
 import { userSchema } from './schemas.js';
 import { uploadSchema } from '../uploads/schemas.js';
+import { checkUserRole } from '../../utils/utils.js';
 
 /**
  * Routes for handling CRUD (Create, Read, Update, and Delete) operations on users
@@ -10,21 +11,6 @@ import { uploadSchema } from '../uploads/schemas.js';
  * @param {Object} options plugin options, refer to https://www.fastify.io/docs/latest/Reference/Plugins/#plugin-options
  */
 export default async function (fastify, options) {
-  /**
-   * @param {['admin'] | ['admin', 'moderator']} roles
-   * @param {boolean} checkSelf
-   */
-  function checkUserRole (roles, checkSelf = false) {
-    return async function (request, reply) {
-      /** @type {import('../../models/User.js').User} */
-      const user = request.session.user;
-      if (!user || (!roles.includes(user.role) && !(checkSelf && user._id === request.params.id))) {
-        reply.code(403).send({ error: 'Forbidden' });
-        return Promise.reject(new Error('Forbidden'));
-      }
-    };
-  }
-
   /**
    * Get all users
    * Should be Admin only

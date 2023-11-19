@@ -3,6 +3,7 @@ import Sound from '../../models/Sound.js';
 import Image from '../../models/Image.js';
 import { uploadSchema } from './schemas.js';
 import { userSchema } from '../users/schemas.js';
+import { verifyLoggedIn, verifyNotBanned } from '../../utils/utils.js';
 
 /**
  * Routes for handling CRUD (Create, Read, Update, and Delete) operations on uploads
@@ -16,13 +17,8 @@ export default async function (fastify, options) {
   fastify.post('/single',
     {
       preHandler: [
-        function (request, reply, done) {
-          if (!request.session.user) {
-            done(new Error('User not logged in'));
-          } else {
-            done();
-          }
-        },
+        verifyLoggedIn,
+        verifyNotBanned,
         fastify.upload.fields([
           { name: 'sound', maxCount: 1 },
           { name: 'images', maxCount: 12 },
