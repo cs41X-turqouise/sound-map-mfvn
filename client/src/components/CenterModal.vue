@@ -56,4 +56,10 @@ export default {
   width: 50vw;
   max-width: 600px;
 }
+
+@media screen and (max-width: 900px) {
+  .modal-content {
+    font-size: x-small;
+  }
+}
 </style>

@@ -600,6 +600,19 @@ userTable td {
   padding: 10px;
   text-align: left;
 }
+@media (max-width: 900px) {
+  h1 {
+    font-size: 2rem;
+  }
+  .userTable {
+    margin-top: 10px;
+    font-size: small;
+  }
+  .userTable th,
+  userTable td {
+    padding: 5px;
+  }
+}
 .userTable th {
   background-color: #f2f2f2;
 }
