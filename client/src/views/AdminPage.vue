@@ -99,6 +99,7 @@
               {{ user._id }}
             </button >
           </td>
+          <td>{{ user.fullname }}</td>
           <td>{{ user.username }}</td>
           <td>{{ user.email }}</td>
           <td>{{ user.uploads.length }}</td>
@@ -330,7 +331,8 @@ export default {
   data () {
     return {
       userTableHeaders: [
-        { key: 'username', label: 'Name' },
+        { key: 'fullname', label: 'Full Name' },
+        { key: 'username', label: 'Username' },
         { key: 'email', label: 'Email' },
         { key: 'uploads.length', label: 'Uploads' },
         { key: 'role', label: 'Role' },
