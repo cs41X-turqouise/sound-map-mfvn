@@ -72,27 +72,14 @@
         <tr>
           <th>Profile Photo</th>
           <th>User ID</th>
-          <th @click="sortUsersBy('username')" class="clickable">
-            Name
-            <v-icon v-if="usersSortBy.key === 'username'" size="x-small">
-              {{ usersSortBy.order === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
-            </v-icon>
-          </th>
-          <th @click="sortUsersBy('email')" class="clickable">
-            Email
-            <v-icon v-if="usersSortBy.key === 'email'" size="x-small">
-              {{ usersSortBy.order === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
-            </v-icon>
-          </th>
-          <th @click="sortUsersBy('uploads.length')" class="clickable">
-            Uploads
-            <v-icon v-if="usersSortBy.key === 'uploads.length'" size="x-small">
-              {{ usersSortBy.order === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
-            </v-icon>
-          </th>
-          <th @click="sortUsersBy('role')" class="clickable">
-            Role
-            <v-icon v-if="usersSortBy.key === 'role'" size="x-small">
+          <th
+            v-for="(entry, index) in userTableHeaders"
+            :key="index"
+            @click="sortUsersBy(entry.key)"
+            class="clickable"
+          >
+            {{ entry.label }}
+            <v-icon v-if="usersSortBy.key === entry.key" size="x-small">
               {{ usersSortBy.order === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
             </v-icon>
           </th>
@@ -300,6 +287,12 @@ export default {
   },
   data () {
     return {
+      userTableHeaders: [
+        { key: 'username', label: 'Name' },
+        { key: 'email', label: 'Email' },
+        { key: 'uploads.length', label: 'Uploads' },
+        { key: 'role', label: 'Role' },
+      ],
       /** @type { UserSchema[] } */
       users: [],
       /** @type { UploadSchema[] } */
