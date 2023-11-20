@@ -1,9 +1,9 @@
 <template>
-  <div class="about-us">
+  <div class="about-page">
     <v-container>
       <v-row>
         <v-col cols="12">
-          <h1 class="page-title">About Us</h1>
+          <h1 class="page-title">About</h1>
         </v-col>
       </v-row>
       <v-row>
@@ -34,23 +34,27 @@ export default {
     return {
       sections: [
         {
-          title: 'Introduction',
-          content: 'Wecome to the SoundMap for a changing landscape. Here we have a developed a program that will, in time, preserve some of the history of the TideWater region. By collecting uploads of sounds, videos, and files by our registered users, we can not only preserve some of the history of the region, but also document the long-term effects of global climate change'
+          title: 'Background: What is it?',
+          content: 'Sound Map For A Changing Landscape is a socially engaged art project combining a digital archive with an art exhibition. This creates a community socially engaged art and artists'
+        },
+        {
+          title: 'What is a sound map?',
+          content: 'Sound maps are digital geographical maps that highlights on representation of a specific location (the Tidewater Region in this case), typically focused on qualitative data and evoking a sense of a place.'
         },
         {
           title: 'Who Are We?',
-          content: 'We are a group of seniors at Old Dominion University creating a SoundMap for the local TideWater Environment. We are: Prestin B., Patrick M., Thomas R., Kori F., Christian W., Brandon B., Benjamin J., and our lead developer, Evan G. Together we are known as Team Turquiose'
+          content: 'We are a group of seniors at Old Dominion University creating a SoundMap for the local TideWater Environment. We are: Prestin B., Patrick M., Thomas R., Kori F., Christian W., Brandon B., Benjamin J., and our lead developer, Evan G. Together we are known as Team Turquiose. A team of collaborators along with Team Turquiose are Professor Morse, Professor Baylor, and Tim Delrosario (designer)'
         },
         {
-          title: 'Our Vision',
-          content: 'Team Turquoises primary goal is to combat climate change by creating a sound map to raise awareness about rising sea levels and related challenges in the Chesapeake Bay region. We believe that giving everyone a voice by aloowing those to upload their own images and sounds so that we can influence policy makers, and ultimately, change.'
+          title: 'Our Plan',
+          content: 'The plan of the project is to create an interactive sound map, with location data of both sounds and images uploaded by its users. This creates a digital archive of the region for years to come.'
         },
         {
-          title: 'Description Of The Interactive Sound Map',
-          content: 'The SoundMap is exactly what it sounds like. An interactive map that allows anyone who registers and upload markers on the map. These files may contain audio (sounds) or visuals (images). Using this, we can preserve the history of the region'
+          title: 'Goals for the Sound Map',
+          content: 'The main goal of this is to create a platform for the everyday person and use this to make seen the visible (or audible) changes in the location region due to climate change. Providing a voice for everyone'
         },
         {
-          title: 'Problem Background',
+          title: 'Our Reason',
           content: 'In the Chesapeake Bay region, rising sea levels present a range of critical issues, including erosion, flooding, saltwater contamination, and habitat destruction, and more intense storms to name a few. The soundmap will allow us to see these changes over-time.'
         },
         {
