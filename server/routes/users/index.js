@@ -3,7 +3,7 @@ import Sound from '../../models/Sound.js';
 import Image from '../../models/Image.js';
 import { userSchema } from './schemas.js';
 import { uploadSchema } from '../uploads/schemas.js';
-import { checkUserRole } from '../../utils/utils.js';
+import { checkUserRole, roles } from '../../utils/utils.js';
 
 /**
  * Routes for handling CRUD (Create, Read, Update, and Delete) operations on users
@@ -16,7 +16,7 @@ export default async function (fastify, options) {
    * Should be Admin only
    */
   fastify.get('/', {
-    preHandler: checkUserRole(['admin', 'moderator']),
+    preHandler: checkUserRole('moderator'),
     schema: {
       tags: ['users'],
       response: {
@@ -36,7 +36,7 @@ export default async function (fastify, options) {
    * Should be Admin only
    */
   fastify.get('/:id', {
-    preHandler: checkUserRole(['admin', 'moderator']),
+    preHandler: checkUserRole('moderator'),
     schema: {
       tags: ['users'],
       params: {
@@ -67,10 +67,11 @@ export default async function (fastify, options) {
       }
     }
   }, async function (request, reply) {
-    if (!request.session.user) {
+    const self = request.session.get('user');
+    if (!self) {
       return reply.send(new Error('User not logged in'));
     }
-    return request.session.user;
+    return self;
   });
 
   /**
@@ -101,7 +102,7 @@ export default async function (fastify, options) {
    * Get all files uploaded by a specific user
    */
   fastify.get('/:userId/uploads', {
-    preHandler: checkUserRole(['admin', 'moderator']),
+    preHandler: checkUserRole('moderator'),
     schema: {
       tags: ['uploads'],
       params: {
@@ -182,7 +183,7 @@ export default async function (fastify, options) {
    * Delete a user - should be Admin only or limited to the user themselves
    */
   fastify.delete('/:id', {
-    preHandler: checkUserRole(['admin', 'moderator'], true),
+    preHandler: checkUserRole('moderator', true),
     schema: {
       tags: ['users'],
       params: {
@@ -240,6 +241,7 @@ export default async function (fastify, options) {
    * Update a user
    */
   fastify.patch('/:id', {
+    preHandler: checkUserRole('moderator', true),
     schema: {
       tags: ['users'],
       body: {
@@ -268,7 +270,7 @@ export default async function (fastify, options) {
 
   // Update user role
   fastify.patch('/:id/role', {
-    preHandler: checkUserRole(['admin', 'moderator']),
+    preHandler: checkUserRole('moderator'),
     schema: {
       tags: ['users'],
       params: {
@@ -294,15 +296,18 @@ export default async function (fastify, options) {
     try {
       const _id = fastify.toObjectId(request.params.id);
       if (!_id) return reply.code(400).send(new Error('Invalid ID'));
-      const newRole = request.body.role; // Expect 'moderator' or 'admin'
-
+      /** @type {User} */
+      const self = request.session.get('user');
+      
       // cannot change own role
-      if (request.session.user._id === _id) {
+      if (self._id === _id) {
         return reply.code(403).send({ error: 'Forbidden' });
       }
+      /** @type {'user' | 'moderator' | 'admin'} */
+      const newRole = request.body.role;
 
-      // cannot promote to admin if not admin
-      if (newRole === 'admin' && request.session.user.role !== 'admin') {
+      // cannot promote user to a role higher than or equal to ourselves
+      if (roles[newRole] >= roles[self.role]) {
         return reply.code(403).send({ error: 'Forbidden' });
       }
   
@@ -323,13 +328,13 @@ export default async function (fastify, options) {
     } catch (error) {
       request.log.error(error); // Log the error for server-side inspection
       // Reply with a server error
-      reply.code(500).send({ error: 'Internal Server Error' });
+      return reply.code(500).send({ error: 'Internal Server Error' });
     }
   });
 
   // Ban a user
   fastify.patch('/:id/ban', {
-    preHandler: checkUserRole(['admin', 'moderator']),
+    preHandler: checkUserRole('moderator'),
     schema: {
       tags: ['users'],
       params: {
@@ -352,10 +357,12 @@ export default async function (fastify, options) {
   }, async function (request, reply) {
     const userId = fastify.toObjectId(request.params.id);
     if (!userId) return reply.code(400).send(new Error('Invalid ID'));
-    const adminId = request.session.user._id; // ID of the admin performing the ban
+    /** @type {User} */
+    const self = request.session.get('user'); // User performing the ban
+    fastify.log.info(self);
 
     // cannot ban self
-    if (userId === adminId) {
+    if (userId === self._id) {
       return reply.code(403).send({ error: 'Forbidden' });
     }
 
@@ -365,14 +372,14 @@ export default async function (fastify, options) {
       return reply.code(404).send({ error: 'User not found' });
     }
 
-    // cannot ban other admins - should we have a superadmin role?
-    if (user.role === 'admin') {
+    // cannot ban users with roles higher than or equal to our own
+    if (roles[user.role] >= roles[self.role]) {
       return reply.code(403).send({ error: 'Forbidden' });
     }
 
     // Update user ban status
     user.banned = request.body.ban;
-    user.bannedBy = adminId;
+    user.bannedBy = self._id;
     await user.save();
 
     return user;

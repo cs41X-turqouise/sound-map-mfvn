@@ -9,17 +9,26 @@
  */
 
 /**
+ * @readonly
+ * @enum {number}
+ */
+export const roles = Object.freeze({
+  user: 1,
+  moderator: 2,
+  admin: 3,
+  superadmin: 4,
+});
+
+/**
  * Checks for a valid user session
  * @param {FastifyRequest} request
  * @param {FastifyReply} reply
  * @param {DoneCallback} done
  */
 export function verifyLoggedIn (request, reply, done) {
-  if (!request.session.get('user')) {
-    done(new Error('User not logged in'));
-  } else {
-    done();
-  }
+  request.session.get('user')
+    ? done()
+    : done(new Error('User not logged in'));
 }
 
 /**
@@ -29,26 +38,24 @@ export function verifyLoggedIn (request, reply, done) {
  * @param {DoneCallback} done
  */
 export function verifyNotBanned (request, reply, done) {
-  if (request.session.get('user').banned) {
-    done(new Error('User is banned'));
-  } else {
-    done();
-  }
+  request.session.get('user').banned
+    ? done(new Error('User is banned'))
+    : done();
 }
 
 /**
- * @param {['admin'] | ['admin', 'moderator']} roles
+ * @param {'admin' | 'moderator' | 'user' | 'superadmin'} role
  * @param {boolean} checkSelf
  */
-export function checkUserRole (roles, checkSelf = false) {
+export function checkUserRole (role, checkSelf = false) {
   /**
    * @param {FastifyRequest} request
    * @param {FastifyReply} reply
    */
   return async function (request, reply) {
     /** @type {import('../../models/User.js').User} */
-    const user = request.session.user;
-    if (!user || (!roles.includes(user.role) && !(checkSelf && user._id === request.params.id))) {
+    const user = request.session.get('user');
+    if (!user || (roles[user.role] < roles[role] && !(checkSelf && user._id === request.params.id))) {
       reply.code(403).send({ error: 'Forbidden' });
       return Promise.reject(new Error('Forbidden'));
     }
