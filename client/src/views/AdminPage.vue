@@ -7,6 +7,9 @@
         label="Search for Users"
         single-line
         hide-details
+        clearable
+        rounded
+        variant="outlined"
       ></v-text-field>
       <v-spacer></v-spacer>
       <v-badge left color="primary" :content="reports.length" style="padding-right: 10px;">
