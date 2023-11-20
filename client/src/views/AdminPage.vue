@@ -272,24 +272,30 @@
         <h2>Manage User</h2>
         <p>Current role: {{ selectedUser.role }}</p>
         <v-btn
-          v-if="selectedUser.role === 'user'"
+          v-if="selectedUser.role === 'user' && roles[store.state.user.role] > roles['moderator']"
           @click="changeUserRole(selectedUser, 'moderator')">
           Promote to Mod
         </v-btn>
         <v-btn
-          v-else-if="selectedUser.role === 'moderator' && store.state.user.role === 'admin'"
+          v-else-if="selectedUser.role === 'moderator' && store.state.user.role === 'superadmin'"
           @click="changeUserRole(selectedUser, 'admin')">
           Promote to Admin
         </v-btn>
         <v-btn
-          v-if="selectedUser.role !== 'user'"
+          v-if="selectedUser.role !== 'user' && roles[selectedUser.role] < roles[store.state.user.role]"
           @click="changeUserRole(selectedUser, 'user')">
           Demote to User
         </v-btn>
-        <v-btn @click="toggleBan(selectedUser, !selectedUser.banned)">
+        <v-btn
+          v-if="roles[selectedUser.role] < roles[store.state.user.role]"
+          @click="toggleBan(selectedUser, !selectedUser.banned)"
+        >
           {{ !selectedUser.banned ? 'Ban' : 'Unban' }} User
         </v-btn>
-        <v-btn @click="deleteUser(selectedUser)">
+        <v-btn
+          v-if="roles[selectedUser.role] < roles[store.state.user.role]"
+          @click="deleteUser(selectedUser)"
+        >
           Delete User
         </v-btn>
       </div>
@@ -358,7 +364,13 @@ export default {
   },
   setup () {
     const store = useStore();
-    return { store };
+    const roles = Object.freeze({
+      user: 1,
+      moderator: 2,
+      admin: 3,
+      superadmin: 4,
+    });
+    return { store, roles };
   },
   data () {
     return {
