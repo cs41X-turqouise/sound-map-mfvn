@@ -145,10 +145,24 @@
               required
             ></v-textarea>
             <v-text-field
-              v-model="edit.new.metadata.tags"
+              v-model="edit.tag"
               label="Tags"
               required
+              hint="Tags are single words, enter a space to create a new tag"
+              persistent-hint
+              @keyup.space="addTag"
+              @keyup.enter.prevent="addTag"
             ></v-text-field>
+            <v-chip-group>
+              <v-chip
+                v-for="(tag, index) in edit.new.metadata.tags"
+                :key="tag"
+                closable
+                @click:close="edit.new.metadata.tags.splice(index, 1)"
+              >
+                {{ tag }}
+              </v-chip>
+            </v-chip-group>
             <v-btn
               type="submit"
               name="submit"
@@ -371,6 +385,7 @@ export default {
       edit: {
         selected: null,
         new: null,
+        tag: '',
       },
     };
   },
@@ -412,6 +427,16 @@ export default {
       this.edit.selected = JSON.parse(JSON.stringify(upload));
       this.edit.new = JSON.parse(JSON.stringify(upload));
     },
+    addTag () {
+      /** @type {string} */
+      const tag = this.edit.tag.toLowerCase().replace(/\s+/g, '');
+      if (!tag) {
+        this.edit.tag = '';
+      } else if (!this.edit.new.metadata.tags.includes(tag)) {
+        this.edit.new.metadata.tags.push(tag);
+        this.edit.tag = '';
+      }
+    },
     closeEdit () {
       this.edit.selected = null;
       this.edit.new = null;
@@ -425,6 +450,7 @@ export default {
           }
           this.edit.selected = null;
           this.edit.new = null;
+          this.edit.tag = '';
         })
         .catch((error) => {
           console.error(error);
