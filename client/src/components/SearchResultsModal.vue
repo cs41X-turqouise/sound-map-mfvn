@@ -138,7 +138,6 @@ export default {
     paginatedFiles () {
       const startIndex = (this.currentPage - 1) * this.perPage;
       const endIndex = startIndex + this.perPage;
-      console.log('FilteredFiles:', this.filteredFiles);
       const filteredFilesArray = Array.from(this.filteredFiles.values());
       return filteredFilesArray.slice(startIndex, endIndex);
     },

@@ -101,10 +101,10 @@ export default {
         if (this.description && !file.metadata.description.includes(this.description)) {
           continue;
         }
-        if (this.dateFrom && file.metadata.date < this.dateFrom) {
+        if (this.dateFrom && (new Date(file.uploadDate) < new Date(this.dateFrom))) {
           continue;
         }
-        if (this.dateTo && file.metadata.date > this.dateTo) {
+        if (this.dateTo && (new Date(file.uploadDate) > new Date(this.dateTo))) {
           continue;
         }
         if (this.tags.length) {
