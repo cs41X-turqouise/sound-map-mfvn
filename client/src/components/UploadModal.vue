@@ -21,6 +21,8 @@
         label="Tags"
         v-model="tagInput"
         clearable
+        hint="Tags are single words, enter a space to create a new tag"
+        persistent-hint
         @keyup.space="addTag"
         @keyup.enter="addTag"
       ></v-text-field>
@@ -100,11 +102,11 @@ export default {
       this.$emit('close');
     },
     addTag () {
-      const tag = this.tagInput.trim();
+      const tag = this.tagInput.replace(/\s+/g, '');
       if (tag) {
         this.tags.add(tag);
-        this.tagInput = '';
       }
+      this.tagInput = '';
     },
     removeTag (tag) {
       this.tags.delete(tag);
