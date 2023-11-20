@@ -92,16 +92,16 @@ export default {
     async submit (e) {
       const filteredFiles = new Map();
       for (const file of this.files.values()) {
-        hits = 0; // this will be used to keep track of how many parameters of each search result matches
+        let hits = 0; // this will be used to keep track of how many parameters of each search result matches
         if (this.title && file.metadata.title.includes(this.title)) {
           hits++;
         }
-        if (this.creator && file.metadata.creator.includes(this.creator)) {
+        // if (this.creator && file.metadata.creator.includes(this.creator)) {
+        //   hits++;
+        // }
+        if (this.description && file.metadata.description.includes(this.description)) {
           hits++;
         }
-        // if (this.description && !file.metadata.description.includes(this.description)) {
-        //   continue;
-        // }
         if (this.dateFrom && (new Date(file.uploadDate) >= new Date(this.dateFrom))) {
           hits++;
         }
@@ -117,9 +117,12 @@ export default {
               // break;
             }
           }
-          if (hits == 0) {
-            continue;
-          }
+          // if (hits == 0) {
+          //   continue;
+          // }
+        }
+        if (hits == 0) {
+          continue;
         }
         filteredFiles.set(file._id, file);
       }
