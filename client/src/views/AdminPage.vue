@@ -163,14 +163,27 @@
                 {{ tag }}
               </v-chip>
             </v-chip-group>
-            <v-btn
-              type="submit"
-              name="submit"
-              value="Submit"
-              color="info"
-            >
-              Save
-            </v-btn>
+            <v-card>
+              <v-card-actions>
+                <v-btn
+                  color="red"
+                  @click="Object.assign(edit.new.metadata, edit.selected.metadata)"
+                >
+                  Reset
+                </v-btn>
+                <v-spacer></v-spacer>
+                <v-btn color="red" @click="closeEdit">Cancel</v-btn>
+                <v-spacer></v-spacer>
+                <v-btn
+                  type="submit"
+                  name="submit"
+                  value="Submit"
+                  color="blue"
+                >
+                  Save
+                </v-btn>
+              </v-card-actions>
+            </v-card>
           </v-form>
         </CenterModal>
         <h2>Uploaded Files</h2>
