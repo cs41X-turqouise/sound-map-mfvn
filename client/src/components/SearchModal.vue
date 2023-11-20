@@ -93,6 +93,7 @@ export default {
       const filteredFiles = new Map();
       for (const file of this.files.values()) {
         let hits = 0; // this will be used to keep track of how many parameters of each search result matches
+        let maxHits = 0;
         if (this.title && file.metadata.title.includes(this.title)) {
           hits++;
         }
@@ -124,6 +125,12 @@ export default {
         if (hits == 0) {
           continue;
         }
+        if (hits > maxHits) {
+          maxHits = hits;
+        }
+        // Here will be the logic for adding files to maps based on how many hits they have
+        // They will then be added to filteredFiles by order of most to least hits
+
         filteredFiles.set(file._id, file);
       }
       e.target.reset();
