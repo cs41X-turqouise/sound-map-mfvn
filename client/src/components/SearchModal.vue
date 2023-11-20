@@ -9,13 +9,13 @@
         label="Title"
         id="title" clearable
       ></v-text-field>
-      <v-text-field
+      <!-- <v-text-field
         v-model="creator"
         name="creator"
         label="Creator"
         id="creator"
         clearable
-      ></v-text-field>
+      ></v-text-field> -->
       <v-text-field
         v-model="description"
         name="description"
@@ -98,9 +98,9 @@ export default {
         if (this.creator && !file.metadata.creator.includes(this.creator)) {
           continue;
         }
-        if (this.description && !file.metadata.description.includes(this.description)) {
-          continue;
-        }
+        // if (this.description && !file.metadata.description.includes(this.description)) {
+        //   continue;
+        // }
         if (this.dateFrom && (new Date(file.uploadDate) < new Date(this.dateFrom))) {
           continue;
         }
