@@ -92,30 +92,32 @@ export default {
     async submit (e) {
       const filteredFiles = new Map();
       for (const file of this.files.values()) {
-        if (this.title && !file.metadata.title.includes(this.title)) {
-          continue;
+        hits = 0; // this will be used to keep track of how many parameters of each search result matches
+        if (this.title && file.metadata.title.includes(this.title)) {
+          hits++;
         }
-        if (this.creator && !file.metadata.creator.includes(this.creator)) {
-          continue;
+        if (this.creator && file.metadata.creator.includes(this.creator)) {
+          hits++;
         }
         // if (this.description && !file.metadata.description.includes(this.description)) {
         //   continue;
         // }
-        if (this.dateFrom && (new Date(file.uploadDate) < new Date(this.dateFrom))) {
-          continue;
+        if (this.dateFrom && (new Date(file.uploadDate) >= new Date(this.dateFrom))) {
+          hits++;
         }
-        if (this.dateTo && (new Date(file.uploadDate) > new Date(this.dateTo))) {
-          continue;
+        if (this.dateTo && (new Date(file.uploadDate) <= new Date(this.dateTo))) {
+          hits++;
         }
         if (this.tags.length) {
-          let found = false;
+          // let found = false;
           for (const tag of this.tags) {
             if (file.metadata.tags.includes(tag)) {
-              found = true;
-              break;
+              hits++;
+              // found = true;
+              // break;
             }
           }
-          if (!found) {
+          if (hits == 0) {
             continue;
           }
         }
