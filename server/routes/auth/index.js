@@ -67,6 +67,9 @@ export default async function (fastify, options) {
     async handler (request, reply) {
       try {
         const token = await fastify.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
+        /**
+         * @type {{ id: string, name: string, email: string, picture: string }}
+         */
         const userInfo = await getUserInfo(token.token.access_token);
         let user = await User.findOne({ gid: userInfo.id });
 
@@ -77,7 +80,11 @@ export default async function (fastify, options) {
             fullname: userInfo.name,
             email: userInfo.email,
             profilePhoto: userInfo.picture,
-            role: fastify.config.ADMINS.includes(userInfo.email) ? 'admin' : 'user',
+            role: fastify.config.SUPERADMIN === userInfo.email
+              ? 'superadmin'
+              : fastify.config.ADMINS.includes(userInfo.email)
+                ? 'admin'
+                : 'user',
           });
           await user.save();
         }

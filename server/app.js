@@ -18,7 +18,17 @@ export default async function (fastify, opts) {
     data: process.env,
     schema: {
       type: 'object',
-      required: ['PORT', 'MONGODB_URL', 'JWT_SECRET', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'ADMINS'],
+      required: [
+        'PORT',
+        'MONGODB_URL',
+        'GOOGLE_CLIENT_ID',
+        'GOOGLE_CLIENT_SECRET',
+        'COOKIE_SECRET',
+        'SESSION_SECRET',
+        'MONGOSTORE_SECRET',
+        'ADMINS',
+        'SUPERADMIN',
+      ],
       properties: {
         PORT: {
           type: 'number',
@@ -28,10 +38,6 @@ export default async function (fastify, opts) {
           type: 'string',
           default: 'mongodb://127.0.0.1:27017/soundmap'
         },
-        JWT_SECRET: {
-          type: 'string',
-          default: '155453cr37'
-        },
         GOOGLE_CLIENT_ID: {
           type: 'string',
           default: '155453cr37'
@@ -40,10 +46,23 @@ export default async function (fastify, opts) {
           type: 'string',
           default: '155453cr37'
         },
+        COOKIE_SECRET: {
+          type: 'string',
+        },
+        SESSION_SECRET: {
+          type: 'string',
+        },
+        MONGOSTORE_SECRET: {
+          type: 'string',
+        },
         ADMINS: {
           type: 'string',
           default: ''
-        }
+        },
+        SUPERADMIN: {
+          type: 'string',
+          default: ''
+        },
       },
     },
     // will read .env in root folder
