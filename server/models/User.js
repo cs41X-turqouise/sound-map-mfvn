@@ -57,6 +57,30 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  inbox: [{
+    date: {
+      type: Date,
+      default: Date.now,
+    },
+    title: {
+      type: String,
+      required: true,
+      maxlength: 255,
+    },
+    message: {
+      type: String,
+      maxlength: 500,
+    },
+    read: {
+      type: Boolean,
+      default: false,
+    },
+    sender: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'users',
+      required: true,
+    },
+  }],
 });
 
 export default mongoose.model('users', userSchema);
