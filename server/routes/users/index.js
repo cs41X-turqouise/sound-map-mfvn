@@ -75,6 +75,28 @@ export default async function (fastify, options) {
   });
 
   /**
+   * Get and refresh the currently logged in user
+   */
+  fastify.get('/self/refresh', {
+    schema: {
+      tags: ['users'],
+      response: {
+        200: userSchema
+      }
+    }
+  }, async function (request, reply) {
+    const self = request.session.get('user');
+    if (!self) {
+      return reply.send(new Error('User not logged in'));
+    }
+    const newSelf = await User.findById(self._id)
+      .populate('inbox.sender', 'username email')
+      .exec();
+    request.session.set('user', newSelf);
+    return newSelf;
+  });
+
+  /**
    * Gets a file uploaded by a user
    * @todo Implement this or remove it
    */

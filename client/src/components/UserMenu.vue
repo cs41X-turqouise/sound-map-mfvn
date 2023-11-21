@@ -110,14 +110,14 @@ export default {
       window.location.href = 'http://localhost:3000/auth/google';
     },
     async logout () {
-      this.store.dispatch('setToken', null);
-      this.store.dispatch('setUser', null);
       await Api().post('auth/logout').catch((error) => {
         if (error.message == 'User not logged in') {
           return;
         }
         console.log(error);
       });
+      this.store.dispatch('setToken', null);
+      this.store.dispatch('setUser', null);
       this.router.push({ path: '/' });
     },
   }

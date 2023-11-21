@@ -82,7 +82,7 @@ export default createStore({
       commit('setUser', user);
     },
     async fetchUser ({ commit }) {
-      const res = await Api().get('/users/self');
+      const res = await Api().get('/users/self/refresh');
       commit('setUser', res.data);
     },
     removeInboxMessage ({ commit }, message) {
