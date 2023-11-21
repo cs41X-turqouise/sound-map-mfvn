@@ -280,6 +280,163 @@ export default async function (fastify, options) {
   });
 
   /**
+   * Delete all messages from user's inbox
+   */
+  fastify.delete('/:id/inbox', {
+    schema: {
+      tags: ['users'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'MongoDB ObjectId' },
+        },
+      },
+      // body: {
+      //   type: 'object',
+      //   properties: {
+      //     messages: {
+      //       type: 'array',
+      //       items: { type: 'string', description: 'MongoDB ObjectId' },
+      //     },
+      //   },
+      // },
+      response: {
+        200: userSchema,
+      },
+    },
+    async handler (request, reply) {
+      try {
+        const _id = fastify.toObjectId(request.params.id);
+        if (!_id) return reply.code(400).send(new Error('Invalid ID'));
+
+        const user = await User.findById(_id);
+        if (!user) return reply.code(404).send(new Error('User not found'));
+
+        /**
+         * @todo - Figure out how to make this work, delete requests don't seem to parse the body
+         * so messages is always undefined
+         */
+        // const messages = (request.body.messages || []).map((id) => fastify.toObjectId(id));
+        // if (messages.length) {
+        //   for (const message of user.inbox) {
+        //     if (messages.includes(message._id)) {
+        //       message.deleteOne();
+        //     }
+        //   }
+        // } else {
+        // }
+        user.inbox = [];
+        await user.save();
+
+        return user;
+      } catch (error) {
+        fastify.log.error(error);
+        return reply.code(500).send('Internal Server Error');
+      }
+    },
+  });
+
+  /**
+   * Update read status of a message
+   */
+  fastify.patch('/:id/inbox/:mid', {
+    schema: {
+      tags: ['users'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'MongoDB ObjectId' },
+          mid: { type: 'string', description: 'MongoDB ObjectId' },
+        },
+      },
+      body: {
+        type: 'object',
+        properties: {
+          read: { type: 'boolean' },
+        },
+      },
+      response: {
+        200: userSchema,
+      },
+    },
+    async handler (request, reply) {
+      try {
+        const _id = fastify.toObjectId(request.params.id);
+        if (!_id) return reply.code(400).send(new Error('Invalid ID'));
+
+        const _mid = fastify.toObjectId(request.params.mid);
+        if (!_mid) return reply.code(400).send(new Error('Invalid Message ID'));
+
+        const user = await User.findById(_id);
+        if (!user) return reply.code(404).send(new Error('User not found'));
+
+        const message = user.inbox.id(_mid);
+        if (!message) return reply.code(404).send(new Error('Message not found'));
+
+        message.read = request.body.read;
+        await user.save();
+
+        return user;
+      } catch (error) {
+        fastify.log.error(error);
+        return reply.code(500).send('Internal Server Error');
+      }
+    },
+  });
+
+  /**
+   * Toggle read status of all messages
+   * Optionally accepts array of message IDs to toggle
+   */
+  fastify.patch('/:id/inbox/toggleAll', {
+    schema: {
+      tags: ['users'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'MongoDB ObjectId' },
+        },
+      },
+      body: {
+        type: 'object',
+        required: ['read'],
+        properties: {
+          read: { type: 'boolean' },
+          messages: {
+            type: 'array',
+            items: { type: 'string', description: 'MongoDB ObjectId' },
+          },
+        },
+      },
+      response: {
+        200: userSchema,
+      },
+    },
+    async handler (request, reply) {
+      try {
+        const _id = fastify.toObjectId(request.params.id);
+        if (!_id) return reply.code(400).send(new Error('Invalid ID'));
+
+        const user = await User.findById(_id);
+        if (!user) return reply.code(404).send(new Error('User not found'));
+
+        const messages = (request.body.messages || []).map((id) => fastify.toObjectId(id));
+        for (const message of user.inbox) {
+          if (!messages.length || messages.includes(message._id)) {
+            message.read = request.body.read;
+          }
+        }
+        await user.save();
+
+        return user;
+      } catch (error) {
+        fastify.log.error(error);
+        return reply.code(500).send('Internal Server Error');
+      }
+    },
+  });
+
+  /**
    * Update a user
    */
   fastify.patch('/:id', {
