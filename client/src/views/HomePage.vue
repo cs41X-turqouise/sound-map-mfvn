@@ -1,15 +1,15 @@
 <template>
   <div class="home" style="height: 100%; width: 100%;
     display: flex; flex-direction: column;">
-    <v-toolbar fixed color="cyan" style="height: fit-content;" dark>
+    <v-toolbar fixed color="cyan" style="height: fit-content; width: 99%;" dark>
       <v-toolbar-items>
         <v-btn @click="showSearchModal = true" flat>
           Search
         </v-btn>
       </v-toolbar-items>
       <v-spacer></v-spacer>
-      <v-toolbar-title v-if="$store.state.user">
-        Welcome {{ $store.state.user.username }}
+      <v-toolbar-title v-if="store.state.user">
+        Welcome {{ store.state.user.username }}
       </v-toolbar-title>
       <v-toolbar-items style="padding: 0 10px;">
         <UserMenu />
@@ -118,15 +118,6 @@ export default {
   appearance: none;
 }
 
-#user-avatar {
-  position: absolute;
-  bottom: 0;
-  right: 1%;
-  width: 50px;
-  height: 50px;
-  cursor: pointer;
-}
-
 .overlay {
   position: fixed;
   top: 0;
@@ -135,9 +126,5 @@ export default {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 9999;
-}
-
-#admin-btn {
-  margin-left: 10px; /* If this needs to be changed, let me know */
 }
 </style>
