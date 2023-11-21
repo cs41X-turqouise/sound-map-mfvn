@@ -620,6 +620,7 @@ export default {
     async deleteUpload (upload) {
       try {
         const deleted = await Api().delete(`uploads/sound/${upload._id}`);
+        this.store.dispatch('removeFile', deleted.data._id);
         const index = this.selectedUser.uploads.findIndex((u) => u._id === deleted.data._id);
         if (this.edit.selected?._id === deleted.data._id) {
           this.edit.selected = null;
