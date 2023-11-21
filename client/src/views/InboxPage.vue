@@ -86,9 +86,9 @@
       <thead>
         <tr>
           <th></th>
-          <th>Date</th>
-          <th>Title</th>
           <th>Sender</th>
+          <th>Title</th>
+          <th>Date</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -109,9 +109,15 @@
               @click.stop
             ></v-checkbox>
           </td>
-          <td>{{ new Date(item.date).toLocaleDateString() }}</td>
-          <td>{{ item.title }}</td>
           <td>{{ item.sender.username }}</td>
+          <td>{{ item.title }}</td>
+          <td>
+            {{
+              new Date(item.date).toLocaleDateString() === today.toLocaleDateString()
+                ? new Date(item.date).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+                : new Date(item.date).toLocaleDateString()
+            }}
+          </td>
           <td>
             <v-btn icon flat density="comfortable" @click.stop="deleteMessage(item)">
               <v-tooltip
@@ -163,7 +169,8 @@ export default {
   },
   setup () {
     const store = useStore();
-    return { store };
+    const today = new Date();
+    return { store, today };
   },
   data () {
     return {
