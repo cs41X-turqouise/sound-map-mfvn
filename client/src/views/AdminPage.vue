@@ -212,7 +212,7 @@
           </thead>
           <tbody>
             <tr
-              v-for="(upload, uploadIndex) in selectedUser.uploads"
+              v-for="(upload, uploadIndex) in paginatedUploads"
               :key="uploadIndex"
               :ref="`tr-${upload._id}`"
               :class="{ 'highlight': upload._id === selectedReport?.fileId }"
@@ -268,6 +268,14 @@
               </td>
             </tr>
           </tbody>
+          <template v-slot:bottom>
+            <v-pagination
+              class="pagination"
+              v-model="currentUploadsPage"
+              :length="maxUploadsPage"
+              style="margin-top: auto;">
+            </v-pagination>
+          </template>
         </v-table>
         <p v-else>No uploads found.</p>
       </div>
@@ -403,6 +411,8 @@ export default {
       viewReports: false,
       currentUserPage: 1,
       usersPerPage: 10,
+      currentUploadsPage: 1,
+      uploadsPerPage: 10,
       currentReportsPage: 1,
       reportsPerPage: 3,
       usersSortBy: {
@@ -435,6 +445,14 @@ export default {
         || user.uploads.length.toString().includes(this.search)
         || user.role.toLowerCase().includes(this.search.toLowerCase())
       );
+    },
+    maxUploadsPage () {
+      return Math.ceil(this.selectedUser.uploads.length / this.uploadsPerPage);
+    },
+    paginatedUploads () {
+      const start = (this.currentUploadsPage - 1) * this.uploadsPerPage;
+      const end = start + this.uploadsPerPage;
+      return this.selectedUser.uploads.slice(start, end);
     },
     maxReportsPage () {
       return Math.ceil(this.reports.length / this.reportsPerPage);
