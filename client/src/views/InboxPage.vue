@@ -25,7 +25,7 @@
         <tr v-for="(item, index) in store.state.user.inbox" :key="index" @click="openMessage(item)">
           <td>{{ new Date(item.date).toLocaleDateString() }}</td>
           <td>{{ item.title }}</td>
-          <td>{{ item.sender }}</td>
+          <td>{{ item.sender.username }}</td>
           <td>
             <v-btn icon flat density="comfortable" @click.stop="deleteMessage(item)">
               <v-tooltip

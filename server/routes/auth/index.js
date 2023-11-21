@@ -71,7 +71,9 @@ export default async function (fastify, options) {
          * @type {{ id: string, name: string, email: string, picture: string }}
          */
         const userInfo = await getUserInfo(token.token.access_token);
-        let user = await User.findOne({ gid: userInfo.id });
+        let user = await User.findOne({ gid: userInfo.id })
+          .populate('inbox.sender', 'username email')
+          .exec();
 
         if (!user) {
           user = new User({

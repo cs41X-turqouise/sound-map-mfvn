@@ -36,7 +36,14 @@ export const userSchema = {
           title: { type: 'string' },
           message: { type: 'string' },
           read: { type: 'boolean' },
-          sender: { type: 'string', description: 'MongoDB ObjectId' },
+          sender: {
+            type: 'object',
+            properties: {
+              _id: { type: 'string', description: 'MongoDB ObjectId' },
+              username: { type: 'string' },
+              email: { type: 'string', format: 'email' },
+            }
+          },
         },
       },
     },
