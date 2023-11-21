@@ -90,10 +90,12 @@ export default {
      * @param {Event} e
      */
     async submit (e) {
-      const filteredFiles = new Map();
+      const hitList = [];
+      const fileList = [];
+      const fileIdList = [];
+      let maxHits = 0;
       for (const file of this.files.values()) {
-        let hits = 0; // this will be used to keep track of how many parameters of each search result matches
-        let maxHits = 0;
+        let hits = 0;
         if (this.title && file.metadata.title.includes(this.title)) {
           hits++;
         }
@@ -110,17 +112,11 @@ export default {
           hits++;
         }
         if (this.tags.length) {
-          // let found = false;
           for (const tag of this.tags) {
             if (file.metadata.tags.includes(tag)) {
               hits++;
-              // found = true;
-              // break;
             }
           }
-          // if (hits == 0) {
-          //   continue;
-          // }
         }
         if (hits == 0) {
           continue;
@@ -128,10 +124,18 @@ export default {
         if (hits > maxHits) {
           maxHits = hits;
         }
-        // Here will be the logic for adding files to maps based on how many hits they have
-        // They will then be added to filteredFiles by order of most to least hits
-
-        filteredFiles.set(file._id, file);
+        fileIdList.push(file._id);
+        fileList.push(file);
+        hitList.push(hits);
+      }
+      const filteredFiles = new Map();
+      for (let i = maxHits; i > 0; i--) {
+        console.log(i);
+        for (let j = 0; j < hitList.length; j++) {
+          if (hitList.at(j) == i) {
+            filteredFiles.set(fileIdList.at(j), fileList.at(j));
+          }
+        }
       }
       e.target.reset();
       this.$emit('filteredFiles', filteredFiles);
