@@ -238,6 +238,48 @@ export default async function (fastify, options) {
   });
 
   /**
+   * Delete message from user's inbox
+   */
+  fastify.delete('/:id/inbox/:mid', {
+    schema: {
+      tags: ['users'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'MongoDB ObjectId' },
+          mid: { type: 'string', description: 'MongoDB ObjectId' },
+        },
+      },
+      response: {
+        200: userSchema,
+      },
+    },
+    async handler (request, reply) {
+      try {
+        const _id = fastify.toObjectId(request.params.id);
+        if (!_id) return reply.code(400).send(new Error('Invalid ID'));
+
+        const _mid = fastify.toObjectId(request.params.mid);
+        if (!_mid) return reply.code(400).send(new Error('Invalid Message ID'));
+
+        const user = await User.findById(_id);
+        if (!user) return reply.code(404).send(new Error('User not found'));
+
+        const message = user.inbox.id(_mid);
+        if (!message) return reply.code(404).send(new Error('Message not found'));
+
+        message.deleteOne();
+        await user.save();
+
+        return user;
+      } catch (error) {
+        fastify.log.error(error);
+        return reply.code(500).send('Internal Server Error');
+      }
+    },
+  });
+
+  /**
    * Update a user
    */
   fastify.patch('/:id', {
@@ -359,7 +401,6 @@ export default async function (fastify, options) {
     if (!userId) return reply.code(400).send(new Error('Invalid ID'));
     /** @type {User} */
     const self = request.session.get('user'); // User performing the ban
-    fastify.log.info(self);
 
     // cannot ban self
     if (userId === self._id) {
@@ -380,6 +421,14 @@ export default async function (fastify, options) {
     // Update user ban status
     user.banned = request.body.ban;
     user.bannedBy = self._id;
+    
+    const notification = {
+      title: 'Ban notification',
+      message: `You have been ${user.banned ? 'banned' : 'unbanned'}`,
+      date: Date.now(),
+      sender: self._id,
+    };
+    user.inbox.push(notification);
     await user.save();
 
     return user;

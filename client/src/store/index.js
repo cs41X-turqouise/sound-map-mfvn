@@ -37,6 +37,11 @@ export default createStore({
     setUser (state, user) {
       state.user = user;
     },
+    removeInboxMessage (state, message) {
+      const index = state.user.inbox.findIndex((m) => m._id === message._id);
+      if (index === -1) return;
+      state.user.inbox.splice(index, 1);
+    },
     setClicked (state, clicked) {
       state.clicked = clicked;
     },
@@ -69,6 +74,9 @@ export default createStore({
     },
     setUser ({ commit }, user) {
       commit('setUser', user);
+    },
+    removeInboxMessage ({ commit }, message) {
+      commit('removeInboxMessage', message);
     },
     setClicked ({ commit }, clicked) {
       commit('setClicked', clicked);
