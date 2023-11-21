@@ -42,6 +42,11 @@ export default createStore({
       if (index === -1) return;
       state.user.inbox.splice(index, 1);
     },
+    toggleReadInboxMessage (state, data) {
+      const index = state.user.inbox.findIndex((m) => m._id === data.message._id);
+      if (index === -1) return;
+      state.user.inbox[index].read = data.read;
+    },
     setClicked (state, clicked) {
       state.clicked = clicked;
     },
@@ -77,6 +82,9 @@ export default createStore({
     },
     removeInboxMessage ({ commit }, message) {
       commit('removeInboxMessage', message);
+    },
+    toggleReadInboxMessage ({ commit }, data) {
+      commit('toggleReadInboxMessage', data);
     },
     setClicked ({ commit }, clicked) {
       commit('setClicked', clicked);
