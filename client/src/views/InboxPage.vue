@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <v-toolbar>
+  <div class="InboxPage">
+    <v-toolbar border>
       <v-text-field
         append-icon="mdi-magnify"
         label="Search in mail"
@@ -241,6 +241,13 @@ export default {
 </script>
 
 <style scoped>
+.InboxPage {
+  padding: 10px;
+  border-radius: 4px;
+  width: 99%;
+  box-sizing: border-box;
+}
+
 table {
   width: 100%;
   table-layout: fixed;

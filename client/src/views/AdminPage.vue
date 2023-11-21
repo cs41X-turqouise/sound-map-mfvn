@@ -1,6 +1,6 @@
 <template>
   <div class="AdminPage">
-    <v-toolbar >
+    <v-toolbar>
       <v-text-field
         v-model="search"
         append-icon="mdi-magnify"
@@ -712,6 +712,7 @@ export default {
 <style scoped>
 .AdminPage {
   padding: 20px;
+  width: 99%;
 }
 .userTable {
   width: 100%;
