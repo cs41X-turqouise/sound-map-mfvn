@@ -566,6 +566,11 @@ export default {
         this.selectedUser.uploads = uploads.data;
         this.activeTab = 'uploads';
         this.selectedReport = report;
+        /**
+         * Figure out which page the report is on and set the current page to that.
+         */
+        const index = this.selectedUser.uploads.findIndex((u) => u._id === report.fileId);
+        this.currentUploadsPage = Math.ceil((index + 1) / this.uploadsPerPage);
         this.$nextTick(() => {
           this.$refs[`tr-${report.fileId}`][0].scrollIntoView();
         });
