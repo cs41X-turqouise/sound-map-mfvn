@@ -18,15 +18,41 @@
           User Menu
         </v-btn>
       </template>
-      <v-list>
+      <v-list density="compact">
         <v-list-item
-          v-if="['admin', 'moderator'].includes(store.state.user?.role)"
-          @click="nav($route.path === '/admin' ? '/' : '/admin')">
+          v-if="$route.path !== '/inbox'"
+          @click="nav('/inbox')"
+        >
           <template v-slot:prepend>
-            <v-icon :icon="$route.path === '/admin' ? 'mdi-home' : 'mdi-shield-crown'"></v-icon>
+            <v-badge
+              left
+              color="primary"
+              :content="store.state.user?.inbox.length || 0"
+            >
+              <v-icon icon="mdi-inbox"></v-icon>
+            </v-badge>
           </template>
-          <v-list-item-title>{{ $route.path === '/admin' ? 'Home' : 'Admin' }}</v-list-item-title>
+          <v-list-item-title>Inbox</v-list-item-title>
         </v-list-item>
+
+        <v-list-item
+          v-if="roles[store.state.user.role] > roles['user'] && $route.path !== '/admin'"
+          @click="nav('/admin')">
+          <template v-slot:prepend>
+            <v-icon icon="mdi-shield-crown"></v-icon>
+          </template>
+          <v-list-item-title>Admin</v-list-item-title>
+        </v-list-item>
+
+        <v-list-item
+          v-if="$route.path !== '/'"
+          @click="nav('/')">
+          <template v-slot:prepend>
+            <v-icon icon="mdi-home"></v-icon>
+          </template>
+          <v-list-item-title>Home</v-list-item-title>
+        </v-list-item>
+
         <v-list-item
           @click="nav('/profile')">
           <template v-slot:prepend>
@@ -34,6 +60,7 @@
           </template>
           <v-list-item-title>Profile</v-list-item-title>
         </v-list-item>
+
         <v-list-item
           @click="logout">
           <template v-slot:prepend>
@@ -56,7 +83,13 @@ export default {
   setup () {
     const router = useRouter();
     const store = useStore();
-    return { router, store };
+    const roles = Object.freeze({
+      user: 1,
+      moderator: 2,
+      admin: 3,
+      superadmin: 4,
+    });
+    return { router, store, roles };
   },
   methods: {
     nav (path) {
