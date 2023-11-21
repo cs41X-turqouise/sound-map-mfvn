@@ -61,7 +61,7 @@
         </v-table>
         <v-pagination
           class="pagination"
-          v-model="currentReportsPage"
+          v-model="reportsTable.current"
           :length="maxReportsPage"
           style="margin-top: auto;">
         </v-pagination>
@@ -112,7 +112,7 @@
     </table>
     <v-pagination
       class="pagination"
-      v-model="currentUserPage"
+      v-model="userTable.current"
       :length="maxUserPage"
       style="margin-top: auto;">
     </v-pagination>
@@ -271,7 +271,7 @@
           <template v-slot:bottom>
             <v-pagination
               class="pagination"
-              v-model="currentUploadsPage"
+              v-model="uploadsTable.current"
               :length="maxUploadsPage"
               style="margin-top: auto;">
             </v-pagination>
@@ -283,31 +283,11 @@
         <h2>Manage User</h2>
         <p>Current role: {{ selectedUser.role }}</p>
         <v-btn
-          v-if="selectedUser.role === 'user' && roles[store.state.user.role] > roles['moderator']"
-          @click="changeUserRole(selectedUser, 'moderator')">
-          Promote to Mod
-        </v-btn>
-        <v-btn
-          v-else-if="selectedUser.role === 'moderator' && store.state.user.role === 'superadmin'"
-          @click="changeUserRole(selectedUser, 'admin')">
-          Promote to Admin
-        </v-btn>
-        <v-btn
-          v-if="selectedUser.role !== 'user' && roles[selectedUser.role] < roles[store.state.user.role]"
-          @click="changeUserRole(selectedUser, 'user')">
-          Demote to User
-        </v-btn>
-        <v-btn
-          v-if="roles[selectedUser.role] < roles[store.state.user.role]"
-          @click="toggleBan(selectedUser, !selectedUser.banned)"
+          v-for="button in roleButtons"
+          :key="button.text"
+          @click="button.click"
         >
-          {{ !selectedUser.banned ? 'Ban' : 'Unban' }} User
-        </v-btn>
-        <v-btn
-          v-if="roles[selectedUser.role] < roles[store.state.user.role]"
-          @click="deleteUser(selectedUser)"
-        >
-          Delete User
+          {{ button.text }}
         </v-btn>
       </div>
     </div>
@@ -366,6 +346,12 @@ import ItemCard from '../components/ItemCard.vue';
  * @property {Date} date - The date the report was created.
  */
 
+/** @param {number} perPage */
+const paginationSetup = (perPage) => ({
+  current: 1,
+  perPage
+});
+
 export default {
   name: 'AdminPage',
   components: {
@@ -409,12 +395,9 @@ export default {
       search: '',
       reports: [],
       viewReports: false,
-      currentUserPage: 1,
-      usersPerPage: 10,
-      currentUploadsPage: 1,
-      uploadsPerPage: 10,
-      currentReportsPage: 1,
-      reportsPerPage: 3,
+      userTable: paginationSetup(10),
+      uploadsTable: paginationSetup(10),
+      reportsTable: paginationSetup(3),
       usersSortBy: {
         key: '',
         order: 'asc',
@@ -429,11 +412,11 @@ export default {
   },
   computed: {
     maxUserPage () {
-      return Math.ceil(this.filteredUsers.length / this.usersPerPage);
+      return Math.ceil(this.filteredUsers.length / this.userTable.perPage);
     },
     paginatedUsers () {
-      const start = (this.currentUserPage - 1) * this.usersPerPage;
-      const end = start + this.usersPerPage;
+      const start = (this.userTable.current - 1) * this.userTable.perPage;
+      const end = start + this.userTable.perPage;
       return this.filteredUsers.slice(start, end);
     },
     filteredUsers () {
@@ -447,20 +430,49 @@ export default {
       );
     },
     maxUploadsPage () {
-      return Math.ceil(this.selectedUser.uploads.length / this.uploadsPerPage);
+      return Math.ceil(this.selectedUser.uploads.length / this.uploadsTable.perPage);
     },
     paginatedUploads () {
-      const start = (this.currentUploadsPage - 1) * this.uploadsPerPage;
-      const end = start + this.uploadsPerPage;
+      const start = (this.uploadsTable.current - 1) * this.uploadsTable.perPage;
+      const end = start + this.uploadsTable.perPage;
       return this.selectedUser.uploads.slice(start, end);
     },
     maxReportsPage () {
-      return Math.ceil(this.reports.length / this.reportsPerPage);
+      return Math.ceil(this.reports.length / this.reportsTable.perPage);
     },
     paginatedReports () {
-      const start = (this.currentReportsPage - 1) * this.reportsPerPage;
-      const end = start + this.reportsPerPage;
+      const start = (this.reportsTable.current - 1) * this.reportsTable.perPage;
+      const end = start + this.reportsTable.perPage;
       return this.reports.slice(start, end);
+    },
+    roleButtons () {
+      return [
+        {
+          condition: this.selectedUser.role === 'user' && this.roles[this.store.state.user.role] > this.roles['moderator'],
+          click: () => this.changeUserRole(this.selectedUser, 'moderator'),
+          text: 'Promote to Mod',
+        },
+        {
+          condition: this.selectedUser.role === 'moderator' && this.store.state.user.role === 'superadmin',
+          click: () => this.changeUserRole(this.selectedUser, 'admin'),
+          text: 'Promote to Admin',
+        },
+        {
+          condition: this.selectedUser.role !== 'user' && this.roles[this.selectedUser.role] < this.roles[this.store.state.user.role],
+          click: () => this.changeUserRole(this.selectedUser, 'user'),
+          text: 'Demote to User',
+        },
+        {
+          condition: this.roles[this.selectedUser.role] < this.roles[this.store.state.user.role],
+          click: () => this.toggleBan(this.selectedUser, !this.selectedUser.banned),
+          text: this.selectedUser.banned ? 'Unban User' : 'Ban User',
+        },
+        {
+          condition: this.roles[this.selectedUser.role] < this.roles[this.store.state.user.role],
+          click: () => this.deleteUser(this.selectedUser),
+          text: 'Delete User',
+        },
+      ].filter((button) => button.condition);
     },
   },
   methods: {
@@ -570,7 +582,7 @@ export default {
          * Figure out which page the report is on and set the current page to that.
          */
         const index = this.selectedUser.uploads.findIndex((u) => u._id === report.fileId);
-        this.currentUploadsPage = Math.ceil((index + 1) / this.uploadsPerPage);
+        this.uploadsTable.current = Math.ceil((index + 1) / this.uploadsTable.perPage);
         this.$nextTick(() => {
           this.$refs[`tr-${report.fileId}`][0].scrollIntoView();
         });
