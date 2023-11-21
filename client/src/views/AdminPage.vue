@@ -27,7 +27,7 @@
     <CenterModal
       :show="viewReports"
       style="top: 0; transform: translate(-50%, 0); font-size: small;"
-      :modalStyle="{ 'width': 'fit-content', 'max-width': 'none' }"
+      :modalStyle="{ 'width': 'fit-content', 'max-width': 'none', 'text-align': 'left' }"
       @close="closeReport"
     >
       <h2>Reports</h2>

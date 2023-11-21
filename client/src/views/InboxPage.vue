@@ -2,10 +2,12 @@
   <div class="InboxPage">
     <v-toolbar border>
       <v-text-field
+        v-model="search"
         append-icon="mdi-magnify"
         label="Search in mail"
         single-line
         hide-details
+        clearable
         rounded
         variant="outlined"
       ></v-text-field>
@@ -19,6 +21,21 @@
             <v-checkbox v-model="selectAll" label="Select All">
             </v-checkbox>
             <v-spacer></v-spacer>
+            <v-btn
+              v-if="!selectedMessages.length"
+              icon
+              @click="refresh()"
+            >
+              <v-tooltip
+                activator="parent"
+                location="bottom"
+                style="z-index: 9999;"
+              >
+                Refresh
+              </v-tooltip>
+              <v-icon>mdi-refresh</v-icon>
+            </v-btn>
+
             <v-btn
               v-if="selectedMessages.length"
               icon
@@ -77,7 +94,7 @@
       </thead>
       <tbody>
         <tr
-          v-for="(item, index) in store.state.user.inbox"
+          v-for="(item, index) in filteredMessages"
           :key="index"
           dark
           :class="{ unread: !item.read }"
@@ -152,10 +169,39 @@ export default {
     return {
       dialog: false,
       selectedMessage: null,
+      search: '',
       selectAll: false,
       selectedOption: 'all',
       selectedMessages: [],
     };
+  },
+  computed: {
+    /** @returns {Message[]} */
+    messages () {
+      return this.store.state.user.inbox;
+    },
+    /** @returns {Message[]} */
+    filteredMessages () {
+      let messages = (() => {
+        switch (this.selectedOption) {
+        case 'read':
+          return this.messages.filter((message) => message.read);
+        case 'unread':
+          return this.messages.filter((message) => !message.read);
+        case 'all':
+        default:
+          return this.messages;
+        }
+      })();
+      if (this.search) {
+        messages = messages.filter((message) => {
+          return message.title.toLowerCase().includes(this.search.toLowerCase())
+            || message.message.toLowerCase().includes(this.search.toLowerCase())
+            || message.sender.username.toLowerCase().includes(this.search.toLowerCase());
+        });
+      }
+      return [...messages].sort((a, b) => new Date(b.date) - new Date(a.date));
+    },
   },
   watch: {
     selectAll (newVal) {
@@ -167,6 +213,9 @@ export default {
     },
   },
   methods: {
+    refresh () {
+      this.store.dispatch('fetchUser');
+    },
     /** @param {Message} message */
     openMessage (message) {
       console.log('openMessage', message);

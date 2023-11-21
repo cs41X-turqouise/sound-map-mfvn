@@ -1,4 +1,5 @@
 import { createStore, createLogger } from 'vuex';
+import Api from '../services/Api';
 // import createPersistedState from 'vuex-persistedstate'
 
 export default createStore({
@@ -79,6 +80,10 @@ export default createStore({
     },
     setUser ({ commit }, user) {
       commit('setUser', user);
+    },
+    async fetchUser ({ commit }) {
+      const res = await Api().get('/users/self');
+      commit('setUser', res.data);
     },
     removeInboxMessage ({ commit }, message) {
       commit('removeInboxMessage', message);
