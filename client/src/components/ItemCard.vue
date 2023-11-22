@@ -9,8 +9,8 @@
           <p>{{ JSON.parse(item.metadata.geodata).formatted }}</p>
         </div>
         <span>
-          Lat: {{ Number(item.metadata.latitude).toFixed(4) }}
-          Lng: {{ Number(item.metadata.longitude).toFixed(4) }}
+          Lat: {{ Number(item.metadata.latitude).toFixed(4) }}&deg;
+          Lng: {{ Number(item.metadata.longitude).toFixed(4) }}&deg;
           <br>
         </span>
         <span class="date">
