@@ -32,7 +32,7 @@
     >
       <h2>Reports</h2>
       <div v-if="reports.length">
-        <v-table >
+        <v-table density="comfortable">
           <thead>
             <tr>
               <th>Actions</th>
@@ -68,7 +68,8 @@
       </div>
       <p v-else>No reports found.</p>
     </CenterModal>
-    <table class="userTable">
+
+    <v-table class="userTable" density="comfortable">
       <thead>
         <tr>
           <th>Profile Photo</th>
@@ -109,13 +110,16 @@
           <td>{{ user.role }}</td>
         </tr>
       </tbody>
-    </table>
-    <v-pagination
-      class="pagination"
-      v-model="userTable.current"
-      :length="maxUserPage"
-      style="margin-top: auto;">
-    </v-pagination>
+      <template v-slot:bottom>
+        <v-pagination
+          class="pagination"
+          v-model="userTable.current"
+          :length="maxUserPage"
+          style="margin-top: auto;">
+        </v-pagination>
+      </template>
+    </v-table>
+
     <div v-if="selectedUser?.username">
       <h2 ref="selectedUser">
         {{ selectedUser.username }}'s Details
@@ -132,6 +136,7 @@
           Manage User
         </button>
       </div>
+
       <div v-show="activeTab === 'uploads'" class="uploads-tab">
         <CenterModal :show="!!edit.selected" @close="closeEdit">
           <ItemCard :item="edit.selected" :urls="urls" @addUrl="(el) => urls.set(el.id, el.objectUrl)">
@@ -279,6 +284,7 @@
         </v-table>
         <p v-else>No uploads found.</p>
       </div>
+
       <div v-show="activeTab === 'roles'" class="roles-tab">
         <h2>Manage User</h2>
         <p>Current role: {{ selectedUser.role }}</p>
@@ -751,12 +757,14 @@ export default {
 }
 .userTable {
   width: 100%;
-  max-width: 800px;
+  /* max-width: 800px; */
+  max-width: min-content;
   margin: 0 auto;
   border-collapse: collapse;
   margin-top: 20px;
   background-color: #fff;
-  text-align: center;
+  text-align: left;
+  /* align-items: center; */
 }
 .userTable th,
 userTable td {
