@@ -292,11 +292,30 @@
         <h2>Manage User</h2>
         <p>Current role: {{ selectedUser.role }}</p>
         <v-btn
-          v-for="button in roleButtons"
+          v-for="button in promoteRoleButtons"
           :key="button.text"
           @click="button.click"
         >
           {{ button.text }}
+        </v-btn>
+
+        <v-btn
+          v-if="selectedUser.role !== 'user' && roles[selectedUser.role] < roles[store.state.user.role]">
+          Demote to User
+          <ReportDialog @submitReason="(reason) => changeUserRole(selectedUser, 'user', reason)" />
+        </v-btn>
+
+        <v-btn
+          v-if="roles[selectedUser.role] < roles[store.state.user.role]">
+          {{ !selectedUser.banned ? 'Ban' : 'Unban' }} User
+          <ReportDialog @submitReason="(reason) => toggleBan(selectedUser, !selectedUser.banned, reason)" />
+        </v-btn>
+
+        <v-btn
+          v-if="roles[selectedUser.role] < roles[store.state.user.role]"
+          @click="deleteUser(selectedUser)"
+        >
+          Delete User
         </v-btn>
       </div>
     </div>
@@ -456,7 +475,7 @@ export default {
       const end = start + this.reportsTable.perPage;
       return this.reports.slice(start, end);
     },
-    roleButtons () {
+    promoteRoleButtons () {
       return [
         {
           condition: this.selectedUser.role === 'user' && this.roles[this.store.state.user.role] > this.roles['moderator'],
@@ -467,21 +486,6 @@ export default {
           condition: this.selectedUser.role === 'moderator' && this.store.state.user.role === 'superadmin',
           click: () => this.changeUserRole(this.selectedUser, 'admin'),
           text: 'Promote to Admin',
-        },
-        {
-          condition: this.selectedUser.role !== 'user' && this.roles[this.selectedUser.role] < this.roles[this.store.state.user.role],
-          click: () => this.changeUserRole(this.selectedUser, 'user'),
-          text: 'Demote to User',
-        },
-        {
-          condition: this.roles[this.selectedUser.role] < this.roles[this.store.state.user.role],
-          click: () => this.toggleBan(this.selectedUser, !this.selectedUser.banned),
-          text: this.selectedUser.banned ? 'Unban User' : 'Ban User',
-        },
-        {
-          condition: this.roles[this.selectedUser.role] < this.roles[this.store.state.user.role],
-          click: () => this.deleteUser(this.selectedUser),
-          text: 'Delete User',
         },
       ].filter((button) => button.condition);
     },
@@ -637,10 +641,11 @@ export default {
     /**
      * @param {UserSchema} user
      * @param {'user' | 'moderator'} newRole
+     * @param {string} [reason]
      */
-    async changeUserRole (user, newRole) {
+    async changeUserRole (user, newRole, reason = '') {
       try {
-        await Api().patch(`users/${user._id}/role`, { role: newRole });
+        await Api().patch(`users/${user._id}/role`, { role: newRole, reason });
         const _user = this.users.find((u) => u._id === user._id);
         if (_user) {
           user.role = newRole;
@@ -653,16 +658,20 @@ export default {
     /**
      * @param {UserSchema} user
      * @param {boolean} [ban]
+     * @param {string} [reason]
      */
-    async toggleBan (user, ban = true) {
+    async toggleBan (user, ban = true, reason = '') {
       try {
-        await Api().patch(`users/${user._id}/ban`, { ban });
+        await Api().patch(`users/${user._id}/ban`, { ban, reason });
         user.banned = ban;
       } catch (err) {
         console.error(err);
       }
     },
-    /** @param {UploadSchema} upload */
+    /**
+     * @param {UploadSchema} upload
+     * @param {string} reason
+     */
     async deleteUpload (upload, reason) {
       try {
         const deleted = await Api().delete(`uploads/sound/${upload._id}`);
@@ -683,7 +692,10 @@ export default {
         console.error(error);
       }
     },
-    /** @param {string} image */
+    /**
+     * @param {string} image
+     * @param {string} reason
+     */
     async deleteImage (image, reason) {
       try {
         const deleted = await Api().delete(`uploads/image/${image}`);
