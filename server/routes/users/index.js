@@ -564,6 +564,7 @@ export default async function (fastify, options) {
             type: 'string',
             enum: ['moderator', 'admin', 'user'],
           },
+          reason: { type: 'string', description: 'Reason for role change' },
         }
       },
       response: {
@@ -588,18 +589,30 @@ export default async function (fastify, options) {
       if (roles[newRole] >= roles[self.role]) {
         return reply.code(403).send({ error: 'Forbidden' });
       }
+
+      const user = await User.findById(_id);
   
+      // Handle case where user does not exist
+      if (!user) {
+        return reply.code(404).send({ error: 'User not found' });
+      }
+
       // Update user role
       const updatedUser = await User.findByIdAndUpdate(
         _id,
         { role: newRole },
         { new: true, runValidators: true }
       );
-  
-      // Handle case where user does not exist
-      if (!updatedUser) {
-        return reply.code(404).send({ error: 'User not found' });
-      }
+
+      const roleChangeType = roles[newRole] < roles[user.role] ? 'demoted' : 'promoted';
+      const notification = new InboxMessage(
+        `[Role Change] You have been ${roleChangeType}`,
+        request.body.reason,
+        Date.now(),
+        self._id
+      );
+      updatedUser.inbox.push(notification);
+      await updatedUser.save();
   
       // Return the updated user
       return reply.code(200).send(updatedUser);
