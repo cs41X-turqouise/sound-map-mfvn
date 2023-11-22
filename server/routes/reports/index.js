@@ -3,6 +3,7 @@ import Sound from '../../models/Sound.js';
 import Reports from '../../models/Reports.js';
 import { reportSchema } from './schemas.js';
 import { userSchema } from '../users/schemas.js';
+import { verifyLoggedIn, checkUserRole } from '../../utils/utils.js';
 
 /**
  * Routes for handling CRUD (Create, Read, Update, and Delete) operations on reports
@@ -10,6 +11,11 @@ import { userSchema } from '../users/schemas.js';
  * @param {Object} options plugin options, refer to https://www.fastify.io/docs/latest/Reference/Plugins/#plugin-options
  */
 export default async function (fastify, options) {
+  /**
+   * Middleware for checking if user is logged in
+   */
+  fastify.addHook('onRequest', verifyLoggedIn);
+
   /**
    * Handle user reporting a file
    */
@@ -69,6 +75,7 @@ export default async function (fastify, options) {
    * Get all reports in the database
    */
   fastify.get('/', {
+    preHandler: checkUserRole('moderator'),
     schema: {
       tags: ['uploads'],
       response: {
@@ -88,6 +95,7 @@ export default async function (fastify, options) {
    * Get a report by ID
    */
   fastify.get('/:id', {
+    preHandler: checkUserRole('moderator'),
     schema: {
       tags: ['reports'],
       params: {
@@ -115,6 +123,7 @@ export default async function (fastify, options) {
    * Get user who filed a report
    */
   fastify.get('/:id/user', {
+    preHandler: checkUserRole('moderator'),
     schema: {
       tags: ['reports'],
       params: {
@@ -145,6 +154,7 @@ export default async function (fastify, options) {
    * Delete a report by ID
    */
   fastify.delete('/:id', {
+    preHandler: checkUserRole('moderator'),
     schema: {
       tags: ['reports'],
       params: {

@@ -2,8 +2,7 @@ import User from '../../models/User.js';
 import Sound from '../../models/Sound.js';
 import Image from '../../models/Image.js';
 import { uploadSchema } from './schemas.js';
-import { userSchema } from '../users/schemas.js';
-import { verifyLoggedIn, verifyNotBanned } from '../../utils/utils.js';
+import { verifyLoggedIn, verifyNotBanned, checkUserRole } from '../../utils/utils.js';
 
 /**
  * Routes for handling CRUD (Create, Read, Update, and Delete) operations on uploads
@@ -81,28 +80,6 @@ export default async function (fastify, options) {
       }
     }
   );
-  
-  /**
-   * Does not work
-   * Allows users to upload an array of files
-   * @todo We should be able to upload multiple sound files and corresponding images if any
-   */
-  fastify.post('/bulk', {
-    schema: {
-      tags: ['uploads'],
-      response: {
-        501: {
-          type: 'object',
-          properties: {
-            error: { type: 'string' }
-          }
-        },
-      },
-    },
-    async handler (request, reply) {
-      reply.code(501).send({ error: 'Not Implemented' });
-    }
-  });
 
   /**
    * Get all uploads
@@ -230,37 +207,10 @@ export default async function (fastify, options) {
   });
 
   /**
-   * Find user who uploaded a file
-   */
-  fastify.get('/:uid/:fid', {
-    schema: {
-      tags: ['uploads'],
-      params: {
-        type: 'object',
-        properties: {
-          fid: { type: 'string', description: 'MongoDB ObjectId of the file' },
-          uid: { type: 'string', description: 'MongoDB ObjectId of the user' },
-        },
-      },
-      response: {
-        200: userSchema,
-      },
-    },
-    async handler (request, reply) {
-      const fid = fastify.toObjectId(request.params.fid);
-      const uid = fastify.toObjectId(request.params.uid);
-      if (!fid || !uid) return reply.code(400).send(new Error('Invalid ID'));
-      const user = await Sound.findById(request.params.fileId)
-        .populate('users')
-        .findById(request.params.userId);
-      return user;
-    },
-  });
-
-  /**
    * Delete a sound file - should be Admin only or limited to the user themselves
    */
   fastify.delete('/sound/:id', {
+    preHandler: checkUserRole('moderator', true),
     schema: {
       tags: ['uploads'],
       params: {
@@ -305,6 +255,7 @@ export default async function (fastify, options) {
    * Delete a image file - should be Admin only or limited to the user themselves
    */
   fastify.delete('/image/:id', {
+    preHandler: checkUserRole('moderator', true),
     schema: {
       tags: ['uploads'],
       params: {
@@ -340,6 +291,7 @@ export default async function (fastify, options) {
    * Rename a file - should be Admin only or limited to the user themselves
    */
   fastify.patch('/filename/:id', {
+    preHandler: checkUserRole('moderator', true),
     schema: {
       tags: ['uploads'],
       params: {
@@ -379,6 +331,7 @@ export default async function (fastify, options) {
    * Update metadata of a file - should be Admin only or limited to the user themselves
    */
   fastify.patch('/metadata/:id', {
+    preHandler: checkUserRole('moderator', true),
     schema: {
       tags: ['uploads'],
       params: {

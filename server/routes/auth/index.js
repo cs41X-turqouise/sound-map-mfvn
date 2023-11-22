@@ -111,6 +111,7 @@ export default async function (fastify, options) {
   });
 
   fastify.post('/logout', {
+    onRequest: fastify.csrfCheck,
     schema: {
       tags: ['auth'],
       response: {
