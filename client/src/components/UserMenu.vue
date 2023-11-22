@@ -27,7 +27,7 @@
             <v-badge
               left
               color="primary"
-              :content="store.state.user?.inbox.length || 0"
+              :content="store.state.user?.inbox.filter((m) => !m.read).length || 0"
             >
               <v-icon icon="mdi-inbox"></v-icon>
             </v-badge>
