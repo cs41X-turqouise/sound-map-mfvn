@@ -6,6 +6,25 @@ import { uploadSchema } from '../uploads/schemas.js';
 import { checkUserRole, roles } from '../../utils/utils.js';
 
 /**
+ * @class InboxMessage
+ */
+class InboxMessage {
+  /**
+   * @constructor
+   * @param {string} title
+   * @param {string} message
+   * @param {Date} date
+   * @param {import('../../models/User').User} sender
+   */
+  constructor (title, message, date, sender) {
+    this.title = title;
+    this.message = message;
+    this.date = date;
+    this.sender = sender;
+  }
+}
+
+/**
  * Routes for handling CRUD (Create, Read, Update, and Delete) operations on users
  * @param {import("fastify").FastifyInstance} fastify
  * @param {Object} options plugin options, refer to https://www.fastify.io/docs/latest/Reference/Plugins/#plugin-options
@@ -202,6 +221,53 @@ export default async function (fastify, options) {
   });
 
   /**
+   * Create a new message for a user
+   */
+  fastify.post('/:id/inbox', {
+    schema: {
+      tags: ['users'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'MongoDB ObjectId' },
+        },
+      },
+      body: {
+        type: 'object',
+        required: ['title', 'message'],
+        properties: {
+          title: { type: 'string' },
+          message: { type: 'string' },
+        },
+      },
+      response: {
+        200: userSchema,
+      },
+    },
+    async handler (request, reply) {
+      try {
+        const _id = fastify.toObjectId(request.params.id);
+        if (!_id) return reply.code(400).send(new Error('Invalid ID'));
+
+        const user = await User.findById(_id);
+        if (!user) return reply.code(404).send(new Error('User not found'));
+
+        const { title, message } = request.body;
+        const sender = request.session.get('user')._id;
+
+        const notification = new InboxMessage(title, message, Date.now(), sender);
+        user.inbox.push(notification);
+        await user.save();
+
+        return user;
+      } catch (error) {
+        fastify.log.error(error);
+        return reply.code(500).send('Internal Server Error');
+      }
+    },
+  });
+
+  /**
    * Delete a user - should be Admin only or limited to the user themselves
    */
   fastify.delete('/:id', {
@@ -313,15 +379,6 @@ export default async function (fastify, options) {
           id: { type: 'string', description: 'MongoDB ObjectId' },
         },
       },
-      // body: {
-      //   type: 'object',
-      //   properties: {
-      //     messages: {
-      //       type: 'array',
-      //       items: { type: 'string', description: 'MongoDB ObjectId' },
-      //     },
-      //   },
-      // },
       response: {
         200: userSchema,
       },
@@ -569,6 +626,7 @@ export default async function (fastify, options) {
         required: ['ban'],
         properties: {
           ban: { type: 'boolean', description: 'true to ban, false to unban' },
+          reason: { type: 'string', description: 'Reason for ban or unban' },
         }
       },
       response: {
@@ -601,12 +659,12 @@ export default async function (fastify, options) {
     user.banned = request.body.ban;
     user.bannedBy = self._id;
     
-    const notification = {
-      title: 'Ban notification',
-      message: `You have been ${user.banned ? 'banned' : 'unbanned'}`,
-      date: Date.now(),
-      sender: self._id,
-    };
+    const notification = new InboxMessage(
+      `[Ban] You have been ${user.banned ? 'banned' : 'unbanned'}`,
+      request.body.reason,
+      Date.now(),
+      self._id
+    );
     user.inbox.push(notification);
     await user.save();
 
