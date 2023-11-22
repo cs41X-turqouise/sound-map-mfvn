@@ -820,17 +820,8 @@ userTable td {
 .userTable th {
   background-color: #f2f2f2;
 }
-/* .userTable tr:nth-child(4n), .userTable tr:nth-child(4n-1) {
+.userTable tr:nth-child(even) {
   background-color: #f2f2f2;
-}
-.userTable tr:nth-child(4n-2), .userTable tr:nth-child(4n-3) {
-  background-color: #e6e6e6;
-} */
-.userTable tr:nth-child(2n) {
-  background-color: #f2f2f2;
-}
-.userTable tr:nth-child(2n - 1) {
-  background-color: #e6e6e6;
 }
 .userTable td span {
   display: block;
@@ -839,30 +830,11 @@ userTable td {
 .userTable td span:last-child {
   margin-bottom: 0;
 }
-.selected-user-files {
-  margin-top: 20px;
-  padding: 10px;
-  background-color: #f5f5f5;
-  border-radius: 5px;
-}
 .user-id-button:hover {
   color: blue;
   background-color: #f2f2f2;
   text-decoration: underline;
   cursor: pointer;
-}
-.tabs button {
-  padding: 10px 20px;
-  border: none;
-  background-color: #f2f2f2;
-  margin-right: 5px;
-  cursor: pointer;
-}
-.tabs button.active {
-  background-color: #d1eaff;
-}
-.tabs button:hover {
-  background-color: #e3f2fd;
 }
 .uploads-tab {
   margin-top: 20px;
@@ -870,6 +842,9 @@ userTable td {
   background-color: #f5f5f5;
   border-radius: 5px;
   font-size: small;
+}
+.uploads-tab th, td {
+  text-align: left;
 }
 .roles-tab {
   margin: 0 auto;
