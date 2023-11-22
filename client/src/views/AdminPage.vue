@@ -120,22 +120,29 @@
       </template>
     </v-table>
 
-    <div v-if="selectedUser?.username">
-      <h2 ref="selectedUser">
-        {{ selectedUser.username }}'s Details
-      </h2>
-      <div class="tabs">
-        <button
-          @click="setActiveTab('uploads')"
-          :class="{ active: activeTab === 'uploads' }">
+    <v-card v-if="selectedUser?.username" class="ma-4">
+      <v-card-title primary-title>
+        <h3 ref="selectedUser">
+          {{ selectedUser.username }}'s Details
+        </h3>
+      </v-card-title>
+
+      <v-tabs
+        v-model="activeTab"
+        color="primary"
+        dark
+        grow
+        slider-color="primary"
+      >
+        <v-tab value="uploads">
+          <v-icon>mdi-upload</v-icon>
           Uploaded Files
-        </button>
-        <button
-          @click="setActiveTab('roles')"
-          :class="{ active: activeTab === 'roles' }">
+        </v-tab>
+        <v-tab value="roles">
+          <v-icon>mdi-account</v-icon>
           Manage User
-        </button>
-      </div>
+        </v-tab>
+      </v-tabs>
 
       <div v-show="activeTab === 'uploads'" class="uploads-tab">
         <CenterModal :show="!!edit.selected" @close="closeEdit">
@@ -194,7 +201,6 @@
             </v-card>
           </v-form>
         </CenterModal>
-        <h2>Uploaded Files</h2>
         <audio class="audio" controls :key="activeMedia.url" ref="audio-player">
           <source :src="activeMedia.url" :type="activeMedia.type">
         </audio>
@@ -288,37 +294,38 @@
         <p v-else>No uploads found.</p>
       </div>
 
-      <div v-show="activeTab === 'roles'" class="roles-tab">
-        <h2>Manage User</h2>
-        <p>Current role: {{ selectedUser.role }}</p>
-        <v-btn
-          v-for="button in promoteRoleButtons"
-          :key="button.text"
-          @click="button.click"
-        >
-          {{ button.text }}
-        </v-btn>
+      <v-card v-show="activeTab === 'roles'" class="roles-tab">
+        <v-card-subtitle>Current role: {{ selectedUser.role }}</v-card-subtitle>
+        <v-card-actions style="justify-content: center;">
+          <v-btn
+            v-for="button in promoteRoleButtons"
+            :key="button.text"
+            @click="button.click"
+          >
+            {{ button.text }}
+          </v-btn>
 
-        <v-btn
-          v-if="selectedUser.role !== 'user' && roles[selectedUser.role] < roles[store.state.user.role]">
-          Demote to User
-          <ReportDialog @submitReason="(reason) => changeUserRole(selectedUser, 'user', reason)" />
-        </v-btn>
+          <v-btn
+            v-if="selectedUser.role !== 'user' && roles[selectedUser.role] < roles[store.state.user.role]">
+            Demote to User
+            <ReportDialog @submitReason="(reason) => changeUserRole(selectedUser, 'user', reason)" />
+          </v-btn>
 
-        <v-btn
-          v-if="roles[selectedUser.role] < roles[store.state.user.role]">
-          {{ !selectedUser.banned ? 'Ban' : 'Unban' }} User
-          <ReportDialog @submitReason="(reason) => toggleBan(selectedUser, !selectedUser.banned, reason)" />
-        </v-btn>
+          <v-btn
+            v-if="roles[selectedUser.role] < roles[store.state.user.role]">
+            {{ !selectedUser.banned ? 'Ban' : 'Unban' }} User
+            <ReportDialog @submitReason="(reason) => toggleBan(selectedUser, !selectedUser.banned, reason)" />
+          </v-btn>
 
-        <v-btn
-          v-if="roles[selectedUser.role] < roles[store.state.user.role]"
-          @click="deleteUser(selectedUser)"
-        >
-          Delete User
-        </v-btn>
-      </div>
-    </div>
+          <v-btn
+            v-if="roles[selectedUser.role] < roles[store.state.user.role]"
+            @click="deleteUser(selectedUser)"
+          >
+            Delete User
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-card>
   </div>
 </template>
 
