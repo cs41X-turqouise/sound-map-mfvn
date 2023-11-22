@@ -1,5 +1,5 @@
 <template>
-  <div class="InboxPage">
+  <div v-if="store.state.user" class="InboxPage">
     <v-toolbar border>
       <v-text-field
         v-model="search"

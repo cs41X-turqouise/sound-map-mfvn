@@ -1,5 +1,5 @@
 <template>
-  <div class="AdminPage">
+  <div v-if="store.state.user" class="AdminPage">
     <v-toolbar>
       <v-text-field
         v-model="search"
@@ -227,7 +227,10 @@
                 <v-btn @click="setEdit(upload)">
                   Edit{{ edit.selected?._id === upload._id ? 'ing' : '' }}
                 </v-btn>
-                <v-btn @click="deleteUpload(upload)">Delete</v-btn>
+                <v-btn>
+                  Delete
+                  <ReportDialog @submitReason="(reason) => deleteUpload(upload, reason)" />
+                </v-btn>
               </td>
               <td><span>{{ upload._id }}</span></td>
               <td><span>{{ upload.filename }}</span></td>
@@ -245,8 +248,7 @@
                       icon
                       density="comfortable"
                       size="small"
-                      style="position: absolute; top: 0; right: 0;"
-                      @click="deleteImage(image)">
+                      style="position: absolute; top: 0; right: 0;">
                       <v-tooltip
                         activator="parent"
                         location="start"
@@ -254,6 +256,7 @@
                       >
                         Delete Image
                       </v-tooltip>
+                      <ReportDialog @submitReason="(reason) => deleteImage(image, reason)" />
                       <v-icon>mdi-delete</v-icon>
                     </v-btn>
                   </v-carousel-item>
@@ -306,6 +309,7 @@ import Api from '../services/Api';
 import CenterModal from '../components/CenterModal.vue';
 import UserMenu from '../components/UserMenu.vue';
 import ItemCard from '../components/ItemCard.vue';
+import ReportDialog from '../components/ReportDialog.vue';
 
 /**
  * @typedef {Object} MetadataSchema
@@ -364,6 +368,7 @@ export default {
     CenterModal,
     UserMenu,
     ItemCard,
+    ReportDialog,
   },
   setup () {
     const store = useStore();
@@ -658,9 +663,13 @@ export default {
       }
     },
     /** @param {UploadSchema} upload */
-    async deleteUpload (upload) {
+    async deleteUpload (upload, reason) {
       try {
         const deleted = await Api().delete(`uploads/sound/${upload._id}`);
+        await Api().post(`users/${this.selectedUser._id}/inbox`, {
+          title: `[Deleted] Your upload "${upload.metadata.title}" has been deleted by an admin.`,
+          message: reason,
+        });
         this.store.dispatch('removeFile', deleted.data._id);
         const index = this.selectedUser.uploads.findIndex((u) => u._id === deleted.data._id);
         if (this.edit.selected?._id === deleted.data._id) {
@@ -675,10 +684,14 @@ export default {
       }
     },
     /** @param {string} image */
-    async deleteImage (image) {
+    async deleteImage (image, reason) {
       try {
         const deleted = await Api().delete(`uploads/image/${image}`);
         const upload = this.selectedUser.uploads.find((u) => u.images.includes(deleted.data._id));
+        await Api().post(`users/${this.selectedUser._id}/inbox`, {
+          title: `[Deleted] An image upload from "${upload?.metadata.title || ''}" has been deleted by an admin.`,
+          message: reason,
+        });
         if (upload) {
           const index = upload.images.findIndex((i) => i === deleted.data._id);
           if (index !== -1) {
