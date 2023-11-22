@@ -3,7 +3,7 @@ import Sound from '../../models/Sound.js';
 import Image from '../../models/Image.js';
 import { userSchema } from './schemas.js';
 import { uploadSchema } from '../uploads/schemas.js';
-import { checkUserRole, roles } from '../../utils/utils.js';
+import { checkUserRole, roles, verifyLoggedIn } from '../../utils/utils.js';
 
 /**
  * @class InboxMessage
@@ -79,6 +79,7 @@ export default async function (fastify, options) {
    * Get the currently logged in user
    */
   fastify.get('/self', {
+    preHandler: verifyLoggedIn,
     schema: {
       tags: ['users'],
       response: {
@@ -87,9 +88,6 @@ export default async function (fastify, options) {
     }
   }, async function (request, reply) {
     const self = request.session.get('user');
-    if (!self) {
-      return reply.send(new Error('User not logged in'));
-    }
     return self;
   });
 
@@ -97,6 +95,7 @@ export default async function (fastify, options) {
    * Get and refresh the currently logged in user
    */
   fastify.get('/self/refresh', {
+    preHandler: verifyLoggedIn,
     schema: {
       tags: ['users'],
       response: {
@@ -105,38 +104,11 @@ export default async function (fastify, options) {
     }
   }, async function (request, reply) {
     const self = request.session.get('user');
-    if (!self) {
-      return reply.send(new Error('User not logged in'));
-    }
     const newSelf = await User.findById(self._id)
       .populate('inbox.sender', 'username email')
       .exec();
     request.session.set('user', newSelf);
     return newSelf;
-  });
-
-  /**
-   * Gets a file uploaded by a user
-   * @todo Implement this or remove it
-   */
-  fastify.get('/:uid/:fid', {
-    schema: {
-      tags: ['users'],
-      params: {
-        type: 'object',
-        properties: {
-          uid: { type: 'string', description: 'MongoDB ObjectId' },
-          fid: { type: 'string', description: 'MongoDB ObjectId' }
-        }
-      },
-      response: {
-        200: {
-          type: 'null',
-        }
-      }
-    }
-  }, async function (request, reply) {
-    return null;
   });
 
   /**
@@ -224,6 +196,7 @@ export default async function (fastify, options) {
    * Create a new message for a user
    */
   fastify.post('/:id/inbox', {
+    preHandler: checkUserRole('moderator'),
     schema: {
       tags: ['users'],
       params: {
@@ -329,6 +302,7 @@ export default async function (fastify, options) {
    * Delete message from user's inbox
    */
   fastify.delete('/:id/inbox/:mid', {
+    preHandler: verifyLoggedIn,
     schema: {
       tags: ['users'],
       params: {
@@ -353,6 +327,11 @@ export default async function (fastify, options) {
         const user = await User.findById(_id);
         if (!user) return reply.code(404).send(new Error('User not found'));
 
+        // Only allow deleting messages from your own inbox
+        if (user._id.toString() !== request.session.get('user')._id.toString()) {
+          return reply.code(403).send(new Error('Forbidden'));
+        }
+
         const message = user.inbox.id(_mid);
         if (!message) return reply.code(404).send(new Error('Message not found'));
 
@@ -371,6 +350,7 @@ export default async function (fastify, options) {
    * Delete all messages from user's inbox
    */
   fastify.delete('/:id/inbox', {
+    preHandler: verifyLoggedIn,
     schema: {
       tags: ['users'],
       params: {
@@ -390,6 +370,11 @@ export default async function (fastify, options) {
 
         const user = await User.findById(_id);
         if (!user) return reply.code(404).send(new Error('User not found'));
+
+        // Only allow deleting messages from your own inbox
+        if (user._id.toString() !== request.session.get('user')._id.toString()) {
+          return reply.code(403).send(new Error('Forbidden'));
+        }
 
         /**
          * @todo - Figure out how to make this work, delete requests don't seem to parse the body
@@ -419,6 +404,7 @@ export default async function (fastify, options) {
    * Update read status of a message
    */
   fastify.patch('/:id/inbox/:mid', {
+    preHandler: verifyLoggedIn,
     schema: {
       tags: ['users'],
       params: {
@@ -449,6 +435,11 @@ export default async function (fastify, options) {
         const user = await User.findById(_id);
         if (!user) return reply.code(404).send(new Error('User not found'));
 
+        // Only allow updating messages from your own inbox
+        if (user._id.toString() !== request.session.get('user')._id.toString()) {
+          return reply.code(403).send(new Error('Forbidden'));
+        }
+
         const message = user.inbox.id(_mid);
         if (!message) return reply.code(404).send(new Error('Message not found'));
 
@@ -468,6 +459,7 @@ export default async function (fastify, options) {
    * Optionally accepts array of message IDs to toggle
    */
   fastify.patch('/:id/inbox/toggleAll', {
+    preHandler: verifyLoggedIn,
     schema: {
       tags: ['users'],
       params: {
@@ -498,6 +490,11 @@ export default async function (fastify, options) {
 
         const user = await User.findById(_id);
         if (!user) return reply.code(404).send(new Error('User not found'));
+
+        // Only allow updating messages from your own inbox
+        if (user._id.toString() !== request.session.get('user')._id.toString()) {
+          return reply.code(403).send(new Error('Forbidden'));
+        }
 
         const messages = (request.body.messages || []).map((id) => fastify.toObjectId(id));
         for (const message of user.inbox) {
