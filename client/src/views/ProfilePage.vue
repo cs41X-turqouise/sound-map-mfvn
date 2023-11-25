@@ -48,13 +48,11 @@
           <v-col cols="6">
             <div class="profile-content">
               <h2>Uploaded Content</h2>
-              <audio class="audio" controls :key="activeMedia.url" ref="audio-player">
-                <source :src="activeMedia.url" :type="activeMedia.type">
-              </audio>
-              <v-row v-for="(item, index) in uploadedContent" :key="index">
-                <v-col style="width: 400px;">
+              <!-- Carousel for displaying uploads -->
+              <v-carousel v-if="filteredUploads.length" hide-delimiters cycle>
+                <v-carousel-item v-for="(item, index) in filteredUploads" :key="index">
                   <v-card>
-                    <v-card-item align="left" justify="center">
+                    <v-card-item align="center" justify="center">
                       <v-card-title>
                         {{ item.metadata.title }}
                       </v-card-title>
@@ -74,19 +72,17 @@
                           {{ tag }}
                         </v-chip>
                       </v-card-subtitle>
-                      <v-carousel
-                        v-if="!!item.images && item.images.length"
-                        show-arrows="hover"
+                      <v-carousel v-if="!!item.images && item.images.length" show-arrows="hover"
                         :style="{ width: '350px', height: '150px' }">
-                        <v-carousel-item
-                          v-for="(image, index) in item.images"
-                          :key="index"
-                          :src="urls.get(image) || fetchImage(image)"
-                          cover>
+                        <v-carousel-item v-for="(image, index) in item.images" :key="index"
+                          :src="urls.get(image) || fetchImage(image)" cover>
                         </v-carousel-item>
                       </v-carousel>
+                      <audio class="audio" controls :key="activeMedia.url" ref="audio-player">
+                        <source :src="activeMedia.url" :type="activeMedia.type">
+                      </audio>
                     </v-card-item>
-                    <v-card-actions>
+                    <v-card-actions class="d-flex justify-center">
                       <v-btn x-small @click="playMedia(item)">
                         <v-icon x-small>mdi-play</v-icon> Play
                       </v-btn>
@@ -98,8 +94,8 @@
                       </v-btn>
                     </v-card-actions>
                   </v-card>
-                </v-col>
-              </v-row>
+                </v-carousel-item>
+              </v-carousel>
             </div>
           </v-col>
         </v-row>
@@ -165,6 +161,14 @@ export default {
         return !!file;
       });
       return files;
+    },
+    filteredUploads () {
+      if (!this.searchQuery) {
+        return this.uploadedContent;
+      }
+      return this.uploadedContent.filter((item) => {
+        return item.metadata.title.toLowerCase().includes(this.searchQuery.toLowerCase());
+      });
     },
   },
   methods: {
