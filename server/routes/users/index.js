@@ -401,6 +401,43 @@ export default async function (fastify, options) {
   });
 
   /**
+   * Update a user
+   */
+  fastify.patch('/:id', {
+    preHandler: checkUserRole('moderator', true),
+    schema: {
+      tags: ['users'],
+      body: {
+        type: 'object',
+        properties: {
+          username: { type: 'string' },
+          fullname: { type: 'string' },
+          email: { type: 'string', format: 'email' },
+          gid: { type: 'string', description: 'Google Id' },
+        }
+      },
+      response: {
+        200: userSchema
+      }
+    }
+  }, async function (request, reply) {
+    try {
+      const _id = fastify.toObjectId(request.params.id);
+      if (!_id) return reply.code(400).send(new Error('Invalid ID'));
+      const user = await User.findByIdAndUpdate(_id, request.body, { new: true });
+      request.session.set('user', user);
+      
+      return user;
+    } catch (err) {
+      fastify.log.error(err);
+      if (err.message.includes('duplicate key error')) {
+        return reply.code(400).send({ error: 'Already in use' });
+      }
+      return reply.internalServerError();
+    }
+  });
+
+  /**
    * Update read status of a message
    */
   fastify.patch('/:id/inbox/:mid', {
@@ -510,37 +547,6 @@ export default async function (fastify, options) {
         return reply.code(500).send('Internal Server Error');
       }
     },
-  });
-
-  /**
-   * Update a user
-   */
-  fastify.patch('/:id', {
-    preHandler: checkUserRole('moderator', true),
-    schema: {
-      tags: ['users'],
-      body: {
-        type: 'object',
-        properties: {
-          username: { type: 'string' },
-          fullname: { type: 'string' },
-          email: { type: 'string', format: 'email' },
-          gid: { type: 'string', description: 'Google Id' },
-        }
-      },
-      response: {
-        200: userSchema
-      }
-    }
-  }, async function (request, reply) {
-    try {
-      const _id = fastify.toObjectId(request.params.id);
-      if (!_id) return reply.code(400).send(new Error('Invalid ID'));
-      const user = await User.findByIdAndUpdate(_id, request.body, { new: true });
-      return user;
-    } catch (err) {
-      fastify.log.error(err);
-    }
   });
 
   // Update user role

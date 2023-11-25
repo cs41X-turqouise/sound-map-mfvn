@@ -78,7 +78,6 @@ export default async function (fastify, options) {
         if (!user) {
           user = new User({
             gid: userInfo.id,
-            username: userInfo.name,
             fullname: userInfo.name,
             email: userInfo.email,
             profilePhoto: userInfo.picture,
