@@ -13,6 +13,7 @@
         <v-btn
           color= "Black"
           v-bind="props"
+          text
           @click="menuClicked"
         >
           User Menu

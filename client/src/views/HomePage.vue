@@ -15,6 +15,7 @@
         <UserMenu />
       </v-toolbar-items>
     </v-toolbar>
+    <UsernameForm v-if="store.state.user && !store.state.user.username"/>
     <div v-if="showSearchModal || showUploadModal" class="overlay"></div>
     <SearchModal
       v-if="showSearchModal"
@@ -35,12 +36,13 @@
 
 <script>
 import { useStore } from 'vuex';
+import Api from '../services/Api';
 import LeafletMap from '../components/LeafletMap.vue';
 import SearchModal from '../components/SearchModal.vue';
 import UploadModal from '../components/UploadModal.vue';
 import UserMenu from '../components/UserMenu.vue';
 import UploadService from '../services/UploadService';
-import Api from '../services/Api';
+import UsernameForm from '../components/UsernameForm.vue';
 
 export default {
   name: 'HomePage',
@@ -49,6 +51,7 @@ export default {
     UserMenu,
     SearchModal,
     UploadModal,
+    UsernameForm,
   },
   setup () {
     const store = useStore();
@@ -60,6 +63,7 @@ export default {
       showUserMenu: false,
       showSearchModal: false,
       showUploadModal: false,
+      dialog: true,
       uploadForm: {
         valid: false
       },
