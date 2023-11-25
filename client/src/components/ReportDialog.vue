@@ -10,6 +10,7 @@
           label="Reason"
           clearable
           required
+          counter
           :rules="[
             (v) => !!v || 'Reason is required',
             (v) => v.length >= 25 || 'Reason must be at least 25 characters',

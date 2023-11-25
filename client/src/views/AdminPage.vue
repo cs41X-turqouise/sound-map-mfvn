@@ -1,38 +1,236 @@
 <template>
   <div v-if="store.state.user" class="AdminPage">
     <v-toolbar>
-      <v-text-field
-        v-model="search"
-        append-icon="mdi-magnify"
-        label="Search for Users"
-        single-line
-        hide-details
-        clearable
-        rounded
-        variant="outlined"
-      ></v-text-field>
+      <!-- <v-img src="/soundmap_main.gif" alt="Logo" class="mr-auto" /> -->
       <v-spacer></v-spacer>
-      <v-badge left color="primary" :content="reports.length" style="padding-right: 10px;">
-        <v-tooltip
-          activator="parent"
-          location="start"
-          style="z-index: 9999;"
-        >
-          View Reports
-        </v-tooltip>
-        <v-btn color="info" icon="mdi-email-outline" @click="viewReports = !viewReports"></v-btn>
-      </v-badge>
       <UserMenu></UserMenu>
     </v-toolbar>
-    <CenterModal
-      :show="viewReports"
-      style="top: 0; transform: translate(-50%, 0); font-size: small;"
-      :modalStyle="{ 'width': 'fit-content', 'max-width': 'none', 'text-align': 'left' }"
-      @close="closeReport"
-    >
-      <h2>Reports</h2>
-      <div v-if="reports.length">
-        <v-table density="comfortable">
+
+    <v-layout row justify-center>
+      <v-dialog v-model="editDialog" persistent max-width="500px">
+        <v-card v-if="!!edit.selected">
+          <v-card-title>
+            <span class="headline">Edit Upload</span>
+          </v-card-title>
+          <v-card-text>
+            <v-container grid-list-md class="bg-white">
+              <v-form @submit.prevent="saveEdit">
+                <v-text-field
+                  v-model="edit.new.metadata.title"
+                  label="Title"
+                  required
+                ></v-text-field>
+                <v-textarea
+                  v-model="edit.new.metadata.description"
+                  label="Description"
+                  required
+                ></v-textarea>
+                <v-text-field
+                  v-model="edit.tag"
+                  label="Tags"
+                  required
+                  hint="Tags are single words, enter a space to create a new tag"
+                  persistent-hint
+                  @keyup.space="addTag"
+                  @keyup.enter.prevent="addTag"
+                ></v-text-field>
+                <v-chip-group>
+                  <v-chip
+                    v-for="(tag, index) in edit.new.metadata.tags"
+                    :key="tag"
+                    closable
+                    @click:close="edit.new.metadata.tags.splice(index, 1)"
+                  >
+                    {{ tag }}
+                  </v-chip>
+                </v-chip-group>
+              </v-form>
+            </v-container>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn
+              color="red"
+              @click="Object.assign(edit.new.metadata, edit.selected.metadata)"
+            >
+              Reset
+            </v-btn>
+            <v-spacer></v-spacer>
+            <v-btn color="red" @click="closeEdit">Cancel</v-btn>
+            <v-spacer></v-spacer>
+            <v-btn
+              type="submit"
+              name="submit"
+              value="Submit"
+              color="blue"
+            >
+              Save
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-layout>
+
+    <v-sheet>
+      <v-tabs
+        v-model="activeMainTab"
+        color="primary"
+        dark
+        grow
+        slider-color="primary"
+        height="52px"
+      >
+        <v-tab value="users">
+          <v-icon>mdi-account-group</v-icon>
+          Users
+        </v-tab>
+        <v-tab value="uploads">
+          <v-icon>mdi-upload</v-icon>
+          Uploads
+        </v-tab>
+        <v-tab value="review">
+          <v-badge location="top right" floating color="primary" :content="0" style="padding-right: 10px;">
+            <v-icon>mdi-upload</v-icon>
+          </v-badge>
+          Pending
+        </v-tab>
+        <v-tab value="reports">
+          <v-badge location="top right" floating color="primary" :content="reports.length" style="padding-right: 10px;">
+            <v-icon>mdi-email-outline</v-icon>
+          </v-badge>
+          Reports
+        </v-tab>
+      </v-tabs>
+
+      <div v-if="activeMainTab === 'users'">
+        <v-table class="userTable" density="comfortable">
+          <template v-slot:top>
+            <v-text-field
+              v-model="search"
+              append-icon="mdi-magnify"
+              label="Search for Users"
+              single-line
+              hide-details
+              clearable
+              rounded
+              variant="outlined"
+              style="max-width: 50%;"
+            ></v-text-field>
+          </template>
+          <thead>
+            <tr>
+              <th style="max-width: fit-content">Avatar</th>
+              <th>User ID</th>
+              <th
+                v-for="(entry, index) in userTableHeaders"
+                :key="index"
+                @click="sortUsersBy(entry.key)"
+                class="clickable"
+              >
+                {{ entry.label }}
+                <v-icon v-if="usersSortBy.key === entry.key" size="x-small">
+                  {{ usersSortBy.order === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
+                </v-icon>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(user, index) in paginatedUsers" :key="index">
+              <td>
+                <img
+                  v-if="user.profilePhoto"
+                  :src="user.profilePhoto"
+                  alt="User Avatar"
+                  width="50"
+                  height="50"
+                />
+              </td>
+              <td>
+                <button class="user-id-button" @click="showMenu(user)">
+                  {{ user._id }}
+                </button >
+              </td>
+              <td>{{ user.fullname }}</td>
+              <td>{{ user.username }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.uploads.length }}</td>
+              <td>{{ user.role }}</td>
+            </tr>
+          </tbody>
+          <template v-slot:bottom>
+            <v-pagination
+              class="pagination"
+              v-model="userTable.current"
+              :length="maxUserPage"
+              style="margin-top: auto;">
+            </v-pagination>
+          </template>
+        </v-table>
+      </div>
+
+      <div v-if="activeMainTab === 'uploads'">
+        <v-row>
+          <v-col cols="12" sm="6" md="6">
+            <v-text-field
+              v-model="search"
+              append-icon="mdi-magnify"
+              label="Search for Uploads"
+              single-line
+              hide-details
+              clearable
+              rounded
+              variant="outlined"
+              style="max-width: 75%;"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="6" md="6">
+            <audio class="audio" controls :key="activeMedia.url" ref="audio-player">
+              <source :src="activeMedia.url" :type="activeMedia.type">
+            </audio>
+          </v-col>
+        </v-row>
+
+        <v-container class="userTable" density="comfortable">
+          <v-row>
+            <v-col
+              cols="12"
+              sm="6"
+              md="6"
+              v-for="upload in paginatedUploads"
+              :key="upload._id"
+            >
+              <ItemCard
+                :item="upload"
+                :urls="urls"
+                @addUrl="(el) => urls.set(el.id, el.objectUrl)">
+                <template v-slot:actions>
+                  <v-btn icon @click="playMedia(upload)">
+                    <v-icon>mdi-play</v-icon>
+                  </v-btn>
+                  <v-btn icon @click="setEdit(upload)">
+                    <v-icon>mdi-pencil</v-icon>
+                  </v-btn>
+                  <v-btn icon>
+                    <v-icon>mdi-delete</v-icon>
+                    <ReportDialog @submitReason="(reason) => deleteUpload(upload, reason)" />
+                  </v-btn>
+                </template>
+              </ItemCard>
+            </v-col>
+          </v-row>
+        </v-container>
+
+        <v-pagination
+          v-model="uploadsTable.current"
+          :length="maxUploadsPage"
+        ></v-pagination>
+      </div>
+
+      <div v-if="activeMainTab === 'review'">
+        <span>Nothing for now</span>
+      </div>
+
+      <div v-if="activeMainTab === 'reports'">
+        <v-table v-if="reports.length" class="reportsTable" density="comfortable">
           <thead>
             <tr>
               <th>Actions</th>
@@ -58,69 +256,20 @@
               <td><span>{{ new Date(report.date).toLocaleDateString() }}</span></td>
             </tr>
           </tbody>
+          <template v-slot:bottom>
+            <v-pagination
+              class="pagination"
+              v-model="reportsTable.current"
+              :length="maxReportsPage"
+              style="margin-top: auto;">
+            </v-pagination>
+          </template>
         </v-table>
-        <v-pagination
-          class="pagination"
-          v-model="reportsTable.current"
-          :length="maxReportsPage"
-          style="margin-top: auto;">
-        </v-pagination>
+        <p v-else>No reports found.</p>
       </div>
-      <p v-else>No reports found.</p>
-    </CenterModal>
+    </v-sheet>
 
-    <v-table class="userTable" density="comfortable">
-      <thead>
-        <tr>
-          <th>Profile Photo</th>
-          <th>User ID</th>
-          <th
-            v-for="(entry, index) in userTableHeaders"
-            :key="index"
-            @click="sortUsersBy(entry.key)"
-            class="clickable"
-          >
-            {{ entry.label }}
-            <v-icon v-if="usersSortBy.key === entry.key" size="x-small">
-              {{ usersSortBy.order === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
-            </v-icon>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(user, index) in paginatedUsers" :key="index">
-          <td>
-            <img
-              v-if="user.profilePhoto"
-              :src="user.profilePhoto"
-              alt="User Avatar"
-              width="50"
-              height="50"
-            />
-          </td>
-          <td>
-            <button class="user-id-button" @click="showMenu(user)">
-              {{ user._id }}
-            </button >
-          </td>
-          <td>{{ user.fullname }}</td>
-          <td>{{ user.username }}</td>
-          <td>{{ user.email }}</td>
-          <td>{{ user.uploads.length }}</td>
-          <td>{{ user.role }}</td>
-        </tr>
-      </tbody>
-      <template v-slot:bottom>
-        <v-pagination
-          class="pagination"
-          v-model="userTable.current"
-          :length="maxUserPage"
-          style="margin-top: auto;">
-        </v-pagination>
-      </template>
-    </v-table>
-
-    <v-card v-if="selectedUser?.username" class="ma-4">
+    <v-card v-if="selectedUser?.username" class="details">
       <v-card-title primary-title>
         <h3 ref="selectedUser">
           {{ selectedUser.username }}'s Details
@@ -128,7 +277,7 @@
       </v-card-title>
 
       <v-tabs
-        v-model="activeTab"
+        v-model="activeUserTab"
         color="primary"
         dark
         grow
@@ -144,86 +293,42 @@
         </v-tab>
       </v-tabs>
 
-      <div v-show="activeTab === 'uploads'" class="uploads-tab">
-        <CenterModal :show="!!edit.selected" @close="closeEdit">
-          <ItemCard :item="edit.selected" :urls="urls" @addUrl="(el) => urls.set(el.id, el.objectUrl)">
-          </ItemCard>
-          <v-form @submit.prevent="saveEdit">
-            <v-text-field
-              v-model="edit.new.metadata.title"
-              label="Title"
-              required
-            ></v-text-field>
-            <v-textarea
-              v-model="edit.new.metadata.description"
-              label="Description"
-              required
-            ></v-textarea>
-            <v-text-field
-              v-model="edit.tag"
-              label="Tags"
-              required
-              hint="Tags are single words, enter a space to create a new tag"
-              persistent-hint
-              @keyup.space="addTag"
-              @keyup.enter.prevent="addTag"
-            ></v-text-field>
-            <v-chip-group>
-              <v-chip
-                v-for="(tag, index) in edit.new.metadata.tags"
-                :key="tag"
-                closable
-                @click:close="edit.new.metadata.tags.splice(index, 1)"
-              >
-                {{ tag }}
-              </v-chip>
-            </v-chip-group>
-            <v-card>
-              <v-card-actions>
-                <v-btn
-                  color="red"
-                  @click="Object.assign(edit.new.metadata, edit.selected.metadata)"
-                >
-                  Reset
-                </v-btn>
-                <v-spacer></v-spacer>
-                <v-btn color="red" @click="closeEdit">Cancel</v-btn>
-                <v-spacer></v-spacer>
-                <v-btn
-                  type="submit"
-                  name="submit"
-                  value="Submit"
-                  color="blue"
-                >
-                  Save
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-form>
-        </CenterModal>
-        <audio class="audio" controls :key="activeMedia.url" ref="audio-player">
-          <source :src="activeMedia.url" :type="activeMedia.type">
-        </audio>
+      <div v-show="activeUserTab === 'uploads'" class="uploads-tab">
         <v-table v-if="selectedUser.uploads && selectedUser.uploads.length">
+          <template v-slot:top>
+            <v-row>
+              <v-col cols="12" sm="6" md="6">
+                <v-text-field
+                  v-model="userUploadSearch"
+                  append-icon="mdi-magnify"
+                  label="Search for Uploads"
+                  single-line
+                  hide-details
+                  clearable
+                  rounded
+                  max-width="50%"
+                  width="100px"
+                  variant="outlined"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6" md="6">
+                <audio class="audio" controls :key="activeMedia.url" ref="audio-player">
+                  <source :src="activeMedia.url" :type="activeMedia.type">
+                </audio>
+              </v-col>
+            </v-row>
+          </template>
           <thead>
             <tr>
-              <th>Actions</th>
-              <th>File Id</th>
-              <th>File Name</th>
-              <th>File Type</th>
+              <th style="width: 50px">Actions</th>
+              <th style="width: 500px">Upload Data</th>
+              <th style="width: 200px;">Metadata</th>
               <th>Image(s)</th>
-              <th>Upload Date</th>
-              <th>Title</th>
-              <th>Description</th>
-              <th>Latitude</th>
-              <th>Longitude</th>
-              <th>Tags</th>
-              <th>Address</th>
             </tr>
           </thead>
           <tbody>
             <tr
-              v-for="(upload, uploadIndex) in paginatedUploads"
+              v-for="(upload, uploadIndex) in paginatedUserUploads"
               :key="uploadIndex"
               :ref="`tr-${upload._id}`"
               :class="{ 'highlight': upload._id === selectedReport?.fileId }"
@@ -238,9 +343,57 @@
                   <ReportDialog @submitReason="(reason) => deleteUpload(upload, reason)" />
                 </v-btn>
               </td>
-              <td><span>{{ upload._id }}</span></td>
-              <td><span>{{ upload.filename }}</span></td>
-              <td><span>{{ upload.contentType }}</span></td>
+              <td>
+                <v-card class="my-2">
+                  <v-card-subtitle>
+                    Title: <span>{{ upload.metadata.title }}</span>
+                  </v-card-subtitle>
+                  <v-card-subtitle>
+                    Address:
+                    <span>
+                      {{ upload.metadata.geodata ? JSON.parse(upload.metadata.geodata).formatted : '' }}
+                    </span>
+                  </v-card-subtitle>
+                  <v-card-subtitle>
+                    Description: <p class="wrap-text">{{ upload.metadata.description }}</p>
+                  </v-card-subtitle>
+                  <v-card-subtitle>
+                    Tags:
+                    <v-chip
+                      v-for="(tag, index) in upload.metadata.tags"
+                      :key="index"
+                      color="primary"
+                      text-color="white"
+                      size="small"
+                      density="comfortable"
+                    >
+                      {{ tag }}
+                    </v-chip>
+                  </v-card-subtitle>
+                </v-card>
+              </td>
+              <td>
+                <v-card class="my-2">
+                  <v-card-subtitle>
+                    ID: <span>{{ upload._id }}</span>
+                  </v-card-subtitle>
+                  <v-card-subtitle>
+                    Uploaded: <span>{{ new Date(upload.uploadDate).toLocaleDateString() }}</span>
+                  </v-card-subtitle>
+                  <v-card-subtitle>
+                    Type: <span>{{ upload.contentType }}</span>
+                  </v-card-subtitle>
+                  <v-card-subtitle>
+                    File Name: <span>{{ upload.filename }}</span>
+                  </v-card-subtitle>
+                  <v-card-subtitle>
+                    File Size: <span>{{ upload.length / 1000 }} KB</span>
+                  </v-card-subtitle>
+                  <v-card-subtitle>
+                    Location: <span>{{ upload.metadata.latitude }}&deg;, {{ upload.metadata.longitude }}&deg;</span>
+                  </v-card-subtitle>
+                </v-card>
+              </td>
               <td v-if="upload.images.length > 0">
                 <v-carousel
                   :style="{ width: '200px', height: '150px' }"
@@ -269,24 +422,13 @@
                 </v-carousel>
               </td>
               <td v-else><span>None</span></td>
-              <td><span>{{ new Date(upload.uploadDate).toLocaleDateString() }}</span></td>
-              <td><span>{{ upload.metadata.title }}</span></td>
-              <td><span>{{ upload.metadata.description }}</span></td>
-              <td><span>{{ upload.metadata.latitude }}&deg;</span></td>
-              <td><span>{{ upload.metadata.longitude }}&deg;</span></td>
-              <td><span>{{ upload.metadata.tags.join(', ') }}</span></td>
-              <td>
-                <span>
-                  {{ upload.metadata.geodata ? JSON.parse(upload.metadata.geodata).formatted : '' }}
-                </span>
-              </td>
             </tr>
           </tbody>
           <template v-slot:bottom>
             <v-pagination
               class="pagination"
               v-model="uploadsTable.current"
-              :length="maxUploadsPage"
+              :length="maxUserUploadsPage"
               style="margin-top: auto;">
             </v-pagination>
           </template>
@@ -294,8 +436,39 @@
         <p v-else>No uploads found.</p>
       </div>
 
-      <v-card v-show="activeTab === 'roles'" class="roles-tab">
-        <v-card-subtitle>Current role: {{ selectedUser.role }}</v-card-subtitle>
+      <v-card v-show="activeUserTab === 'roles'" class="roles-tab">
+        <v-row>
+          <v-col cols="12" sm="4" md="4">
+            <v-card>
+              <v-card-subtitle>
+                Full Name: <span>{{ selectedUser.fullname }}</span>
+              </v-card-subtitle>
+              <v-card-subtitle>
+                Email: <span>{{ selectedUser.email }}</span>
+              </v-card-subtitle>
+            </v-card>
+          </v-col>
+          <v-col cols="12" sm="4" md="4">
+            <v-card>
+              <v-card-subtitle>
+                Role: <span>{{ selectedUser.role }}</span>
+              </v-card-subtitle>
+              <v-card-subtitle>
+                Banned: <span>{{ selectedUser.banned ? 'Yes' : 'No' }}</span>
+              </v-card-subtitle>
+            </v-card>
+          </v-col>
+          <v-col cols="12" sm="4" md="4">
+            <v-card>
+              <v-card-subtitle>
+                Uploads: <span>{{ selectedUser.uploads.length }}</span>
+              </v-card-subtitle>
+              <v-card-subtitle>
+                Bookmarks: <span>{{ selectedUser.bookmarks.length }}</span>
+              </v-card-subtitle>
+            </v-card>
+          </v-col>
+        </v-row>
         <v-card-actions style="justify-content: center;">
           <v-btn
             v-for="button in promoteRoleButtons"
@@ -332,55 +505,14 @@
 <script>
 import { useStore } from 'vuex';
 import Api from '../services/Api';
-import CenterModal from '../components/CenterModal.vue';
 import UserMenu from '../components/UserMenu.vue';
 import ItemCard from '../components/ItemCard.vue';
 import ReportDialog from '../components/ReportDialog.vue';
 
-/**
- * @typedef {Object} MetadataSchema
- * @property {string} [title]
- * @property {string} [description]
- * @property {string[]} [tags]
- * @property {string} [latitude]
- * @property {string} [longitude]
- * @property {string} [geodata]
- */
-
-/**
- * @typedef {Object} UploadSchema
- * @property {string} _id - MongoDB ObjectId
- * @property {number} length
- * @property {number} chunkSize
- * @property {string} uploadDate - date-time format
- * @property {string} filename
- * @property {string} contentType
- * @property {MetadataSchema} metadata
- * @property {string} user - UserID as a MongoDB ObjectId
- * @property {string[]} images - Array of MongoDB ObjectId
- */
-
-/**
- * @typedef {Object} UserSchema
- * @property {string} _id - MongoDB ObjectId
- * @property {string} username
- * @property {string} fullname
- * @property {string} email - Email format
- * @property {string} gid - Google ID
- * @property {string[] | UploadSchema[]} uploads - Array of MongoDB ObjectId or UploadSchema
- * @property {string[]} bookmarks - Array of MongoDB ObjectId
- * @property {string} role - 'user' | 'moderator' | 'admin'
- * @property {boolean} banned
- */
-
-/**
- * @typedef {Object} ReportSchema
- * @property {string} _id - The MongoDB ObjectId of the document.
- * @property {string} reporter - The MongoDB ObjectId of the user who created the report.
- * @property {string} fileId - The MongoDB ObjectId of the upload being reported.
- * @property {string} reason - The reason for the report.
- * @property {Date} date - The date the report was created.
- */
+/** @typedef {import('../App.vue').UserSchema} UserSchema */
+/** @typedef {import('../App.vue').ReportSchema} ReportSchema */
+/** @typedef {import('../App.vue').MetadataSchema} Metadataschema */
+/** @typedef {import('../App.vue').UploadSchema} UploadSchema */
 
 /** @param {number} perPage */
 const paginationSetup = (perPage) => ({
@@ -391,7 +523,6 @@ const paginationSetup = (perPage) => ({
 export default {
   name: 'AdminPage',
   components: {
-    CenterModal,
     UserMenu,
     ItemCard,
     ReportDialog,
@@ -404,17 +535,17 @@ export default {
       admin: 3,
       superadmin: 4,
     });
-    return { store, roles };
+    const userTableHeaders = [
+      { key: 'fullname', label: 'Full Name' },
+      { key: 'username', label: 'Username' },
+      { key: 'email', label: 'Email' },
+      { key: 'uploads.length', label: 'Uploads' },
+      { key: 'role', label: 'Role' },
+    ];
+    return { store, roles, userTableHeaders };
   },
   data () {
     return {
-      userTableHeaders: [
-        { key: 'fullname', label: 'Full Name' },
-        { key: 'username', label: 'Username' },
-        { key: 'email', label: 'Email' },
-        { key: 'uploads.length', label: 'Uploads' },
-        { key: 'role', label: 'Role' },
-      ],
       /** @type { UserSchema[] } */
       users: [],
       /** @type { UploadSchema[] } */
@@ -423,13 +554,15 @@ export default {
       selectedUser: { uploads: [] },
       /** @type { ReportSchema } */
       selectedReport: null,
-      activeTab: null,
+      activeMainTab: 'users',
+      activeUserTab: null,
       activeMedia: {
         type: null,
         url: null,
       },
       urls: new Map(),
       search: '',
+      userUploadSearch: '',
       reports: [],
       viewReports: false,
       userTable: paginationSetup(10),
@@ -440,6 +573,7 @@ export default {
         order: 'asc',
         sorted: false,
       },
+      editDialog: false,
       edit: {
         selected: null,
         new: null,
@@ -448,14 +582,6 @@ export default {
     };
   },
   computed: {
-    maxUserPage () {
-      return Math.ceil(this.filteredUsers.length / this.userTable.perPage);
-    },
-    paginatedUsers () {
-      const start = (this.userTable.current - 1) * this.userTable.perPage;
-      const end = start + this.userTable.perPage;
-      return this.filteredUsers.slice(start, end);
-    },
     filteredUsers () {
       if (!this.search) return this.users;
       return this.users.filter((user) =>
@@ -466,13 +592,49 @@ export default {
         || user.role.toLowerCase().includes(this.search.toLowerCase())
       );
     },
+    maxUserPage () {
+      return Math.ceil(this.filteredUsers.length / this.userTable.perPage);
+    },
+    paginatedUsers () {
+      const start = (this.userTable.current - 1) * this.userTable.perPage;
+      const end = start + this.userTable.perPage;
+      return this.filteredUsers.slice(start, end);
+    },
+    filteredUploads () {
+      if (!this.search) return this.uploads;
+      return this.uploads.filter((upload) =>
+        upload.metadata.title.toLowerCase().includes(this.search.toLowerCase())
+        || upload.metadata.description.toLowerCase().includes(this.search.toLowerCase())
+        || upload.metadata.tags.some((tag) => tag.toLowerCase().includes(this.search.toLowerCase()))
+        || upload.filename.toLowerCase().includes(this.search.toLowerCase())
+        || upload.contentType.toLowerCase().includes(this.search.toLowerCase())
+      );
+    },
     maxUploadsPage () {
-      return Math.ceil(this.selectedUser.uploads.length / this.uploadsTable.perPage);
+      return Math.ceil(this.filteredUploads.length / this.uploadsTable.perPage);
     },
     paginatedUploads () {
       const start = (this.uploadsTable.current - 1) * this.uploadsTable.perPage;
       const end = start + this.uploadsTable.perPage;
-      return this.selectedUser.uploads.slice(start, end);
+      return this.filteredUploads.slice(start, end);
+    },
+    filteredUserUploads () {
+      if (!this.userUploadSearch) return this.selectedUser.uploads;
+      return this.selectedUser.uploads.filter((upload) =>
+        upload.metadata.title.toLowerCase().includes(this.userUploadSearch.toLowerCase())
+        || upload.metadata.description.toLowerCase().includes(this.userUploadSearch.toLowerCase())
+        || upload.metadata.tags.some((tag) => tag.toLowerCase().includes(this.userUploadSearch.toLowerCase()))
+        || upload.filename.toLowerCase().includes(this.userUploadSearch.toLowerCase())
+        || upload.contentType.toLowerCase().includes(this.userUploadSearch.toLowerCase())
+      );
+    },
+    maxUserUploadsPage () {
+      return Math.ceil(this.filteredUserUploads.length / this.uploadsTable.perPage);
+    },
+    paginatedUserUploads () {
+      const start = (this.uploadsTable.current - 1) * this.uploadsTable.perPage;
+      const end = start + this.uploadsTable.perPage;
+      return this.filteredUserUploads.slice(start, end);
     },
     maxReportsPage () {
       return Math.ceil(this.reports.length / this.reportsTable.perPage);
@@ -498,14 +660,11 @@ export default {
     },
   },
   methods: {
-    /** @param {'uploads' | 'roles'} tab */
-    setActiveTab (tab) {
-      this.activeTab = tab;
-    },
     /** @param {UploadSchema} upload */
     setEdit (upload) {
       this.edit.selected = JSON.parse(JSON.stringify(upload));
       this.edit.new = JSON.parse(JSON.stringify(upload));
+      this.editDialog = true;
     },
     addTag () {
       /** @type {string} */
@@ -520,6 +679,8 @@ export default {
     closeEdit () {
       this.edit.selected = null;
       this.edit.new = null;
+      this.edit.tag = '';
+      this.editDialog = false;
     },
     saveEdit () {
       Api().patch(`uploads/metadata/${this.edit.selected._id}`, { ...this.edit.new.metadata })
@@ -528,9 +689,7 @@ export default {
           if (index !== -1) {
             this.selectedUser.uploads[index].metadata = response.data.metadata;
           }
-          this.edit.selected = null;
-          this.edit.new = null;
-          this.edit.tag = '';
+          this.closeEdit();
         })
         .catch((error) => {
           console.error(error);
@@ -598,12 +757,13 @@ export default {
         };
         const uploads = await Api().get(`users/${this.selectedUser._id}/uploads`);
         this.selectedUser.uploads = uploads.data;
-        this.activeTab = 'uploads';
+        this.activeUserTab = 'uploads';
         this.selectedReport = report;
         /**
          * Figure out which page the report is on and set the current page to that.
          */
         const index = this.selectedUser.uploads.findIndex((u) => u._id === report.fileId);
+        console.log(index);
         this.uploadsTable.current = Math.ceil((index + 1) / this.uploadsTable.perPage);
         this.$nextTick(() => {
           this.$refs[`tr-${report.fileId}`][0].scrollIntoView();
@@ -682,19 +842,21 @@ export default {
     async deleteUpload (upload, reason) {
       try {
         const deleted = await Api().delete(`uploads/sound/${upload._id}`);
-        await Api().post(`users/${this.selectedUser._id}/inbox`, {
+        const owner = this.selectedUser._id
+          ? this.selectedUser
+          : this.users.find((u) => u.uploads.find((f) => f._id === deleted.data._id));
+        await Api().post(`users/${owner._id}/inbox`, {
           title: `[Deleted] Your upload "${upload.metadata.title}" has been deleted by an admin.`,
           message: reason,
         });
         this.store.dispatch('removeFile', deleted.data._id);
-        const index = this.selectedUser.uploads.findIndex((u) => u._id === deleted.data._id);
         if (this.edit.selected?._id === deleted.data._id) {
-          this.edit.selected = null;
-          this.edit.new = null;
+          this.closeEdit();
         }
-        if (index !== -1) {
-          this.selectedUser.uploads.splice(index, 1);
-        }
+        const index = owner.uploads.findIndex((u) => u._id === deleted.data._id);
+        const uIdx = this.uploads.findIndex((u) => u._id === deleted.data._id);
+        index !== -1 && owner.uploads.splice(index, 1);
+        uIdx !== -1 && this.uploads.splice(uIdx, 1);
       } catch (error) {
         console.error(error);
       }
@@ -749,7 +911,25 @@ export default {
   },
   watch: {
     search () {
-      this.currentUserPage = 1;
+      if (this.activeMainTab === 'users') {
+        this.userTable.current = 1;
+      } else if (this.activeMainTab === 'uploads') {
+        this.uploadsTable.current = 1;
+      } else if (this.activeMainTab === 'reports') {
+        this.reportsTable.current = 1;
+      } else if (this.activeMainTab === 'review') {
+        //
+      }
+    },
+    userUploadSearch () {
+      this.uploadsTable.current = 1;
+    },
+    activeMainTab () {
+      this.activeUserTab = null;
+      this.selectedUser = { uploads: [] };
+      this.selectedReport = null;
+      this.viewReports = false;
+      this.search = '';
     },
   },
   /**
@@ -767,7 +947,7 @@ export default {
       }
     }
     Api().get('uploads/filedata/all').then((response) => {
-      this.uploads = response.data;
+      this.uploads = response.data.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
       console.log(this.uploads);
     });
     Api().get('users/').then((response) => {
@@ -787,22 +967,24 @@ export default {
   padding: 20px;
   width: 99%;
 }
+.v-sheet {
+  width: 80%;
+  margin: 1em auto;
+}
 .userTable {
-  width: 100%;
-  /* max-width: 800px; */
-  max-width: min-content;
-  margin: 0 auto;
-  border-collapse: collapse;
-  margin-top: 20px;
   background-color: #fff;
-  text-align: left;
-  /* align-items: center; */
 }
 .userTable th,
 userTable td {
   border: 1px solid #ccc;
   padding: 10px;
   text-align: left;
+}
+.userTable th:first-child, td:first-child {
+  width: 50px;
+  text-align: center;
+  justify-content: center;
+  padding: 0;
 }
 @media (max-width: 900px) {
   h1 {
@@ -817,10 +999,10 @@ userTable td {
     padding: 5px;
   }
 }
-.userTable th {
+.userTable th, .reportsTable th {
   background-color: #f2f2f2;
 }
-.userTable tr:nth-child(even) {
+.userTable tr:nth-child(even), .reportsTable tr:nth-child(even) {
   background-color: #f2f2f2;
 }
 .userTable td span {
@@ -835,6 +1017,10 @@ userTable td {
   background-color: #f2f2f2;
   text-decoration: underline;
   cursor: pointer;
+}
+.details {
+  width: 80%;
+  margin: 1em auto;
 }
 .uploads-tab {
   margin-top: 20px;
@@ -865,5 +1051,13 @@ userTable td {
 }
 .highlight {
   background-color: #d1eaff;
+}
+.wrap-text {
+  white-space: normal;
+  word-wrap: break-word;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 </style>
