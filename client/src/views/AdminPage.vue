@@ -14,37 +14,35 @@
           </v-card-title>
           <v-card-text>
             <v-container grid-list-md class="bg-white">
-              <v-form @submit.prevent="saveEdit">
-                <v-text-field
-                  v-model="edit.new.metadata.title"
-                  label="Title"
-                  required
-                ></v-text-field>
-                <v-textarea
-                  v-model="edit.new.metadata.description"
-                  label="Description"
-                  required
-                ></v-textarea>
-                <v-text-field
-                  v-model="edit.tag"
-                  label="Tags"
-                  required
-                  hint="Tags are single words, enter a space to create a new tag"
-                  persistent-hint
-                  @keyup.space="addTag"
-                  @keyup.enter.prevent="addTag"
-                ></v-text-field>
-                <v-chip-group>
-                  <v-chip
-                    v-for="(tag, index) in edit.new.metadata.tags"
-                    :key="tag"
-                    closable
-                    @click:close="edit.new.metadata.tags.splice(index, 1)"
-                  >
-                    {{ tag }}
-                  </v-chip>
-                </v-chip-group>
-              </v-form>
+              <v-text-field
+                v-model="edit.new.metadata.title"
+                label="Title"
+                required
+              ></v-text-field>
+              <v-textarea
+                v-model="edit.new.metadata.description"
+                label="Description"
+                required
+              ></v-textarea>
+              <v-text-field
+                v-model="edit.tag"
+                label="Tags"
+                required
+                hint="Tags are single words, enter a space to create a new tag"
+                persistent-hint
+                @keyup.space="addTag"
+                @keyup.enter.prevent="addTag"
+              ></v-text-field>
+              <v-chip-group>
+                <v-chip
+                  v-for="(tag, index) in edit.new.metadata.tags"
+                  :key="tag"
+                  closable
+                  @click:close="edit.new.metadata.tags.splice(index, 1)"
+                >
+                  {{ tag }}
+                </v-chip>
+              </v-chip-group>
             </v-container>
           </v-card-text>
           <v-card-actions>
@@ -62,6 +60,7 @@
               name="submit"
               value="Submit"
               color="blue"
+              @click="saveEdit"
             >
               Save
             </v-btn>
@@ -682,18 +681,20 @@ export default {
       this.edit.tag = '';
       this.editDialog = false;
     },
-    saveEdit () {
-      Api().patch(`uploads/metadata/${this.edit.selected._id}`, { ...this.edit.new.metadata })
-        .then((response) => {
-          const index = this.selectedUser.uploads.findIndex((u) => u._id === response.data._id);
-          if (index !== -1) {
-            this.selectedUser.uploads[index].metadata = response.data.metadata;
-          }
-          this.closeEdit();
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+    async saveEdit () {
+      try {
+        const res = await Api().patch(`uploads/metadata/${this.edit.selected._id}`, { ...this.edit.new.metadata });
+        const owner = this.selectedUser._id
+          ? this.selectedUser
+          : this.users.find((u) => u.uploads.find((f) => f._id === res.data._id));
+        const index = owner.uploads.findIndex((u) => u._id === res.data._id);
+        const uIdx = this.uploads.findIndex((u) => u._id === res.data._id);
+        index !== -1 && (owner.uploads[index].metadata = res.data.metadata);
+        uIdx !== -1 && (this.uploads[uIdx].metadata = res.data.metadata);
+        this.closeEdit();
+      } catch (err) {
+        console.error(err);
+      }
     },
     closeReport () {
       this.selectedReport = null;
@@ -841,7 +842,7 @@ export default {
      */
     async deleteUpload (upload, reason) {
       try {
-        const deleted = await Api().delete(`uploads/sound/${upload._id}`);
+        const res = await Api().delete(`uploads/sound/${upload._id}`);
         const owner = this.selectedUser._id
           ? this.selectedUser
           : this.users.find((u) => u.uploads.find((f) => f._id === deleted.data._id));
@@ -849,18 +850,18 @@ export default {
           title: `[Deleted] Your upload "${upload.metadata.title}" has been deleted by an admin.`,
           message: reason,
         });
-        this.store.dispatch('removeFile', deleted.data._id);
-        if (this.edit.selected?._id === deleted.data._id) {
+        this.store.dispatch('removeFile', res.data._id);
+        if (this.edit.selected?._id === res.data._id) {
           this.closeEdit();
         }
-        const index = owner.uploads.findIndex((u) => u._id === deleted.data._id);
-        const uIdx = this.uploads.findIndex((u) => u._id === deleted.data._id);
+        const index = owner.uploads.findIndex((u) => u._id === res.data._id);
+        const uIdx = this.uploads.findIndex((u) => u._id === res.data._id);
         index !== -1 && owner.uploads.splice(index, 1);
         uIdx !== -1 && this.uploads.splice(uIdx, 1);
 
         // Remove any reports related to this upload
         for (let i = 0; i < this.reports.length; i++) {
-          if (this.reports[i].fileId === deleted.data._id) {
+          if (this.reports[i].fileId === res.data._id) {
             this.reports.splice(i, 1);
             i--;
           }
