@@ -857,6 +857,14 @@ export default {
         const uIdx = this.uploads.findIndex((u) => u._id === deleted.data._id);
         index !== -1 && owner.uploads.splice(index, 1);
         uIdx !== -1 && this.uploads.splice(uIdx, 1);
+
+        // Remove any reports related to this upload
+        for (let i = 0; i < this.reports.length; i++) {
+          if (this.reports[i].fileId === deleted.data._id) {
+            this.reports.splice(i, 1);
+            i--;
+          }
+        }
       } catch (error) {
         console.error(error);
       }

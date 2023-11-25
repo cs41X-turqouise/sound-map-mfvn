@@ -1,6 +1,7 @@
 import User from '../../models/User.js';
 import Sound from '../../models/Sound.js';
 import Image from '../../models/Image.js';
+import Reports from '../../models/Reports.js';
 import { uploadSchema } from './schemas.js';
 import { verifyLoggedIn, verifyNotBanned, checkUserRole } from '../../utils/utils.js';
 
@@ -243,6 +244,10 @@ export default async function (fastify, options) {
           user.uploads.pull(file._id);
           await user.save();
         }
+
+        // Delete any reports associated with the file - todo: notify the reporter that the file has been deleted
+        await Reports.deleteMany({ fileId: file._id });
+
         return file;
       } catch (err) {
         fastify.log.error(err);
