@@ -3,7 +3,7 @@
     <v-dialog v-model="dialog" persistent max-width="500px">
       <v-card>
         <v-card-title>
-          <span class="headline">Create Username</span>
+          <span class="headline">{{ store.state.user?.username ? 'Change' : 'Create' }} Username</span>
         </v-card-title>
         <v-card-text>
           <v-text-field
@@ -18,7 +18,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <!-- <v-btn color="blue darken-1" flat @click="close">Close</v-btn> -->
+          <v-btn v-if="allowCancel" color="blue darken-1" flat @click="close">Close</v-btn>
           <v-btn
             color="blue darken-1"
             flat
@@ -39,6 +39,12 @@ import Api from '../services/Api';
 
 export default {
   name: 'UsernameForm',
+  props: {
+    allowCancel: {
+      type: Boolean,
+      required: false,
+    },
+  },
   setup () {
     const store = useStore();
     const formRules = [
@@ -67,6 +73,7 @@ export default {
       this.loading = false;
       this.username = '';
       this.errorMessage = '';
+      this.$emit('close');
     },
     async submit () {
       this.loading = true;
@@ -76,7 +83,6 @@ export default {
         const response = await Api().patch(`/users/${this.store.state.user._id}`, {
           username: this.username,
         });
-        console.log(response);
         if (response.status === 200) {
           this.store.commit('setUser', response.data);
           this.close();
