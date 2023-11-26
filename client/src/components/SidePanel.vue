@@ -62,7 +62,8 @@
             controls>
             <source :src="urls.get(marker.data._id)" :type="`${marker.data.contentType}`">
           </audio>-->
-          <v-btn @click="fetchAudio(marker.data)">Play</v-btn>
+          <v-btn v-if="playing && audioId == marker.data._id"  @click="pause();">Pause</v-btn>
+          <v-btn v-else @click="play(marker)">Play</v-btn>
         </div>
       </li>
     </ul>
@@ -113,6 +114,9 @@ export default {
       this.$emit('close');
     },
     async fetchAudio (marker) {
+      if (this.$store.state.fileUrls.has(marker._id)) {
+        return;
+      }
       fetch(`http://localhost:3000/uploads/${marker._id}`)
         .then((response) => {
           return response.blob();
@@ -148,15 +152,20 @@ export default {
           return objectUrl;
         });
     },
-    playing (marker) {
-      const newAudio = this.$refs[`audio-${marker.data._id}`][0];
-      if (this.currentAudio) {
-        if (this.currentAudio === newAudio) return;
-        this.currentAudio.pause();
-      }
-      this.currentAudio = newAudio;
+    async play (marker) {
+      await this.fetchAudio(marker.data);
+      this.$store.dispatch('setPlaying', true);
+      // const newAudio = this.$refs[`audio-${marker.data._id}`][0];
+      // if (this.currentAudio) {
+      //   if (this.currentAudio === newAudio) return;
+      //   this.currentAudio.pause();
+      // }
+      // this.currentAudio = newAudio;
       this.$emit('focusMarker', marker);
     },
+    pause () {
+      this.$store.dispatch('setPlaying', false);
+    }
   },
   computed: {
     paginatedMarkers () {
@@ -174,6 +183,12 @@ export default {
     },
     urls () {
       return this.$store.state.fileUrls;
+    },
+    audioId () {
+      return this.$store.state.fileId;
+    },
+    playing () {
+      return this.$store.state.playing;
     }
   },
   watch: {

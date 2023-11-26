@@ -19,7 +19,7 @@ const options = {
 };
 
 let wavesurfer = null;
-const playing = ref(false);
+const playing = computed(() => store.state.playing);
 
 onMounted(() => {
   wavesurfer = WaveSurfer.create(options);
@@ -33,6 +33,14 @@ watch(id, (newId, oldId) => {
     });
   }
 });
+
+watch(playing, (newPlaying, oldPlaying) => {
+  if (newPlaying) {
+    play();
+  } else {
+    pause();
+  }
+});
 /** */
 function toggle () {
   if (playing.value) {
@@ -44,13 +52,13 @@ function toggle () {
 /** */
 function play () {
   if (wavesurfer.isPlaying()) return;
-  playing.value = true;
+  store.dispatch('setPlaying', true);
   wavesurfer.play();
 }
 /** */
 function pause () {
   if (!wavesurfer.isPlaying()) return;
-  playing.value = false;
+  store.dispatch('setPlaying', false);
   wavesurfer.pause();
 }
 </script>

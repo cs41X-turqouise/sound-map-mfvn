@@ -28,7 +28,8 @@ export default createStore({
     /** @type {Map<number, FileData>} */
     files: new Map(),
     fileId: null,
-    fileUrls: new Map()
+    fileUrls: new Map(),
+    playing: false
   },
   mutations: {
     setToken (state, token) {
@@ -86,6 +87,9 @@ export default createStore({
       newFileUrls.delete(fileId);
       state.fileUrls = newFileUrls;
     },
+    setPlaying (state, playing) {
+      state.playing = playing;
+    }
   },
   actions: {
     setToken ({ commit }, token) {
@@ -124,5 +128,8 @@ export default createStore({
     removeFileUrl ({ commit }, fileId) {
       commit('removeFileUrl', fileId);
     },
+    setPlaying ({ commit }, playing) {
+      commit('setPlaying', playing);
+    }
   }
 });
