@@ -8,9 +8,9 @@
         </v-btn>
       </v-toolbar-items>
       <v-spacer></v-spacer>
-      <v-toolbar-title v-if="store.state.user">
+      <!-- <v-toolbar-title v-if="store.state.user">
         Welcome {{ store.state.user.username }}
-      </v-toolbar-title>
+      </v-toolbar-title> -->
       <v-toolbar-items style="padding: 0 10px;">
         <UserMenu />
       </v-toolbar-items>
@@ -72,8 +72,8 @@ export default {
       filteredFiles: new Map(),
     };
   },
-  beforeCreate () {
-    Api().get('uploads/filedata/all').then((response) => {
+  async beforeCreate () {
+    await Api().get('uploads/filedata/all').then((response) => {
       const fileMap = new Map();
       response.data.forEach((file) => {
         fileMap.set(file._id, file);
