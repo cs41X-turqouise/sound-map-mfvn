@@ -9,6 +9,7 @@ import mongoose from 'mongoose';
  * @property {mongoose.Schema.Types.ObjectId} reporter - The MongoDB ObjectId of the user who created the report.
  * @property {mongoose.Schema.Types.ObjectId} fileId - The MongoDB ObjectId of the upload being reported.
  * @property {string} reason - The reason for the report.
+ * @property {string} viewableBy - Minimum role required to view the report. Can be 'moderator', 'admin', or 'superadmin'.
  * @property {Date} date - The date the report was created.
  */
 const reportSchema = new mongoose.Schema({
@@ -26,6 +27,12 @@ const reportSchema = new mongoose.Schema({
     minLength: 1,
     maxLength: 1000,
     trim: true,
+  },
+  viewableBy: {
+    type: String,
+    enum: ['moderator', 'admin', 'superadmin'],
+    default: 'moderator',
+    lowercase: true,
   },
   date: {
     type: Date,
