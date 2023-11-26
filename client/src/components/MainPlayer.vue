@@ -1,14 +1,20 @@
 <script setup>
-import { inject } from 'vue';
+import { useStore } from 'vuex';
 
-const currentMarkerId = inject('currentMarkerId');
+import { computed } from 'vue';
+const store = useStore();
+
+const file = computed(() => {
+  return store.state.files.get(store.state.fileId);
+});
+
 </script>
 
 <template>
     <v-footer>
         <v-row>
             <v-icon icon="mdi-play-circle" size="50px"></v-icon>
-            {{ currentMarkerId }}
+            {{ file }}
         </v-row>
     </v-footer>
 </template>

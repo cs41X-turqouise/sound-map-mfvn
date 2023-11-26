@@ -27,6 +27,7 @@ export default createStore({
      */
     /** @type {Map<number, FileData>} */
     files: new Map(),
+    fileId: null,
   },
   mutations: {
     setToken (state, token) {
@@ -58,6 +59,10 @@ export default createStore({
       newFiles.delete(file._id);
       state.files = newFiles;
     },
+    setFileId (state, id) {
+      console.log('store fileId: ', id)
+      state.fileId = id;
+    }
   },
   actions: {
     setToken ({ commit }, token) {
@@ -81,5 +86,8 @@ export default createStore({
     removeFile ({ commit }, file) {
       commit('removeFile', file);
     },
+    setFileId ({ commit }, id) {
+      commit('setFileId', id);
+    }
   }
 });

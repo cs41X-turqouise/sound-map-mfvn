@@ -118,6 +118,7 @@ export default {
           this.$nextTick(() => {
             this.$refs[`audio-${marker._id}`][0].play();
           });
+          this.$store.dispatch('setFileId', marker._id);
         });
     },
     async fetchImage (id) {
