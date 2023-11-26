@@ -100,10 +100,12 @@ export default {
     ReportModal,
   },
   props: {
+    /** @type {Array<import('leaflet').Marker & { data: import('../App.vue').UploadSchema }>} */
     markers: {
       type: Array,
       default: () => [],
     },
+    /** @type {import('leaflet').Map} */
     map: {
       type: Object,
       default: null,
@@ -168,12 +170,15 @@ export default {
         });
       }
     },
+    getFileData (id) {
+      return this.store.state.files.get(id);
+    },
   },
   computed: {
     paginatedMarkers () {
       const start = (this.currentPage - 1) * this.perPage;
       const end = start + this.perPage;
-      return this.markers.toSorted((a, b) => {
+      return this.markers.filter((m) => m.data.visible).toSorted((a, b) => {
         const distanceA = this.clicked.latlng.distanceTo(a._latlng);
         const distanceB = this.clicked.latlng.distanceTo(b._latlng);
         return distanceA - distanceB;
@@ -209,6 +214,9 @@ export default {
   },
   mounted () {
     window.addEventListener('resize', this.updatePerPage);
+    for (const marker of this.markers) {
+      marker.data = this.getFileData(marker.data._id);
+    }
     this.paginatedMarkers.forEach((marker, index) => {
       const color = this.colors[index];
       const circleMarker = circle(marker._latlng, {
