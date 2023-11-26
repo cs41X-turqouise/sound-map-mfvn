@@ -62,6 +62,7 @@ async function populateDB () {
           .pipe(soundBucket.openUploadStream(`${faker.string.numeric({ length: { min: 5, max: 10 } })}_waves-crashing.wav`, {
             contentType: 'audio/wav',
             metadata: {
+              creator: user._id,
               title: faker.lorem.lines(1),
               description: faker.lorem.paragraph({ min: 1, max: 3 }),
               tags: faker.lorem.words({ min: 3, max: 5 }).split(' '),

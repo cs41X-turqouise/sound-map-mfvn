@@ -7,6 +7,13 @@ export const metadataSchema = {
   type: 'object',
   nullable: true,
   properties: {
+    creator: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string', description: 'MongoDB ObjectId' },
+        username: { type: 'string' }
+      }
+    },
     title: { type: 'string' },
     description: { type: 'string' },
     tags: {

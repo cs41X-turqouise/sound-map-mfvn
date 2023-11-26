@@ -13,7 +13,8 @@
       <v-text-field name="description" label="Description" id="description" clearable
       ></v-text-field>
       <!-- Hacky - Fixes order in which formdata elements are processed though -->
-      <v-text-field name="tags" label="Tags" id="tags" style="display: none;"></v-text-field>
+      <v-text-field name="creator" id="creator" style="display: none;"></v-text-field>
+      <v-text-field name="tags" id="tags" style="display: none;"></v-text-field>
       <v-text-field name="latitude" id="latitude" style="display: none;"></v-text-field>
       <v-text-field name="longitude" id="longitude" style="display: none;"></v-text-field>
       <v-text-field name="geodata" id="geodata" style="display: none;"></v-text-field>
@@ -140,6 +141,7 @@ export default {
         }
         return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
       }).join(' ');
+      formData.set('creator', this.$store.state.user._id);
       formData.set('title', title);
       formData.set('tags', Array.from(this.tags));
       formData.set('latitude', lat);

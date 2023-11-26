@@ -16,6 +16,9 @@
         <span class="date">
           Date: {{ new Date(item.uploadDate).toLocaleDateString() }}
         </span><br>
+        <span v-if="item.metadata.creator">
+          Creator: {{ item.metadata.creator.username }}
+        </span><br>
         <span class="wrap-text" v-if="item.metadata.description">
           Description: <p>{{ item.metadata.description }}</p>
         </span><br>

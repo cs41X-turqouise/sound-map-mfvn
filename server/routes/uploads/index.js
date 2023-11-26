@@ -196,6 +196,13 @@ export default async function (fastify, options) {
         try {
           const file = await upload.getFile(fastify);
           file.images = upload.images || [];
+
+          if (file.metadata.creator) {
+            const creator = fastify.toObjectId(file.metadata.creator);
+            file.metadata.creator = await User.findById(creator, 'username').exec();
+          } else {
+            file.metadata.creator = { username: 'Unknown' };
+          }
           data.push(file);
         } catch (err) {
           // should we remove the file if its not found in the bucket?
