@@ -438,17 +438,25 @@
               :class="{ 'highlight': upload._id === selectedReport?.fileId }"
             >
               <td>
-                <v-btn @click="playMedia(upload)">Play</v-btn>
-                <v-btn @click="setEdit(upload)">
-                  Edit{{ edit.selected?._id === upload._id ? 'ing' : '' }}
-                </v-btn>
-                <v-btn>
-                  Delete
-                  <ReportDialog @submitReason="(reason) => deleteUpload(upload, reason)" />
-                </v-btn>
+                <v-row dense>
+                  <v-col>
+                    <v-btn @click="playMedia(upload)">Play</v-btn>
+                  </v-col>
+                  <v-col>
+                    <v-btn @click="setEdit(upload)">
+                      Edit{{ edit.selected?._id === upload._id ? 'ing' : '' }}
+                    </v-btn>
+                  </v-col>
+                  <v-col>
+                    <v-btn>
+                      Delete
+                      <ReportDialog @submitReason="(reason) => deleteUpload(upload, reason)" />
+                    </v-btn>
+                  </v-col>
+                </v-row>
               </td>
               <td>
-                <v-card class="my-2">
+                <v-card flat class="my-2">
                   <v-card-subtitle>
                     Title: <span>{{ upload.metadata.title }}</span>
                   </v-card-subtitle>
@@ -477,7 +485,7 @@
                 </v-card>
               </td>
               <td>
-                <v-card class="my-2">
+                <v-card flat class="my-2">
                   <v-card-subtitle>
                     ID: <span>{{ upload._id }}</span>
                   </v-card-subtitle>
@@ -543,7 +551,7 @@
       <v-card v-show="activeUserTab === 'roles'" class="roles-tab">
         <v-row>
           <v-col cols="12" sm="4" md="4">
-            <v-card>
+            <v-card flat>
               <v-card-subtitle>
                 Full Name: <span>{{ selectedUser.fullname }}</span>
               </v-card-subtitle>
@@ -553,7 +561,7 @@
             </v-card>
           </v-col>
           <v-col cols="12" sm="4" md="4">
-            <v-card>
+            <v-card flat>
               <v-card-subtitle>
                 Role: <span>{{ selectedUser.role }}</span>
               </v-card-subtitle>
@@ -563,7 +571,7 @@
             </v-card>
           </v-col>
           <v-col cols="12" sm="4" md="4">
-            <v-card>
+            <v-card flat>
               <v-card-subtitle>
                 Uploads: <span>{{ selectedUser.uploads.length }}</span>
               </v-card-subtitle>
@@ -577,25 +585,31 @@
           <v-btn
             v-for="button in promoteRoleButtons"
             :key="button.text"
+            variant="outlined"
             @click="button.click"
           >
             {{ button.text }}
           </v-btn>
 
           <v-btn
-            v-if="selectedUser.role !== 'user' && roles[selectedUser.role] < roles[store.state.user.role]">
+            v-if="selectedUser.role !== 'user' && roles[selectedUser.role] < roles[store.state.user.role]"
+            variant="outlined"
+          >
             Demote to User
             <ReportDialog @submitReason="(reason) => changeUserRole(selectedUser, 'user', reason)" />
           </v-btn>
 
           <v-btn
-            v-if="roles[selectedUser.role] < roles[store.state.user.role]">
+            v-if="roles[selectedUser.role] < roles[store.state.user.role]"
+            variant="outlined"
+          >
             {{ !selectedUser.banned ? 'Ban' : 'Unban' }} User
             <ReportDialog @submitReason="(reason) => toggleBan(selectedUser, !selectedUser.banned, reason)" />
           </v-btn>
 
           <v-btn
             v-if="roles[selectedUser.role] < roles[store.state.user.role]"
+            variant="outlined"
             @click="deleteUser(selectedUser)"
           >
             Delete User
