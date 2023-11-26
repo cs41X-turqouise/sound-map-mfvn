@@ -203,14 +203,29 @@
                 @addUrl="(el) => urls.set(el.id, el.objectUrl)">
                 <template v-slot:actions>
                   <v-btn icon @click="playMedia(upload)">
+                    <v-tooltip activator="parent" location="top">
+                      Play
+                    </v-tooltip>
                     <v-icon>mdi-play</v-icon>
                   </v-btn>
                   <v-btn icon @click="setEdit(upload)">
+                    <v-tooltip activator="parent" location="top">
+                      Edit
+                    </v-tooltip>
                     <v-icon>mdi-pencil</v-icon>
                   </v-btn>
                   <v-btn icon>
+                    <v-tooltip activator="parent" location="top">
+                      Delete
+                    </v-tooltip>
                     <v-icon>mdi-delete</v-icon>
                     <ReportDialog @submitReason="(reason) => deleteUpload(upload, reason)" />
+                  </v-btn>
+                  <v-btn icon @click="toggleVisibility(upload)">
+                    <v-tooltip activator="parent" location="top">
+                      {{ upload.visible ? 'Visible' : 'Hidden' }}
+                    </v-tooltip>
+                    <v-icon>{{ !!upload.visible ? 'mdi-eye' : 'mdi-eye-off' }}</v-icon>
                   </v-btn>
                 </template>
               </ItemCard>
@@ -832,6 +847,15 @@ export default {
       try {
         await Api().patch(`users/${user._id}/ban`, { ban, reason });
         user.banned = ban;
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    /** @param {UploadSchema} upload */
+    async toggleVisibility (upload) {
+      try {
+        upload.visible = !upload.visible;
+        await Api().patch(`uploads/visibility/${upload._id}`, { visible: upload.visible });
       } catch (err) {
         console.error(err);
       }
