@@ -28,6 +28,7 @@ export default createStore({
     /** @type {Map<number, FileData>} */
     files: new Map(),
     fileId: null,
+    fileUrls: new Map()
   },
   mutations: {
     setToken (state, token) {
@@ -60,9 +61,31 @@ export default createStore({
       state.files = newFiles;
     },
     setFileId (state, id) {
-      console.log('store fileId: ', id)
       state.fileId = id;
-    }
+    },
+    setFileUrls (state, fileUrls) {
+      state.fileUrls = fileUrls;
+    },
+    addFileUrl (state, payload) {
+      const fileId = payload.fileId;
+      const url = payload.url;
+      const newFileUrls = new Map(state.fileUrls.entries());
+      newFileUrls.set(fileId, url);
+      state.fileUrls = payload.newFileUrls;
+    },
+    updateFileUrl (state,  payload) {
+      const fileId = payload.fileId;
+      const url = payload.url;
+      const newFileUrls = new Map(state.fileUrls.entries());
+      newFileUrls.set(fileId, url);
+      state.fileUrls = newFileUrls;
+    },
+    removeFileUrl (state, payload) {
+      const fileId = payload.fileId;
+      const newFileUrls = new Map(state.fileUrls.entries());
+      newFileUrls.delete(fileId);
+      state.fileUrls = newFileUrls;
+    },
   },
   actions: {
     setToken ({ commit }, token) {
@@ -88,6 +111,18 @@ export default createStore({
     },
     setFileId ({ commit }, id) {
       commit('setFileId', id);
-    }
+    },
+    setFileUrls ({ commit }, fileUrls) {
+      commit('setFileUrls', fileUrls);
+    },
+    addFileUrl ({ commit }, fileId, url) {
+      commit('addFileUrl', fileId, url);
+    },
+    updateFileUrl ({ commit }, fileId, url) {
+      commit('updateFileUrl', fileId, url);
+    },
+    removeFileUrl ({ commit }, fileId) {
+      commit('removeFileUrl', fileId);
+    },
   }
 });

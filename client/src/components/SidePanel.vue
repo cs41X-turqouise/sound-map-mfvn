@@ -74,6 +74,7 @@
 // import { divIcon } from 'leaflet';
 import { circle } from 'leaflet';
 // import CloseButton from './CloseButton.vue';
+import { useStore } from 'vuex';
 
 export default {
   name: 'SidePanel',
@@ -94,7 +95,7 @@ export default {
   },
   data () {
     return {
-      urls: new Map(),
+      // urls: new Map(),
       circles: new WeakMap(),
       /** @type {HTMLAudioElement} */
       currentAudio: null,
@@ -102,6 +103,10 @@ export default {
       perPage: 4,
       colors: ['red', 'green', 'blue', 'purple'],
     };
+  },
+  setup () {
+    const store = useStore();
+    return { store };
   },
   methods: {
     close () {
@@ -114,10 +119,16 @@ export default {
         })
         .then((blob) => {
           const objectUrl = URL.createObjectURL(blob);
-          this.urls.set(marker._id, objectUrl);
-          this.$nextTick(() => {
-            this.$refs[`audio-${marker._id}`][0].play();
+          console.log('sidepanel- objurl--', objectUrl);
+          this.$store.dispatch('updateFileUrl', {
+            fileId: marker._id,
+            url: objectUrl
           });
+          console.log('sidepanel- urls--', this.urls);
+          // this.urls.set(marker._id, objectUrl);
+          // this.$nextTick(() => {
+          //   this.$refs[`audio-${marker._id}`][0].play();
+          // });
           this.$store.dispatch('setFileId', marker._id);
         });
     },
@@ -128,7 +139,12 @@ export default {
         })
         .then((blob) => {
           const objectUrl = URL.createObjectURL(blob);
-          this.urls.set(id, objectUrl);
+
+          this.$store.dispatch('updateFileUrl', {
+            fileId: id,
+            url: objectUrl
+          });
+          // this.urls.set(id, objectUrl);
           return objectUrl;
         });
     },
@@ -155,6 +171,9 @@ export default {
     /** @returns {number} */
     maxPage () {
       return Math.ceil(this.markers.length / this.perPage);
+    },
+    urls () {
+      return this.$store.state.fileUrls;
     }
   },
   watch: {
