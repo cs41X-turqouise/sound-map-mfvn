@@ -306,6 +306,13 @@
                       </v-tooltip>
                       <v-icon>{{ !!upload.visible ? 'mdi-eye' : 'mdi-eye-off' }}</v-icon>
                     </v-btn>
+                    <v-btn icon>
+                      <v-tooltip activator="parent" location="top">
+                        Disapprove
+                      </v-tooltip>
+                      <v-icon color="red">mdi-close-thick</v-icon>
+                      <ReportDialog @submitReason="(reason) => dissaproveUpload(upload, reason)" />
+                    </v-btn>
                     <v-btn icon @click="approveUpload(upload)">
                       <v-tooltip activator="parent" location="top">
                         Approve
@@ -963,9 +970,24 @@ export default {
           ? this.selectedUser
           : this.users.find((u) => u.uploads.find((f) => f._id === upload._id));
         await Api().post(`users/${owner._id}/inbox`, {
-          title: 'Your upload has been approved!',
+          title: '[Review] Your upload has been approved!',
           message: `Your upload "${upload.metadata.title}" has been approved by an admin.`,
         });
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    /** @param {UploadSchema} upload */
+    async dissaproveUpload (upload, reason) {
+      try {
+        const owner = this.selectedUser._id
+          ? this.selectedUser
+          : this.users.find((u) => u.uploads.find((f) => f._id === upload._id));
+        await Api().post(`users/${owner._id}/inbox`, {
+          title: `[Review] Your upload "${upload.metadata.title}" has been dissaproved.`,
+          message: reason,
+        });
+        await this.deleteUpload(upload, reason);
       } catch (err) {
         console.error(err);
       }
