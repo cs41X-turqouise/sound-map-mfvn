@@ -11,6 +11,7 @@ import mongoose from 'mongoose';
  * @property {string} email - The email address of the user.
  * @property {string} gid - The Google ID of the user.
  * @property {string} profilePhoto - The URL of the user's profile photo.
+ * @property {Date} joined - The date the user joined.
  * @property {mongoose.Schema.Types.ObjectId[]} uploads - An array of IDs of the user's uploaded files.
  * @property {mongoose.Schema.Types.ObjectId[]} bookmarks - An array of IDs of the user's bookmarked files.
  * @property {string} role - The role of the user. Can be 'user', 'moderator', or 'admin'.
@@ -34,6 +35,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+  },
+  joined: {
+    type: Date,
+    default: Date.now,
   },
   profilePhoto: {
     type: String,
