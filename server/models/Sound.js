@@ -16,7 +16,7 @@ const soundSchema = new mongoose.Schema(
     },
     visible: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     approvedBy: {
       type: mongoose.Schema.Types.ObjectId,
