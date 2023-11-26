@@ -363,6 +363,7 @@ export default async function (fastify, options) {
           latitude: { type: 'number', description: 'New latitude value' },
           longitude: { type: 'number', description: 'New longitude value' },
         },
+        additionalProperties: false,
       },
       response: {
         200: uploadSchema,
