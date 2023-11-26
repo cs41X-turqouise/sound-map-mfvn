@@ -50,8 +50,6 @@ import CloseButton from './CloseButton.vue';
 import MainPlayer from './MainPlayer.vue';
 import { ref } from 'vue';
 
-
-
 const CoordinatesControl = L.Control.extend({
   onAdd: function (map) {
     const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
@@ -104,18 +102,10 @@ export default {
       showPanel: false,
       showModal: false,
       highlight: false,
-      currentMarkerId: ref(null),
-      audioUrls: new Map(),
     };
   },
 
-  provide () {
-    return {
-      currentMarkerId: this.currentMarkerId,
-      setCurrentMarkerId: this.setCurrentMarkerId,
-      audioUrls: this.audioUrls
-    };
-  },
+ 
   setup () {
     const store = useStore();
     return { store };

@@ -62,8 +62,7 @@
             controls>
             <source :src="urls.get(marker.data._id)" :type="`${marker.data.contentType}`">
           </audio>
-          <v-btn v-else @click="fetchAudio(marker.data);
-          currentMarkerId.value = marker.data._id; console.log('oooooo');">Play</v-btn>
+          <v-btn v-else @click="fetchAudio(marker.data)">Play</v-btn>
         </div>
       </li>
     </ul>
@@ -95,7 +94,7 @@ export default {
   },
   data () {
     return {
-      // urls: new Map(),
+      urls: new Map(),
       circles: new WeakMap(),
       /** @type {HTMLAudioElement} */
       currentAudio: null,
@@ -103,17 +102,6 @@ export default {
       perPage: 4,
       colors: ['red', 'green', 'blue', 'purple'],
     };
-  },
-  inject: {
-    urls: {
-      from: 'audioUrls'
-    },
-    currentMarkerId: {
-      from: 'currentMarkerId'
-    },
-    setCurrentMarkerId: {
-      from: 'setCurrentMarkerId'
-    }
   },
   methods: {
     close () {
