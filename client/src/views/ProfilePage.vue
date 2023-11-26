@@ -49,7 +49,7 @@
             <div class="profile-content">
               <h2>Uploaded Content</h2>
               <!-- Carousel for displaying uploads -->
-              <v-carousel v-if="filteredUploads.length" hide-delimiters cycle>
+              <v-carousel v-if="filteredUploads.length" hide-delimiters>
                 <v-carousel-item v-for="(item, index) in filteredUploads" :key="index">
                   <v-card>
                     <v-card-item align="center" justify="center">
