@@ -1,6 +1,6 @@
 <script setup>
 import { useStore } from 'vuex';
-import { computed, onMounted, watch } from 'vue';
+import { computed, onMounted, watch, ref } from 'vue';
 import WaveSurfer from 'wavesurfer.js';
 
 const store = useStore();
@@ -10,6 +10,7 @@ const files = computed(() => {
 });
 const urls = computed(() => store.state.fileUrls);
 
+
 const options = {
   container: '#waveform',
   waveColor: '#4F4A85',
@@ -17,8 +18,9 @@ const options = {
   height: 'auto'
 };
 
-
 let wavesurfer = null;
+const playing = ref(false);
+
 onMounted(() => {
   wavesurfer = WaveSurfer.create(options);
 });
@@ -28,18 +30,44 @@ watch(id, (newId, oldId) => {
     // options.url = urls.value.get(newId);
     wavesurfer.load(urls.value.get(newId));
     wavesurfer.on('ready', (duration) => {
-      wavesurfer.play();
+      play();
     });
   }
 });
+/** */
+function toggle () {
+  if (playing.value) {
+    pause();
+  } else {
+    play();
+  }
+}
+/** */
+function play () {
+  if (wavesurfer.isPlaying()) return;
+  playing.value = true;
+  wavesurfer.play();
+}
+/** */
+function pause () {
+  if (!wavesurfer.isPlaying()) return;
+  playing.value = false;
+  wavesurfer.pause();
+}
 </script>
 
 <template>
     <v-footer>
         <v-row>
-            <v-icon icon="mdi-play-circle" size="50px"></v-icon>
             <div id="waveform" class="flex-fill"></div>
-            {{ file }}
+            <v-icon v-if="!playing"
+                icon="mdi-play-circle"
+                size="50px"
+                @click="toggle()"></v-icon>
+            <v-icon v-else
+                icon="mdi-pause-circle"
+                size="50px"
+                @click="toggle()"></v-icon>
         </v-row>
     </v-footer>
 </template>

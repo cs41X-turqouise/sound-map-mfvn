@@ -104,8 +104,6 @@ export default {
       highlight: false,
     };
   },
-
- 
   setup () {
     const store = useStore();
     return { store };

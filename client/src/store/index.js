@@ -73,7 +73,7 @@ export default createStore({
       newFileUrls.set(fileId, url);
       state.fileUrls = payload.newFileUrls;
     },
-    updateFileUrl (state,  payload) {
+    updateFileUrl (state, payload) {
       const fileId = payload.fileId;
       const url = payload.url;
       const newFileUrls = new Map(state.fileUrls.entries());
