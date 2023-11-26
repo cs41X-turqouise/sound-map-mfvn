@@ -196,6 +196,8 @@ export default async function (fastify, options) {
         try {
           const file = await upload.getFile(fastify);
           file.images = upload.images || [];
+          file.visible = upload.visible;
+          file.approvedBy = upload.approvedBy;
 
           if (file.metadata.creator) {
             const creator = fastify.toObjectId(file.metadata.creator);
@@ -391,6 +393,79 @@ export default async function (fastify, options) {
         fastify.log.info(file);
 
         return file.value;
+      } catch (err) {
+        fastify.log.error(err);
+        throw new Error('Internal Server Error');
+      }
+    },
+  });
+
+  /**
+   * Approve a file
+   */
+  fastify.patch('/approve/:id', {
+    preHandler: checkUserRole('moderator', true),
+    schema: {
+      tags: ['uploads'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'MongoDB ObjectId' },
+        },
+      },
+      response: {
+        200: uploadSchema,
+      },
+    },
+    async handler (request, reply) {
+      try {
+        const _id = fastify.toObjectId(request.params.id);
+        if (!_id) return reply.code(400).send(new Error('Invalid ID'));
+
+        const file = await Sound.findByIdAndUpdate(_id, {
+          visible: true,
+          approvedBy: request.session.user._id
+        }, { new: true });
+        return file;
+      } catch (err) {
+        fastify.log.error(err);
+        throw new Error('Internal Server Error');
+      }
+    },
+  });
+
+  /**
+   * Change visibility of a file
+   */
+  fastify.patch('/visibility/:id', {
+    preHandler: checkUserRole('moderator', true),
+    schema: {
+      tags: ['uploads'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'MongoDB ObjectId' },
+        },
+      },
+      body: {
+        type: 'object',
+        properties: {
+          visible: { type: 'boolean', description: 'New visibility value' },
+        },
+      },
+      response: {
+        200: uploadSchema,
+      },
+    },
+    async handler (request, reply) {
+      try {
+        const _id = fastify.toObjectId(request.params.id);
+        if (!_id) return reply.code(400).send(new Error('Invalid ID'));
+
+        const file = await Sound.findByIdAndUpdate(_id, {
+          visible: request.body.visible,
+        }, { new: true });
+        return file;
       } catch (err) {
         fastify.log.error(err);
         throw new Error('Internal Server Error');
