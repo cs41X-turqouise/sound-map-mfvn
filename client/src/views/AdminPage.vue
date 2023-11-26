@@ -719,13 +719,13 @@ export default {
       return this.filteredUsers.slice(start, end);
     },
     filteredUploads () {
-      if (!this.search) return this.uploads;
-      return this.uploads.filter((upload) =>
-        upload.metadata.title.toLowerCase().includes(this.search.toLowerCase())
+      if (!this.search) return this.uploads.filter((upload) => upload.approvedBy);
+      return this.uploads.filter((upload) => upload.approvedBy
+        && (upload.metadata.title.toLowerCase().includes(this.search.toLowerCase())
         || upload.metadata.description.toLowerCase().includes(this.search.toLowerCase())
         || upload.metadata.tags.some((tag) => tag.toLowerCase().includes(this.search.toLowerCase()))
         || upload.filename.toLowerCase().includes(this.search.toLowerCase())
-        || upload.contentType.toLowerCase().includes(this.search.toLowerCase())
+        || upload.contentType.toLowerCase().includes(this.search.toLowerCase()))
       );
     },
     maxUploadsPage () {
