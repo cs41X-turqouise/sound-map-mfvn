@@ -38,5 +38,6 @@ export const uploadSchema = {
     contentType: { type: 'string' },
     metadata: metadataSchema,
     visible: { type: 'boolean' },
+    approvedBy: { type: 'string', description: 'MongoDB ObjectId of Moderator who approved this upload' },
   }
 };

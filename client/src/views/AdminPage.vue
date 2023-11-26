@@ -87,7 +87,12 @@
           Uploads
         </v-tab>
         <v-tab value="review">
-          <v-badge location="top right" floating color="primary" :content="0" style="padding-right: 10px;">
+          <v-badge
+            location="top right"
+            floating color="primary"
+            :content="pendingUploads.length"
+            style="padding-right: 10px;"
+          >
             <v-icon>mdi-upload</v-icon>
           </v-badge>
           Pending
@@ -240,7 +245,85 @@
       </div>
 
       <div v-if="activeMainTab === 'review'">
-        <span>Nothing for now</span>
+        <div v-if="pendingUploads.length">
+          <v-row>
+            <v-col cols="12" sm="6" md="6">
+              <v-text-field
+                v-model="search"
+                append-icon="mdi-magnify"
+                label="Search for Uploads"
+                single-line
+                hide-details
+                clearable
+                rounded
+                variant="outlined"
+                style="max-width: 75%;"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="6" md="6">
+              <audio class="audio" controls :key="activeMedia.url" ref="audio-player">
+                <source :src="activeMedia.url" :type="activeMedia.type">
+              </audio>
+            </v-col>
+          </v-row>
+
+          <v-container class="userTable" density="comfortable">
+            <v-row>
+              <v-col
+                cols="12"
+                sm="6"
+                md="6"
+                v-for="upload in paginatedPendingUploads"
+                :key="upload._id"
+              >
+                <ItemCard
+                  :item="upload"
+                  :urls="urls"
+                  @addUrl="(el) => urls.set(el.id, el.objectUrl)">
+                  <template v-slot:actions>
+                    <v-btn icon @click="playMedia(upload)">
+                      <v-tooltip activator="parent" location="top">
+                        Play
+                      </v-tooltip>
+                      <v-icon>mdi-play</v-icon>
+                    </v-btn>
+                    <v-btn icon @click="setEdit(upload)">
+                      <v-tooltip activator="parent" location="top">
+                        Edit
+                      </v-tooltip>
+                      <v-icon>mdi-pencil</v-icon>
+                    </v-btn>
+                    <v-btn icon>
+                      <v-tooltip activator="parent" location="top">
+                        Delete
+                      </v-tooltip>
+                      <v-icon>mdi-delete</v-icon>
+                      <ReportDialog @submitReason="(reason) => deleteUpload(upload, reason)" />
+                    </v-btn>
+                    <v-btn icon @click="toggleVisibility(upload)">
+                      <v-tooltip activator="parent" location="top">
+                        {{ upload.visible ? 'Visible' : 'Hidden' }}
+                      </v-tooltip>
+                      <v-icon>{{ !!upload.visible ? 'mdi-eye' : 'mdi-eye-off' }}</v-icon>
+                    </v-btn>
+                    <v-btn icon @click="approveUpload(upload)">
+                      <v-tooltip activator="parent" location="top">
+                        Approve
+                      </v-tooltip>
+                      <v-icon color="green">mdi-check-bold</v-icon>
+                    </v-btn>
+                  </template>
+                </ItemCard>
+              </v-col>
+            </v-row>
+          </v-container>
+
+          <v-pagination
+            v-model="uploadsTable.current"
+            :length="maxPendingUploadsPage"
+          ></v-pagination>
+        </div>
+        <span v-else>Nothing for now</span>
       </div>
 
       <div v-if="activeMainTab === 'reports'">
@@ -650,6 +733,17 @@ export default {
       const end = start + this.uploadsTable.perPage;
       return this.filteredUserUploads.slice(start, end);
     },
+    pendingUploads () {
+      return this.uploads.filter((upload) => !upload.approvedBy);
+    },
+    maxPendingUploadsPage () {
+      return Math.ceil(this.pendingUploads.length / this.uploadsTable.perPage);
+    },
+    paginatedPendingUploads () {
+      const start = (this.uploadsTable.current - 1) * this.uploadsTable.perPage;
+      const end = start + this.uploadsTable.perPage;
+      return this.pendingUploads.slice(start, end);
+    },
     maxReportsPage () {
       return Math.ceil(this.reports.length / this.reportsTable.perPage);
     },
@@ -856,6 +950,22 @@ export default {
       try {
         upload.visible = !upload.visible;
         await Api().patch(`uploads/visibility/${upload._id}`, { visible: upload.visible });
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    /** @param {UploadSchema} upload */
+    async approveUpload (upload) {
+      try {
+        await Api().patch(`uploads/approve/${upload._id}`);
+        upload.approvedBy = this.store.state.user._id;
+        const owner = this.selectedUser._id
+          ? this.selectedUser
+          : this.users.find((u) => u.uploads.find((f) => f._id === upload._id));
+        await Api().post(`users/${owner._id}/inbox`, {
+          title: 'Your upload has been approved!',
+          message: `Your upload "${upload.metadata.title}" has been approved by an admin.`,
+        });
       } catch (err) {
         console.error(err);
       }

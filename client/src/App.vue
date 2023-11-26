@@ -14,6 +14,7 @@ import PageFooter from './components/PageFooter.vue';
 
 /**
  * @typedef {Object} MetadataSchema
+ * @property {{ _id: string, username: string }} [creator] - The user who uploaded the file.
  * @property {string} [title]
  * @property {string} [description]
  * @property {string[]} [tags]
@@ -31,8 +32,9 @@ import PageFooter from './components/PageFooter.vue';
  * @property {string} filename
  * @property {string} contentType
  * @property {MetadataSchema} metadata
- * @property {string} user - UserID as a MongoDB ObjectId
  * @property {string[]} images - Array of MongoDB ObjectId
+ * @property {boolean} visible - Whether the upload is visible to other users.
+ * @property {string} approvedBy - UserID as a MongoDB ObjectId
  */
 
 /**
