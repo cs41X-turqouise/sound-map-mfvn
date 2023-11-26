@@ -243,7 +243,9 @@ export default {
       if (confirm('Are you sure you want to delete this upload?')) {
         try {
           await Api().delete(`uploads/sound/${upload._id}`);
-          this.store.dispatch('deleteFile', upload._id);
+          this.store.dispatch('deleteFile', upload._id).then(() => {
+            this.uploadedContent = this.uploadedContent.filter((item) => item._id !== upload._id);
+          });
         } catch {
           console.log(error);
         }
