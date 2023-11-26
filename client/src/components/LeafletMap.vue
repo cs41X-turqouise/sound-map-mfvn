@@ -48,7 +48,6 @@ import L from 'leaflet';
 import SidePanel from './SidePanel.vue';
 import CloseButton from './CloseButton.vue';
 import MainPlayer from './MainPlayer.vue';
-import { ref } from 'vue';
 
 const CoordinatesControl = L.Control.extend({
   onAdd: function (map) {

@@ -5,17 +5,17 @@ import WaveSurfer from 'wavesurfer.js';
 
 const store = useStore();
 const id = computed(() => store.state.fileId);
-const files = computed(() => {
-  return store.state.files;
-});
 const urls = computed(() => store.state.fileUrls);
-
 
 const options = {
   container: '#waveform',
   waveColor: '#4F4A85',
   progressColor: '#383351',
-  height: 'auto'
+  width: 'auto',
+  height: 'auto',
+  barWidth: 2,
+  barGap: 2,
+  barRadius: 5,
 };
 
 let wavesurfer = null;
@@ -27,7 +27,6 @@ onMounted(() => {
 
 watch(id, (newId, oldId) => {
   if (urls.value.has(newId)) {
-    // options.url = urls.value.get(newId);
     wavesurfer.load(urls.value.get(newId));
     wavesurfer.on('ready', (duration) => {
       play();
