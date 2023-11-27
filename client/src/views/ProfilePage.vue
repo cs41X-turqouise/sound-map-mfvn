@@ -1,3 +1,4 @@
+<!-- views/ProfilePage -->
 <template>
   <div>
     <v-toolbar fixed color="cyan" style="height: 85px;" dark>
@@ -51,6 +52,9 @@
               <!-- Carousel for displaying uploads -->
               <v-carousel v-if="filteredUploads.length" hide-delimiters>
                 <v-carousel-item v-for="(item, index) in filteredUploads" :key="index">
+                  <v-text-field v-model="searchQuery" label="Search by Title" single-line hide-details></v-text-field>
+                  <div>Search Query: "{{ searchQuery }}"</div>
+                  <div>Number of Matches: {{ filteredUploads.length }}</div>
                   <v-card>
                     <v-card-item align="center" justify="center">
                       <v-card-title>
@@ -134,6 +138,7 @@ export default {
         title: '',
         description: '',
       },
+      searchQuery: '',
     };
   },
   computed: {
@@ -164,10 +169,13 @@ export default {
     },
     filteredUploads () {
       if (!this.searchQuery) {
+      // If the search query is empty, return all uploaded content
         return this.uploadedContent;
       }
+
+      const query = this.searchQuery.toLowerCase();
       return this.uploadedContent.filter((item) => {
-        return item.metadata.title.toLowerCase().includes(this.searchQuery.toLowerCase());
+        return item.metadata.title.toLowerCase().includes(query);
       });
     },
   },

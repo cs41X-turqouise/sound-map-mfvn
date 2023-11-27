@@ -1,3 +1,4 @@
+// store/index.js
 import { createStore, createLogger } from 'vuex';
 // import createPersistedState from 'vuex-persistedstate'
 
