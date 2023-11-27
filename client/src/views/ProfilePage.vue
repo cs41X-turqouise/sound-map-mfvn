@@ -49,57 +49,67 @@
           <v-col cols="6">
             <div class="profile-content">
               <h2>Uploaded Content</h2>
-              <!-- Carousel for displaying uploads -->
-              <v-carousel v-if="filteredUploads.length" hide-delimiters>
-                <v-carousel-item v-for="(item, index) in filteredUploads" :key="index">
-                  <v-text-field v-model="searchQuery" label="Search by Title" single-line hide-details></v-text-field>
-                  <div>Search Query: "{{ searchQuery }}"</div>
-                  <div>Number of Matches: {{ filteredUploads.length }}</div>
-                  <v-card>
-                    <v-card-item align="center" justify="center">
-                      <v-card-title>
-                        {{ item.metadata.title }}
-                      </v-card-title>
-                      <v-card-subtitle>
-                        <span>
-                          Lat: {{ Number(item.metadata.latitude).toFixed(4) }}
-                          Lng: {{ Number(item.metadata.longitude).toFixed(4) }}
-                          <br>
-                        </span>
-                        <span class="date">
-                          Date: {{ new Date(item.uploadDate).toLocaleDateString() }}
-                        </span><br>
-                        <span class="description" v-if="item.metadata.description">
-                          Description: <p>{{ item.metadata.description }}</p>
-                        </span><br>
-                        <v-chip v-for="(tag, index) of item.metadata.tags" :key="index">
-                          {{ tag }}
-                        </v-chip>
-                      </v-card-subtitle>
-                      <v-carousel v-if="!!item.images && item.images.length" show-arrows="hover"
-                        :style="{ width: '350px', height: '150px' }">
-                        <v-carousel-item v-for="(image, index) in item.images" :key="index"
-                          :src="urls.get(image) || fetchImage(image)" cover>
-                        </v-carousel-item>
-                      </v-carousel>
-                      <audio class="audio" controls :key="activeMedia.url" ref="audio-player">
-                        <source :src="activeMedia.url" :type="activeMedia.type">
-                      </audio>
-                    </v-card-item>
-                    <v-card-actions class="d-flex justify-center">
-                      <v-btn x-small @click="playMedia(item)">
-                        <v-icon x-small>mdi-play</v-icon> Play
-                      </v-btn>
-                      <v-btn x-small @click="editUpload(item)">
-                        <v-icon x-small>mdi-pencil</v-icon> Edit
-                      </v-btn>
-                      <v-btn x-small @click="deleteUpload(item)">
-                        <v-icon x-small>mdi-delete</v-icon> Delete
-                      </v-btn>
-                    </v-card-actions>
-                  </v-card>
-                </v-carousel-item>
-              </v-carousel>
+              <v-container>
+                <v-row>
+                  <v-col cols="30">
+                    <v-text-field v-model="searchQuery" label="Search by Title" single-line hide-details full-width>
+                    </v-text-field>
+                    <div>Search Query: "{{ searchQuery }}"</div>
+                    <div>Number of Matches: {{ filteredUploads.length }}</div>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col cols="30">
+                    <v-carousel v-if="filteredUploads.length" hide-delimiters>
+                      <v-carousel-item v-for="(item, index) in filteredUploads" :key="index">
+                        <v-card>
+                          <v-card-item align="center" justify="center">
+                            <v-card-title>
+                              {{ item.metadata.title }}
+                            </v-card-title>
+                            <v-card-subtitle>
+                              <span>
+                                Lat: {{ Number(item.metadata.latitude).toFixed(4) }}
+                                Lng: {{ Number(item.metadata.longitude).toFixed(4) }}
+                                <br>
+                              </span>
+                              <span class="date">
+                                Date: {{ new Date(item.uploadDate).toLocaleDateString() }}
+                              </span><br>
+                              <span class="description" v-if="item.metadata.description">
+                                Description: <p>{{ item.metadata.description }}</p>
+                              </span><br>
+                              <v-chip v-for="(tag, index) of item.metadata.tags" :key="index">
+                                {{ tag }}
+                              </v-chip>
+                            </v-card-subtitle>
+                            <v-carousel v-if="!!item.images && item.images.length" show-arrows="hover"
+                              :style="{ width: '350px', height: '150px' }">
+                              <v-carousel-item v-for="(image, index) in item.images" :key="index"
+                                :src="urls.get(image) || fetchImage(image)" cover>
+                              </v-carousel-item>
+                            </v-carousel>
+                            <audio class="audio" controls :key="activeMedia.url" ref="audio-player">
+                              <source :src="activeMedia.url" :type="activeMedia.type">
+                            </audio>
+                          </v-card-item>
+                          <v-card-actions class="d-flex justify-center">
+                            <v-btn x-small @click="playMedia(item)">
+                              <v-icon x-small>mdi-play</v-icon> Play
+                            </v-btn>
+                            <v-btn x-small @click="editUpload(item)">
+                              <v-icon x-small>mdi-pencil</v-icon> Edit
+                            </v-btn>
+                            <v-btn x-small @click="deleteUpload(item)">
+                              <v-icon x-small>mdi-delete</v-icon> Delete
+                            </v-btn>
+                          </v-card-actions>
+                        </v-card>
+                      </v-carousel-item>
+                    </v-carousel>
+                  </v-col>
+                </v-row>
+              </v-container>
             </div>
           </v-col>
         </v-row>
@@ -169,7 +179,6 @@ export default {
     },
     filteredUploads () {
       if (!this.searchQuery) {
-      // If the search query is empty, return all uploaded content
         return this.uploadedContent;
       }
 
