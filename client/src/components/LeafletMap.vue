@@ -26,7 +26,7 @@
               {{ showPanel ? 'Hide' : 'Show'}} Panel
             </v-btn>
             <v-btn
-              v-if="$store.state.user"
+              v-if="store.state.user && !store.state.user.banned"
               color="info"
               size="small"
               density="comfortable"
@@ -70,6 +70,10 @@ export default {
     SidePanel,
     CloseButton,
   },
+  setup () {
+    const store = useStore();
+    return { store };
+  },
   data () {
     return {
       mapId: 'leaflet-map',
@@ -100,9 +104,10 @@ export default {
       highlight: false,
     };
   },
-  setup () {
-    const store = useStore();
-    return { store };
+  computed: {
+    userMenuClicked () {
+      return this.store.state.userMenuClicked;
+    }
   },
   methods: {
     initMap () {
@@ -220,6 +225,13 @@ export default {
       `);
       marker.data = file;
       return marker;
+    },
+  },
+  watch: {
+    userMenuClicked (newValue, oldValue) {
+      if (newValue) {
+        this.showModal = false;
+      }
     },
   },
   created () {

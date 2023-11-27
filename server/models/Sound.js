@@ -14,6 +14,14 @@ const soundSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       required: true,
     },
+    visible: {
+      type: Boolean,
+      default: false,
+    },
+    approvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'users',
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'users',

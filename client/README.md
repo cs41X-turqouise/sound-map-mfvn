@@ -1,6 +1,30 @@
 # Vue 3 + Vite
+This project uses the Vue.js options API. For more information see https://vuejs.org/guide/introduction.html#options-api
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## Available Scripts
+
+In the project directory, you can run:
+
+### `npm run dev`
+
+To start the app in dev mode.\
+Open [http://localhost:5173](http://localhost:5173) to view it in the browser.
+
+### `npm start`
+
+For production mode
+
+### `npm build`
+
+Build for production
+
+### `npm run preview`
+
+Locally preview the production build. Do not use this as a production server as it's not designed for it.
+
+### `npm run lint`
+
+Run eslint
 
 ## Recommended IDE Setup
 

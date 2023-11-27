@@ -21,9 +21,13 @@ declare module 'fastify' {
     config: {
       PORT: number;
       MONGODB_URL: string;
-      JWT_SECRET: string;
       GOOGLE_CLIENT_ID: string;
       GOOGLE_CLIENT_SECRET: string;
+      COOKIE_SECRET: string;
+      SESSION_SECRET: string;
+      MONGOSTORE_SECRET: string;
+      ADMINS: string[];
+      SUPERADMIN: string;
     };
   }
 }
