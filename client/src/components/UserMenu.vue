@@ -3,15 +3,17 @@
     <v-btn
       v-if="!store.state.user"
       flat
-      @click="loginWithGoogle">
+      @click="loginWithGoogle"
+    >
       Sign in with Google
     </v-btn>
     <v-menu
       v-if="store.state.user"
-      persistent>
+      persistent
+    >
       <template v-slot:activator="{ props }">
         <v-btn
-          color= "Black"
+          color="Black"
           v-bind="props"
           text
           @click="menuClicked"
@@ -38,7 +40,8 @@
 
         <v-list-item
           v-if="roles[store.state.user.role] > roles['user'] && $route.path !== '/admin'"
-          @click="nav('/admin')">
+          @click="nav('/admin')"
+        >
           <template v-slot:prepend>
             <v-icon icon="mdi-shield-crown"></v-icon>
           </template>
@@ -47,7 +50,8 @@
 
         <v-list-item
           v-if="$route.path !== '/'"
-          @click="nav('/')">
+          @click="nav('/')"
+        >
           <template v-slot:prepend>
             <v-icon icon="mdi-home"></v-icon>
           </template>
@@ -55,15 +59,16 @@
         </v-list-item>
 
         <v-list-item
-          @click="nav('/profile')">
+          v-if="$route.path !== '/profile'"
+          @click="nav('/profile')"
+        >
           <template v-slot:prepend>
             <v-icon icon="mdi-account"></v-icon>
           </template>
           <v-list-item-title>Profile</v-list-item-title>
         </v-list-item>
 
-        <v-list-item
-          @click="logout">
+        <v-list-item @click="logout">
           <template v-slot:prepend>
             <v-icon icon="mdi-logout"></v-icon>
           </template>
