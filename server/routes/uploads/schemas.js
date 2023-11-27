@@ -7,6 +7,13 @@ export const metadataSchema = {
   type: 'object',
   nullable: true,
   properties: {
+    creator: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string', description: 'MongoDB ObjectId' },
+        username: { type: 'string' }
+      }
+    },
     title: { type: 'string' },
     description: { type: 'string' },
     tags: {
@@ -30,5 +37,7 @@ export const uploadSchema = {
     filename: { type: 'string' },
     contentType: { type: 'string' },
     metadata: metadataSchema,
+    visible: { type: 'boolean' },
+    approvedBy: { type: 'string', description: 'MongoDB ObjectId of Moderator who approved this upload' },
   }
 };

@@ -1,5 +1,5 @@
-# Getting Started with [Fastify-CLI](https://www.npmjs.com/package/fastify-cli)
-This project was bootstrapped with Fastify-CLI.
+## Documentation
+Documentation provided by [Swagger](https://github.com/fastify/fastify-swagger), view in browser at http://localhost:3000/docs/static/index.html#/
 
 ## Available Scripts
 
@@ -17,6 +17,22 @@ For production mode
 ### `npm run test`
 
 Run the test cases.
+
+### `npm run lint`
+
+Run eslint
+
+### `npm run clean-db`
+
+Clean all collections
+
+### `npm run seed-db [# of users to create]`
+
+Generate fake users to populate the database. Each user will generate  between 1 and 3 audio uploads and each of those uploads will generate between 0 and 3 image attachments
+
+## `node node .\scripts\gen-secrets.js`
+
+Generate secrets for the cookie, session, and mongostore enviroment variables 
 
 ## Learn More
 

@@ -1,4 +1,5 @@
 import { createStore, createLogger } from 'vuex';
+import Api from '../services/Api';
 // import createPersistedState from 'vuex-persistedstate'
 
 export default createStore({
@@ -27,6 +28,7 @@ export default createStore({
      */
     /** @type {Map<number, FileData>} */
     files: new Map(),
+    userMenuClicked: false,
   },
   mutations: {
     setToken (state, token) {
@@ -35,6 +37,16 @@ export default createStore({
     },
     setUser (state, user) {
       state.user = user;
+    },
+    removeInboxMessage (state, message) {
+      const index = state.user.inbox.findIndex((m) => m._id === message._id);
+      if (index === -1) return;
+      state.user.inbox.splice(index, 1);
+    },
+    toggleReadInboxMessage (state, data) {
+      const index = state.user.inbox.findIndex((m) => m._id === data.message._id);
+      if (index === -1) return;
+      state.user.inbox[index].read = data.read;
     },
     setClicked (state, clicked) {
       state.clicked = clicked;
@@ -58,6 +70,9 @@ export default createStore({
       newFiles.delete(file._id);
       state.files = newFiles;
     },
+    userMenuClicked (state, clicked) {
+      state.userMenuClicked = clicked;
+    },
   },
   actions: {
     setToken ({ commit }, token) {
@@ -65,6 +80,16 @@ export default createStore({
     },
     setUser ({ commit }, user) {
       commit('setUser', user);
+    },
+    async fetchUser ({ commit }) {
+      const res = await Api().get('/users/self/refresh');
+      commit('setUser', res.data);
+    },
+    removeInboxMessage ({ commit }, message) {
+      commit('removeInboxMessage', message);
+    },
+    toggleReadInboxMessage ({ commit }, data) {
+      commit('toggleReadInboxMessage', data);
     },
     setClicked ({ commit }, clicked) {
       commit('setClicked', clicked);
@@ -80,6 +105,9 @@ export default createStore({
     },
     removeFile ({ commit }, file) {
       commit('removeFile', file);
+    },
+    userMenuClicked ({ commit }, clicked) {
+      commit('userMenuClicked', clicked);
     },
   }
 });
