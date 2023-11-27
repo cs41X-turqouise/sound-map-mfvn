@@ -1,6 +1,9 @@
 <template>
-  <div class="home" style="height: 100%; width: 100%;
-    display: flex; flex-direction: column;">
+  <div
+    class="home"
+    style="height: 100%; width: 100%;
+    display: flex; flex-direction: column;"
+  >
     <v-toolbar fixed color="cyan" style="height: fit-content; width: 99%;" dark>
       <v-toolbar-items>
         <v-btn @click="showSearchModal = true" flat>
@@ -15,29 +18,33 @@
         <UserMenu />
       </v-toolbar-items>
     </v-toolbar>
-    <UsernameForm v-if="store.state.user && !store.state.user.username"/>
+    <UsernameForm v-if="store.state.user && !store.state.user.username" />
     <div v-if="showSearchModal || showUploadModal || showSearchResultsModal" class="overlay"></div>
     <SearchModal
       v-if="showSearchModal"
       :show="showSearchModal"
-      @filteredFiles="search"
-      @close="showSearchModal = false">
+      @filtered-files="search"
+      @close="showSearchModal = false"
+    >
     </SearchModal>
     <SearchResultsModal
       v-if="showSearchResultsModal"
       :show="showSearchResultsModal"
-      :filteredFiles="filteredFiles"
-      @close="showSearchResultsModal = false">
+      :filtered-files="filteredFiles"
+      @close="showSearchResultsModal = false"
+    >
     </SearchResultsModal>
     <UploadModal
       v-if="showUploadModal"
       :show="showUploadModal"
       @close="showUploadModal = false"
-      @upload="upload">
+      @upload="upload"
+    >
     </UploadModal>
     <LeafletMap
-      @openUploadModal="showUploadModal = true"
-      @closeUploadModal="showUploadModal = false"/>
+      @open-upload-modal="showUploadModal = true"
+      @close-upload-modal="showUploadModal = false"
+    />
   </div>
 </template>
 
