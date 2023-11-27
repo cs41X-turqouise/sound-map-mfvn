@@ -24,6 +24,7 @@ export default {
   components: {
     CloseButton,
   },
+  emits: ['close'],
   methods: {
     close () {
       this.$emit('close');

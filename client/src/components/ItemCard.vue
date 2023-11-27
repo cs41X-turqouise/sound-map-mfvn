@@ -30,12 +30,14 @@
         v-if="!!item.images && item.images.length"
         :hide-delimiters="item.images.length > 1 ? false : true"
         :show-arrows="item.images.length > 1 ? 'hover' : false"
-        :style="{ width: '350px', height: '150px' }">
+        :style="{ width: '350px', height: '150px' }"
+      >
         <v-carousel-item
           v-for="(image, index) in item.images"
           :key="index"
           :src="urls.get(image) || fetchImage(image)"
-          cover>
+          cover
+        >
         </v-carousel-item>
       </v-carousel>
     </v-card-item>
@@ -60,12 +62,13 @@ export default {
       required: true,
     },
   },
+  emits: ['add-url'],
   methods: {
     async fetchImage (id) {
       await Api().get(`uploads/image/${id}`, { responseType: 'blob' })
         .then((response) => {
           const objectUrl = URL.createObjectURL(response.data);
-          this.$emit('addUrl', { id, objectUrl });
+          this.$emit('add-url', { id, objectUrl });
           return objectUrl;
         })
         .catch((error) => {
