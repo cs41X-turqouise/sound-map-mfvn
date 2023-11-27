@@ -186,7 +186,7 @@ export default {
     },
     /** @returns {number} */
     maxPage () {
-      return Math.ceil(this.markers.length / this.perPage);
+      return Math.ceil(this.markers.filter((m) => m.data.visible).length / this.perPage);
     }
   },
   watch: {
