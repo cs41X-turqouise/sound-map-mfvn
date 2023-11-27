@@ -16,7 +16,7 @@
           location="start"
           style="z-index: 9999;"
         >
-        View on Github
+          View on Github
         </v-tooltip>
         <v-icon>mdi-github</v-icon>
       </v-btn>
@@ -47,6 +47,7 @@ export default {
   width: 100%;
   height: 2.5rem;
   line-height: 2.5rem;
+  /* background-color: gainsboro; */
   background-color: #00bcd4;
   text-align: center;
   justify-content: center;

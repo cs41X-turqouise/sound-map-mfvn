@@ -4,36 +4,65 @@
     id="sidebar"
     class="sidebar"
     @click.stop>
-    <!-- <section id="heading">
-      <CloseButton @close="close" />
-    </section> -->
-    <ul id="popup-list" class="popup-list">
-      <li v-for="(marker, index) in paginatedMarkers" :key="marker.data._id">
+    <ReportModal
+      v-if="reportMarker"
+      :marker="reportMarker"
+      :show="!!reportMarker"
+      @close="reportMarker = null"
+      @report="report">
+    </ReportModal>
+    <div id="popup-grid" class="popup-grid">
+      <v-card v-for="(marker, index) in paginatedMarkers" :key="marker.data._id" elevation-19>
         <div class="file-info">
           <div>
-            <!-- <span>ID: {{ marker.data._id }}</span><br> -->
-            <h2>
-              <b class="name">
-                {{ marker.data.metadata.title }}
-              </b>
+            <h2 class="title">
+              <v-btn
+                v-if="store.state.user && !store.state.user.banned"
+                flat
+                size="x-small"
+                icon="mdi-flag"
+                @click="reportMarker = marker.data">
+                <v-tooltip
+                  activator="parent"
+                  location="end"
+                  style="z-index: 9999;"
+                >
+                  Report
+                </v-tooltip>
+                <v-icon color="red">mdi-flag</v-icon>
+              </v-btn>
+              <b>{{ marker.data.metadata.title }}</b>
             </h2>
             <div v-if="marker.data.metadata.geodata">
-              <p>
-                {{ JSON.parse(marker.data.metadata.geodata).formatted }}
-              </p>
+              <p>{{ JSON.parse(marker.data.metadata.geodata).formatted }}</p>
             </div>
-            <span>
-              Lat: {{ Number(marker.data.metadata.latitude).toFixed(4) }}
-              Lng: {{ Number(marker.data.metadata.longitude).toFixed(4) }}
-              <br>
-            </span>
-            <span class="distance">
-              Distance: {{ clicked.latlng.distanceTo(marker._latlng).toFixed(2) }} m
-            </span>
-            <br>
-            <span class="date">
-              Date: {{ new Date(marker.data.uploadDate).toLocaleDateString() }}
-            </span><br>
+            <div class="info-row">
+              <div class="info-column">
+                <span>
+                  Lat: {{ Number(marker.data.metadata.latitude).toFixed(4) }}&deg;
+                  Lng: {{ Number(marker.data.metadata.longitude).toFixed(4) }}&deg;
+                  <br>
+                </span>
+                <span class="distance">
+                  Distance: {{ clicked.latlng.distanceTo(marker._latlng).toFixed(2) }} m
+                </span>
+                <br>
+                <span class="date">
+                  Date: {{ new Date(marker.data.uploadDate).toLocaleDateString() }}
+                </span><br>
+              </div>
+              <v-carousel
+                v-if="!!marker.data.images && marker.data.images.length"
+                show-arrows="hover"
+                :style="{ width: '200px', height: '100px' }">
+                <v-carousel-item
+                  v-for="(image, index) in marker.data.images"
+                  :key="index"
+                  :src="urls.get(image) || fetchImage(image)"
+                  cover>
+                </v-carousel-item>
+              </v-carousel>
+            </div>
             <span class="description" v-if="marker.data.metadata.description">
               Description: <p>{{ marker.data.metadata.description }}</p>
             </span><br>
@@ -41,17 +70,6 @@
               {{ tag }}
             </v-chip>
           </div>
-          <v-carousel
-            v-if="!!marker.data.images && marker.data.images.length"
-            show-arrows="hover"
-            :style="{ width: '350px', height: '150px' }">
-            <v-carousel-item
-              v-for="(image, index) in marker.data.images"
-              :key="index"
-              :src="urls.get(image) || fetchImage(image)"
-              cover>
-            </v-carousel-item>
-          </v-carousel>
         </div>
         <div class="sound-bar" :style="{ backgroundColor: colors[index] }">
           <audio
@@ -62,35 +80,42 @@
             controls>
             <source :src="urls.get(marker.data._id)" :type="`${marker.data.contentType}`">
           </audio>
-          <v-btn v-else @click="fetchAudio(marker.data)">Play</v-btn>
+          <v-btn v-else @click="fetchAudio(marker.data)" flat>Play</v-btn>
         </div>
-      </li>
-    </ul>
+      </v-card>
+    </div>
     <v-pagination class="pagination" v-model="currentPage" :length="maxPage" style="margin-top: auto;"></v-pagination>
   </div>
 </template>
 
 <script>
-// import { divIcon } from 'leaflet';
+import Api from '../services/Api';
 import { circle } from 'leaflet';
-// import CloseButton from './CloseButton.vue';
+import { useStore } from 'vuex';
+import ReportModal from './ReportModal.vue';
 
 export default {
   name: 'SidePanel',
   components: {
-    // CloseButton,
+    ReportModal,
   },
   props: {
+    /** @type {Array<import('leaflet').Marker & { data: import('../App.vue').UploadSchema }>} */
     markers: {
       type: Array,
       default: () => [],
     },
+    /** @type {import('leaflet').Map} */
     map: {
       type: Object,
       default: null,
     },
     /** @type {{ lat: number, lng: number }} */
     clicked: null,
+  },
+  setup () {
+    const store = useStore();
+    return { store };
   },
   data () {
     return {
@@ -99,37 +124,34 @@ export default {
       /** @type {HTMLAudioElement} */
       currentAudio: null,
       currentPage: 1,
-      perPage: 4,
+      perPage: Math.max(1, Math.floor(window.innerHeight / 400)),
       colors: ['red', 'green', 'blue', 'purple'],
+      reportMarker: null,
     };
   },
   methods: {
     close () {
       this.$emit('close');
     },
+    updatePerPage () {
+      this.perPage = Math.max(1, Math.floor(window.innerHeight / 400));
+      this.currentPage = 1;
+    },
     async fetchAudio (marker) {
-      fetch(`http://localhost:3000/uploads/${marker._id}`)
-        .then((response) => {
-          return response.blob();
-        })
-        .then((blob) => {
-          const objectUrl = URL.createObjectURL(blob);
-          this.urls.set(marker._id, objectUrl);
-          this.$nextTick(() => {
-            this.$refs[`audio-${marker._id}`][0].play();
-          });
+      await Api().get(`uploads/${marker._id}`, { responseType: 'blob' }).then((response) => {
+        const objectUrl = URL.createObjectURL(response.data);
+        this.urls.set(marker._id, objectUrl);
+        this.$nextTick(() => {
+          this.$refs[`audio-${marker._id}`][0].play();
         });
+      });
     },
     async fetchImage (id) {
-      fetch(`http://localhost:3000/uploads/image/${id}`)
-        .then((response) => {
-          return response.blob();
-        })
-        .then((blob) => {
-          const objectUrl = URL.createObjectURL(blob);
-          this.urls.set(id, objectUrl);
-          return objectUrl;
-        });
+      await Api().get(`uploads/image/${id}`, { responseType: 'blob' }).then((response) => {
+        const objectUrl = URL.createObjectURL(response.data);
+        this.urls.set(id, objectUrl);
+        return objectUrl;
+      });
     },
     playing (marker) {
       const newAudio = this.$refs[`audio-${marker.data._id}`][0];
@@ -140,12 +162,23 @@ export default {
       this.currentAudio = newAudio;
       this.$emit('focusMarker', marker);
     },
+    report (marker, reason) {
+      if (confirm('Are you sure you want to report this content?')) {
+        Api().post(`reports/${marker._id}`, { reason, reporter: this.store.state.user._id }).then((response) => {
+          console.log(response);
+          this.reportMarker = null;
+        });
+      }
+    },
+    getFileData (id) {
+      return this.store.state.files.get(id);
+    },
   },
   computed: {
     paginatedMarkers () {
       const start = (this.currentPage - 1) * this.perPage;
       const end = start + this.perPage;
-      return this.markers.toSorted((a, b) => {
+      return this.markers.filter((m) => m.data.visible).toSorted((a, b) => {
         const distanceA = this.clicked.latlng.distanceTo(a._latlng);
         const distanceB = this.clicked.latlng.distanceTo(b._latlng);
         return distanceA - distanceB;
@@ -153,7 +186,7 @@ export default {
     },
     /** @returns {number} */
     maxPage () {
-      return Math.ceil(this.markers.length / this.perPage);
+      return Math.ceil(this.markers.filter((m) => m.data.visible).length / this.perPage);
     }
   },
   watch: {
@@ -180,6 +213,10 @@ export default {
     },
   },
   mounted () {
+    window.addEventListener('resize', this.updatePerPage);
+    for (const marker of this.markers) {
+      marker.data = this.getFileData(marker.data._id);
+    }
     this.paginatedMarkers.forEach((marker, index) => {
       const color = this.colors[index];
       const circleMarker = circle(marker._latlng, {
@@ -192,6 +229,7 @@ export default {
     });
   },
   beforeUnmount () {
+    window.removeEventListener('resize', this.updatePerPage);
     this.paginatedMarkers.forEach((marker) => {
       if (this.circles.has(marker)) {
         this.circles.get(marker).remove();
@@ -213,7 +251,7 @@ export default {
   left: 0;
   z-index: 9999;
   background-color: #f9f9f9;
-  width: 400px;
+  width: 410px;
   min-width: 200px;
   height: 100%;
   overflow: hidden;
@@ -228,25 +266,17 @@ export default {
   height: 40px;
 }
 
-h3 {
-  /* TODO: Change this font */
-  position: absolute;
-  margin: 0;
-  padding: 10px 10px;
-  left: 0;
+.title {
+  width: 100%;
 }
 
-.popup-list {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
+.info-row {
+  display: flex;
+  flex-direction: row;
 }
 
-.popup-list li {
-  padding: 8px 16px;
-  text-decoration: none;
-  display: block;
-  border-bottom: 1px solid #ddd;
+.info-column {
+  flex: 1;
 }
 
 .file-info {
@@ -255,7 +285,13 @@ h3 {
   text-align: left;
 }
 
-.popup-list li:hover {
+.popup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1em;
+  padding: 1em;
+}
+.popup-grid .file-info:hover {
   background-color: aliceblue;
 }
 
