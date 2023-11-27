@@ -5,6 +5,7 @@ module.exports = {
   },
   'extends': [
     'plugin:vue/vue3-essential',
+    'plugin:vue/vue3-strongly-recommended',
     'google',
   ],
   'overrides': [
@@ -31,5 +32,11 @@ module.exports = {
     'valid-jsdoc': 0,
     'indent': ['error', 2, { 'MemberExpression': 1 }],
     'new-cap': 0,
+    'vue/html-indent': ['error', 2],
+    'vue/html-self-closing': 'off',
+    'vue/max-attributes-per-line': ['error', {
+      'singleline': { 'max': 5 },
+      'multiline': { 'max': 1 }
+    }],
   },
 };
