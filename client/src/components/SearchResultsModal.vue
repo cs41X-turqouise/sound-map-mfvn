@@ -1,7 +1,7 @@
 <template>
-  <CenterModal :show="show" @close="close">
+  <BorderlessCenterModal :show="show" @close="close">
+    <v-card  style="border: 1px solid #888; margin: 1% 1%">
     <h2>Search Results</h2>
-    <v-card>
     <ul id="popup-list" class="popup-list">
       <li v-for="(file, index) in paginatedFiles" :key="file._id">
         <div class="file-info" style="overflow-y:auto;">
@@ -49,17 +49,17 @@
       <v-pagination class="pagination" v-model="currentPage" :length="maxPage"></v-pagination>
     </ul>
   </v-card>
-  </CenterModal>
+  </BorderlessCenterModal>
 </template>
 
 <script>
 import { useStore } from 'vuex';
-import CenterModal from './CenterModal.vue';
+import BorderlessCenterModal from './BorderlessCenterModal.vue';
 
 export default {
   name: 'SearchResultsModal',
   components: {
-    CenterModal,
+    BorderlessCenterModal,
   },
   props: {
     show: {
@@ -150,4 +150,8 @@ export default {
 </script>
 
 <style scoped>
+.modal-content {
+  border: 1px solid #FF0000 !important;
+}
 </style>
+
