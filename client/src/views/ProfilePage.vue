@@ -1,194 +1,263 @@
 <!-- views/ProfilePage -->
 <template>
   <div>
-    <v-toolbar fixed color="cyan" style="height: 85px;" dark>
-      <v-toolbar-items style="padding: 0 50px;">
-        <figure>
-          <router-link to="/">
-            <img src="../assets/globe-icon.png" height="50" width="50">
-            <figcaption>Home</figcaption>
-          </router-link>
-        </figure>
-      </v-toolbar-items>
+    <v-toolbar class="bg-orange">
+      <v-spacer></v-spacer>
+      <UserMenu />
     </v-toolbar>
-    <main style="height: 100vh; background-color: beige;">
-      <v-container>
-        <CenterModal v-if="showModal" :show="showModal" @close="cancelEditUpload">
-          <h1>Editing Mode</h1>
-          <v-form>
-            <v-text-field v-model="editableFields.title" label="Title"></v-text-field>
-            <v-text-field v-model="editableFields.description" label="Description"></v-text-field>
-            <v-btn @click="saveChanges">Save</v-btn>
-            <v-btn @click="cancelEditUpload">Cancel</v-btn>
-          </v-form>
-        </CenterModal>
-        <v-row>
-          <v-col cols="6">
-            <div id="profile">
-              <div id="profile-header">
-                <img id="profile-avatar" src="../assets/default-avatar.png" alt="Profile Avatar">
-                <div>
-                  <h2 v-if="!editMode" id="profile-username">
-                    {{ store.state.user.username }}
-                  </h2>
-                  <v-text-field v-else v-model="username" label="Username">
-                  </v-text-field>
-                  <v-btn v-if="!editMode" color="info" @click="editMode = !editMode">
-                    Edit
-                  </v-btn>
-                  <v-btn v-else color="info" @click="saveEdit">
-                    Save
-                  </v-btn>
-                  <v-btn v-if="editMode" color="red" @click="cancelEdit">
-                    Cancel
-                  </v-btn>
-                </div>
+
+    <v-layout row justify-center>
+      <v-dialog v-model="editDialog" persistent max-width="500px">
+        <v-card v-if="!!edit.selected">
+          <v-card-title>
+            <span class="headline">Edit Upload</span>
+          </v-card-title>
+          <v-card-text>
+            <v-container grid-list-md class="bg-white">
+              <v-text-field
+                v-model="edit.new.metadata.title"
+                label="Title"
+                required
+              ></v-text-field>
+              <v-textarea
+                v-model="edit.new.metadata.description"
+                label="Description"
+                required
+              ></v-textarea>
+              <v-text-field
+                v-model="edit.tag"
+                label="Tags"
+                required
+                hint="Tags are single words, enter a space to create a new tag"
+                persistent-hint
+                @keyup.space="addTag"
+                @keyup.enter.prevent="addTag"
+              ></v-text-field>
+              <v-chip-group>
+                <v-chip
+                  v-for="(tag, index) in edit.new.metadata.tags"
+                  :key="tag"
+                  closable
+                  @click:close="edit.new.metadata.tags.splice(index, 1)"
+                >
+                  {{ tag }}
+                </v-chip>
+              </v-chip-group>
+            </v-container>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn
+              color="red"
+              @click="Object.assign(edit.new.metadata, edit.selected.metadata)"
+            >
+              Reset
+            </v-btn>
+            <v-spacer></v-spacer>
+            <v-btn color="red" @click="closeEdit">
+              Cancel
+            </v-btn>
+            <v-spacer></v-spacer>
+            <v-btn
+              type="submit"
+              name="submit"
+              value="Submit"
+              color="blue"
+              @click="saveEdit"
+            >
+              Save
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-layout>
+
+    <UsernameFormVue
+      v-if="editUserDialog"
+      :allow-cancel="true"
+      @close="editUserDialog = false"
+    />
+
+    <v-container>
+      <v-row>
+        <v-col cols="6">
+          <div id="profile">
+            <div id="profile-header">
+              <img id="profile-avatar" :src="store.state.user.profilePhoto" alt="Profile Avatar">
+              <div>
+                <h2 id="profile-username">
+                  {{ store.state.user.username }}
+                </h2>
+                <v-btn color="info" @click="editUserDialog = true">
+                  Edit
+                </v-btn>
               </div>
             </div>
-          </v-col>
-          <v-col cols="6">
-            <div class="profile-content">
-              <h2>Uploaded Content</h2>
-              <v-container>
-                <v-row>
-                  <v-col cols="30">
-                    <v-text-field v-model="searchQuery" label="Search by Title" single-line hide-details full-width>
-                    </v-text-field>
-                    <!-- <div>Search Query: "{{ searchQuery }}"</div> -->
-                    <div>Number of Matches: {{ filteredUploads.length }}</div>
-                  </v-col>
-                </v-row>
-                <v-row>
-                  <v-col cols="30">
-                    <v-carousel v-if="filteredUploads.length" hide-delimiters>
-                      <v-carousel-item v-for="(item, index) in filteredUploads" :key="index">
-                        <v-card>
-                          <v-card-item align="center" justify="center">
-                            <v-card-title>
-                              {{ item.metadata.title }}
-                            </v-card-title>
-                            <v-card-subtitle>
-                              <span>
-                                Lat: {{ Number(item.metadata.latitude).toFixed(4) }}
-                                Lng: {{ Number(item.metadata.longitude).toFixed(4) }}
-                                <br>
-                              </span>
-                              <span class="date">
-                                Date: {{ new Date(item.uploadDate).toLocaleDateString() }}
-                              </span><br>
-                              <span class="description" v-if="item.metadata.description">
-                                Description: <p>{{ item.metadata.description }}</p>
-                              </span><br>
-                              <v-chip v-for="(tag, index) of item.metadata.tags" :key="index">
-                                {{ tag }}
-                              </v-chip>
-                            </v-card-subtitle>
-                            <v-carousel v-if="!!item.images && item.images.length" show-arrows="hover"
-                              :style="{ width: '350px', height: '150px' }">
-                              <v-carousel-item v-for="(image, index) in item.images" :key="index"
-                                :src="urls.get(image) || fetchImage(image)" cover>
-                              </v-carousel-item>
-                            </v-carousel>
-                            <audio class="audio" controls :key="activeMedia.url" ref="audio-player">
-                              <source :src="activeMedia.url" :type="activeMedia.type">
-                            </audio>
-                          </v-card-item>
-                          <v-card-actions class="d-flex justify-center">
-                            <v-btn x-small @click="playMedia(item)">
-                              <v-icon x-small>mdi-play</v-icon> Play
-                            </v-btn>
-                            <v-btn x-small @click="editUpload(item)">
-                              <v-icon x-small>mdi-pencil</v-icon> Edit
-                            </v-btn>
-                            <v-btn x-small @click="deleteUpload(item)">
-                              <v-icon x-small>mdi-delete</v-icon> Delete
-                            </v-btn>
-                          </v-card-actions>
-                        </v-card>
-                      </v-carousel-item>
-                    </v-carousel>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </div>
-          </v-col>
-        </v-row>
-      </v-container>
-    </main>
+          </div>
+        </v-col>
+        <v-col cols="6">
+          <div class="profile-content">
+            <h2>Uploaded Content</h2>
+            <v-col cols="12" sm="6" md="6">
+              <audio class="audio" controls :key="activeMedia.url" ref="audio-player">
+                <source :src="activeMedia.url" :type="activeMedia.type">
+              </audio>
+            </v-col>
+            <v-container>
+              <v-row>
+                <v-col cols="12">
+                  <v-text-field v-model="search" label="Search by Title" single-line hide-details full-width>
+                  </v-text-field>
+                  <div>Number of Matches: {{ filteredUploads.length }}</div>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col
+                  cols="12"
+                  sm="6"
+                  md="6"
+                  v-for="upload in paginatedUploads"
+                  :key="upload._id"
+                >
+                  <ItemCard
+                    :item="upload"
+                    :urls="urls"
+                    @addUrl="(el) => urls.set(el.id, el.objectUrl)"
+                  >
+                    <template v-slot:actions>
+                      <v-btn icon @click="playMedia(upload)">
+                        <v-tooltip activator="parent" location="top">
+                          Play
+                        </v-tooltip>
+                        <v-icon>mdi-play</v-icon>
+                      </v-btn>
+                      <v-btn icon @click="setEdit(upload)">
+                        <v-tooltip activator="parent" location="top">
+                          Edit
+                        </v-tooltip>
+                        <v-icon>mdi-pencil</v-icon>
+                      </v-btn>
+                      <v-btn icon>
+                        <v-tooltip activator="parent" location="top">
+                          Delete
+                        </v-tooltip>
+                        <v-icon>mdi-delete</v-icon>
+                        <!-- <ReportDialog @submitReason="(reason) => deleteUpload(upload, reason)" /> -->
+                      </v-btn>
+                      <v-btn icon @click="toggleVisibility(upload)">
+                        <v-tooltip activator="parent" location="top">
+                          {{ upload.visible ? 'Visible' : 'Hidden' }}
+                        </v-tooltip>
+                        <v-icon>{{ !!upload.visible ? 'mdi-eye' : 'mdi-eye-off' }}</v-icon>
+                      </v-btn>
+                    </template>
+                  </ItemCard>
+                </v-col>
+              </v-row>
+              <v-pagination
+                v-model="uploadsTable.current"
+                :length="maxUploadsPage"
+              ></v-pagination>
+            </v-container>
+          </div>
+        </v-col>
+      </v-row>
+    </v-container>
   </div>
 </template>
 
 <script>
 import { useStore } from 'vuex';
 import Api from '../services/Api';
-import CenterModal from '../components/CenterModal.vue';
+import UserMenu from '../components/UserMenu.vue';
+import ItemCard from '../components/ItemCard.vue';
+import UsernameFormVue from '../components/UsernameForm.vue';
+
+/** @typedef {import('../App.vue').UserSchema} UserSchema */
+/** @typedef {import('../App.vue').ReportSchema} ReportSchema */
+/** @typedef {import('../App.vue').MetadataSchema} Metadataschema */
+/** @typedef {import('../App.vue').UploadSchema} UploadSchema */
+
+/** @param {number} perPage */
+const paginationSetup = (perPage) => ({
+  current: 1,
+  perPage
+});
 
 export default {
   name: 'ProfilePage',
   components: {
-    CenterModal,
+    UserMenu,
+    ItemCard,
+    UsernameFormVue,
   },
   setup () {
     const store = useStore();
-    console.log(store.state.user);
     return { store };
   },
   data () {
     return {
       urls: new Map(),
+      /** @type { UploadSchema[] } */
+      uploads: [],
+      uploadsTable: paginationSetup(2),
       activeMedia: {
         type: null,
         url: null,
       },
-      editMode: false,
-      username: '',
-      showModal: false,
-      selectedItem: null,
-      editableFields: {
-        title: '',
-        description: '',
+      editDialog: false,
+      editUserDialog: false,
+      edit: {
+        selected: null,
+        new: null,
+        tag: '',
       },
-      searchQuery: '',
+      username: '',
+      search: '',
     };
   },
   computed: {
-    /**
-     * @typedef {Object} FileData
-     * @property {string} _id
-     * @property {string} filename
-     * @property {string} contentType
-     * @property {Date} uploadDate
-     * @property {number} length
-     * @property {number} chunkSize
-     * @property {Object} metadata
-     * @property {string} metadata.title
-     * @property {string} metadata.description
-     * @property {string} metadata.latitude
-     * @property {string} metadata.longitude
-     * @property {string} metadata.tags
-     */
-    /** @return {Array<FileData>} */
-    uploadedContent () {
-      /** @type {Array<FileData>} */
-      const files = this.store.state.user.uploads.map((file) => {
-        return this.store.state.files.get(file);
-      }).filter((file) => {
-        return !!file;
-      });
-      return files;
-    },
     filteredUploads () {
-      if (!this.searchQuery) {
-        return this.uploadedContent;
-      }
-
-      const query = this.searchQuery.toLowerCase();
-      return this.uploadedContent.filter((item) => {
-        return item.metadata.title.toLowerCase().includes(query);
-      });
+      if (!this.search) return this.uploads;
+      return this.uploads.filter((upload) =>
+        upload.metadata.title.toLowerCase().includes(this.search.toLowerCase())
+        || upload.metadata.description.toLowerCase().includes(this.search.toLowerCase())
+        || upload.metadata.tags.some((tag) => tag.toLowerCase().includes(this.search.toLowerCase()))
+        || upload.filename.toLowerCase().includes(this.search.toLowerCase())
+        || upload.contentType.toLowerCase().includes(this.search.toLowerCase())
+      );
+    },
+    maxUploadsPage () {
+      return Math.ceil(this.filteredUploads.length / this.uploadsTable.perPage);
+    },
+    paginatedUploads () {
+      const start = (this.uploadsTable.current - 1) * this.uploadsTable.perPage;
+      const end = start + this.uploadsTable.perPage;
+      return this.filteredUploads.slice(start, end);
     },
   },
   methods: {
+    /** @param {UploadSchema} upload */
+    setEdit (upload) {
+      this.edit.selected = JSON.parse(JSON.stringify(upload));
+      this.edit.new = JSON.parse(JSON.stringify(upload));
+      this.editDialog = true;
+    },
+    addTag () {
+      /** @type {string} */
+      const tag = this.edit.tag.toLowerCase().replace(/\s+/g, '');
+      if (!tag) {
+        this.edit.tag = '';
+      } else if (!this.edit.new.metadata.tags.includes(tag)) {
+        this.edit.new.metadata.tags.push(tag);
+        this.edit.tag = '';
+      }
+    },
+    closeEdit () {
+      this.edit.selected = null;
+      this.edit.new = null;
+      this.edit.tag = '';
+      this.editDialog = false;
+    },
     async fetchImage (id) {
       await Api().get(`uploads/image/${id}`, { responseType: 'blob' }).then((response) => {
         const objectUrl = URL.createObjectURL(response.data);
@@ -219,41 +288,24 @@ export default {
         audioPlayer.play();
       });
     },
-    cancelEdit () {
-      this.username = this.store.state.user.username;
-      this.editMode = false;
-    },
-    saveEdit () {
-      this.editMode = false;
-      Api().patch(`users/${this.store.state.user._id}`, { username: this.username }).then((response) => {
-        this.store.dispatch('setUser', response.data);
-      }).catch((error) => {
-        console.log(error);
-      });
+    async saveEdit () {
+      try {
+        const res = await Api().patch(`uploads/metadata/${this.edit.selected._id}`, { ...this.edit.new.metadata });
+        const uIdx = this.uploads.findIndex((u) => u._id === res.data._id);
+        uIdx !== -1 && (this.uploads[uIdx].metadata = res.data.metadata);
+        this.closeEdit();
+      } catch (err) {
+        console.error(err);
+      }
     },
     /** @param {UploadSchema} upload */
-    editUpload (upload) {
-      this.selectedItem = upload;
-      this.editableFields.title = upload.metadata.title;
-      this.editableFields.description = upload.metadata.description;
-      this.showModal = true;
-    },
-    cancelEditUpload () {
-      this.selectedItem = null;
-      this.editableFields.title = '';
-      this.editableFields.description = '';
-      this.showModal = false;
-    },
-    saveChanges () {
-      this.showModal = false;
-      Api().patch(`uploads/metadata/${this.selectedItem._id}`, {
-        title: this.editableFields.title,
-        description: this.editableFields.description,
-      }).then((response) => {
-        this.store.dispatch('updateFile', response.data);
-      }).catch((error) => {
-        console.log(error);
-      });
+    async toggleVisibility (upload) {
+      try {
+        upload.visible = !upload.visible;
+        await Api().patch(`uploads/visibility/${upload._id}`, { visible: upload.visible });
+      } catch (err) {
+        console.error(err);
+      }
     },
     /** @param {UploadSchema} upload */
     async deleteUpload (upload) {
@@ -261,11 +313,31 @@ export default {
         try {
           await Api().delete(`uploads/sound/${upload._id}`);
           this.store.dispatch('deleteFile', upload._id).then(() => {
-            this.uploadedContent = this.uploadedContent.filter((item) => item._id !== upload._id);
+            this.uploads = this.uploads.filter((item) => item._id !== upload._id);
           });
         } catch {
           console.log(error);
         }
+      }
+    }
+  },
+  /**
+   * Lifecycle hook
+   */
+  async beforeCreate () {
+    try {
+      if (!this.store.state.user) {
+        await Api().get('users/self').then((response) => {
+          this.store.dispatch('setUser', response.data);
+        });
+      }
+      const uploads = await Api().get(`users/${this.store.state.user._id}/uploads`);
+      this.uploads = uploads.data;
+      console.log(this.uploads);
+    } catch (err) {
+      console.log(err);
+      if (!this.store.state.user) {
+        this.$router.push({ path: '/' });
       }
     }
   },
@@ -276,45 +348,6 @@ export default {
 </script>
 
 <style scoped>
-/* header a {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  margin: 10px;
-  padding: 10px;
-  border: 1px solid black;
-  border-radius: 5px;
-  text-decoration: none;
-  color: black;
-}
-
-header a:hover {
-  background-color: black;
-  color: white;
-}
-
-#profile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-top: 50px;
-}
-
-#profile-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 50px;
-}
-
-#profile-avatar {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  margin-bottom: 10px;
-}*/
 .profile-content {
   display: flex;
   flex-direction: column;
@@ -344,16 +377,4 @@ header a:hover {
   /* Adjust as necessary */
   color: red;
 }
-
-/* #uploaded-content-list,
-#bookmarked-content-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-#uploaded-content-list li,
-#bookmarked-content-list li {
-  margin-bottom: 10px; */
-/* } */
 </style>

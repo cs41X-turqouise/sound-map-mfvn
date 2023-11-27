@@ -38,5 +38,6 @@ module.exports = {
       'singleline': { 'max': 5 },
       'multiline': { 'max': 1 }
     }],
+    'vue/v-slot-style': 'off',
   },
 };
