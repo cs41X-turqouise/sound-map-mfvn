@@ -428,6 +428,7 @@
               <th style="width: 500px">Upload Data</th>
               <th style="width: 200px;">Metadata</th>
               <th>Image(s)</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
@@ -460,7 +461,7 @@
                   <v-card-subtitle>
                     Title: <span>{{ upload.metadata.title }}</span>
                   </v-card-subtitle>
-                  <v-card-subtitle>
+                  <v-card-subtitle class="wrap-text">
                     Address:
                     <span>
                       {{ upload.metadata.geodata ? JSON.parse(upload.metadata.geodata).formatted : '' }}
@@ -534,6 +535,16 @@
                 </v-carousel>
               </td>
               <td v-else><span>None</span></td>
+              <td>
+                <v-chip
+                  :color="upload.approvedBy ? 'green' : 'red'"
+                  text-color="white"
+                  size="small"
+                  density="comfortable"
+                >
+                  {{ upload.approvedBy ? 'Approved' : 'Pending' }}
+                </v-chip>
+              </td>
             </tr>
           </tbody>
           <template v-slot:bottom>

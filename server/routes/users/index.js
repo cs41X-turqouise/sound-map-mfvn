@@ -135,6 +135,15 @@ export default async function (fastify, options) {
         for (const upload of uploads) {
           const file = await upload.getFile(fastify);
           file.images = upload.images || [];
+          file.visible = upload.visible;
+          file.approvedBy = upload.approvedBy;
+
+          if (file.metadata.creator) {
+            const creator = fastify.toObjectId(file.metadata.creator);
+            file.metadata.creator = await User.findById(creator, 'username').exec();
+          } else {
+            file.metadata.creator = { username: 'Unknown' };
+          }
           data.push(file);
         }
         return reply.send(data);
