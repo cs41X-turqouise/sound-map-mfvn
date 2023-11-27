@@ -86,7 +86,7 @@
           <v-icon>mdi-upload</v-icon>
           Uploads
         </v-tab>
-        <v-tab value="review">
+        <v-tab value="pending">
           <v-badge
             location="top right"
             floating color="primary"
@@ -244,7 +244,7 @@
         ></v-pagination>
       </div>
 
-      <div v-if="activeMainTab === 'review'">
+      <div v-if="activeMainTab === 'pending'">
         <div v-if="pendingUploads.length">
           <v-row>
             <v-col cols="12" sm="6" md="6">
