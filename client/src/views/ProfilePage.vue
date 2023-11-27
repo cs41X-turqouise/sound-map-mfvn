@@ -54,7 +54,7 @@
                   <v-col cols="30">
                     <v-text-field v-model="searchQuery" label="Search by Title" single-line hide-details full-width>
                     </v-text-field>
-                    <div>Search Query: "{{ searchQuery }}"</div>
+                    <!-- <div>Search Query: "{{ searchQuery }}"</div> -->
                     <div>Number of Matches: {{ filteredUploads.length }}</div>
                   </v-col>
                 </v-row>
