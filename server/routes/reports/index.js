@@ -63,7 +63,7 @@ export default async function (fastify, options) {
         });
 
         await report.save();
-        return file;
+        return reply.send(file);
       } catch (err) {
         fastify.log.error(err);
         throw new Error('Internal Server Error');
@@ -87,7 +87,7 @@ export default async function (fastify, options) {
     },
     async handler (request, reply) {
       const reports = await Reports.find({});
-      return reports;
+      return reply.send(reports);
     },
   });
 
@@ -115,7 +115,7 @@ export default async function (fastify, options) {
       const report = await Reports.findById(_id);
       if (!report) return reply.code(404).send(new Error('Report not found'));
 
-      return report;
+      return reply.send(report);
     },
   });
 
@@ -146,7 +146,7 @@ export default async function (fastify, options) {
       const user = await User.findById(report.userId);
       if (!user) return reply.code(404).send(new Error('User not found'));
 
-      return user;
+      return reply.send(user);
     },
   });
 

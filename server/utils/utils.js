@@ -56,8 +56,7 @@ export function checkUserRole (role, checkSelf = false) {
     /** @type {import('../../models/User.js').User} */
     const user = request.session.get('user');
     if (!user || (roles[user.role] < roles[role] && !(checkSelf && user._id === request.params.id))) {
-      reply.code(403).send({ error: 'Forbidden' });
-      return Promise.reject(new Error('Forbidden'));
+      return reply.code(403).send({ error: 'Forbidden' });
     }
   };
 }

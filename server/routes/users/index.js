@@ -31,7 +31,7 @@ export default async function (fastify, options) {
     }
   }, async function (request, reply) {
     const users = await User.find({}).populate('uploads');
-    return users;
+    return reply.send(users);
   });
 
   /**
@@ -56,7 +56,7 @@ export default async function (fastify, options) {
     const _id = fastify.toObjectId(request.params.id);
     if (!_id) return reply.code(400).send(new Error('Invalid ID'));
     const user = await User.findById(_id);
-    return user;
+    return reply.send(user);
   });
 
   /**
@@ -72,7 +72,7 @@ export default async function (fastify, options) {
     }
   }, async function (request, reply) {
     const self = request.session.get('user');
-    return self;
+    return reply.send(self);
   });
 
   /**
@@ -92,7 +92,7 @@ export default async function (fastify, options) {
       .populate('inbox.sender', 'username email')
       .exec();
     request.session.set('user', newSelf);
-    return newSelf;
+    return reply.send(newSelf);
   });
 
   /**
@@ -169,7 +169,7 @@ export default async function (fastify, options) {
     try {
       const user = new User(request.body);
       await user.save();
-      return user;
+      return reply.send(user);
     } catch (err) {
       fastify.log.error(err);
       reply.code(500).send(err);
@@ -228,7 +228,7 @@ export default async function (fastify, options) {
           }
         }
       }
-      return deletedUser;
+      return reply.send(deletedUser);
     } catch (err) {
       fastify.log.error(err);
     }
@@ -259,9 +259,14 @@ export default async function (fastify, options) {
       const _id = fastify.toObjectId(request.params.id);
       if (!_id) return reply.code(400).send(new Error('Invalid ID'));
       const user = await User.findByIdAndUpdate(_id, request.body, { new: true });
-      request.session.set('user', user);
       
-      return user;
+      // TODO - Implement socket.io to update all clients when a user is updated
+      // Currnetly this works for updating the currently logged in user - but others won't see the changes until they refresh
+      if (_id === request.session.get('user')._id) {
+        request.session.set('user', user);
+      }
+      
+      return reply.send(user);
     } catch (err) {
       fastify.log.error(err);
       if (err.message.includes('duplicate key error')) {
@@ -406,6 +411,6 @@ export default async function (fastify, options) {
     user.inbox.push(notification);
     await user.save();
 
-    return user;
+    return reply.send(user);
   });
 }
