@@ -44,6 +44,10 @@ export default {
       type: Boolean,
       required: false,
     },
+    userId: {
+      type: String,
+      required: false,
+    },
   },
   setup () {
     const store = useStore();
@@ -80,11 +84,13 @@ export default {
       this.errorMessage = '';
 
       try {
-        const response = await Api().patch(`/users/${this.store.state.user._id}`, {
+        const response = await Api().patch(`/users/${this.userId || this.store.state.user._id}`, {
           username: this.username,
         });
         if (response.status === 200) {
-          this.store.commit('setUser', response.data);
+          if (this.userId === this.store.state.user._id) {
+            this.store.commit('setUser', response.data);
+          }
           this.close();
         }
       } catch (error) {
