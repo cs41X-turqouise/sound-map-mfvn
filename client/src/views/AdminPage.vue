@@ -581,7 +581,7 @@
             </v-card>
           </v-col>
         </v-row>
-        <v-card-actions style="justify-content: center;">
+        <v-card-actions style="justify-content: center; margin-top: 10px;">
           <v-btn
             v-for="button in promoteRoleButtons"
             :key="button.text"
@@ -614,6 +614,20 @@
           >
             Delete User
           </v-btn>
+
+          <v-btn
+            v-if="roles[selectedUser.role] < roles[store.state.user.role] || selectedUser._id === store.state.user._id"
+            variant="outlined"
+            @click="editUserDialog = true"
+          >
+            Change Username
+            <UsernameForm
+              v-if="editUserDialog"
+              :allowCancel="true"
+              :user-id="selectedUser._id"
+              @close="editUserDialog = false"
+            />
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-card>
@@ -626,6 +640,7 @@ import Api from '../services/Api';
 import UserMenu from '../components/UserMenu.vue';
 import ItemCard from '../components/ItemCard.vue';
 import ReportDialog from '../components/ReportDialog.vue';
+import UsernameForm from '../components/UsernameForm.vue';
 
 /** @typedef {import('../App.vue').UserSchema} UserSchema */
 /** @typedef {import('../App.vue').ReportSchema} ReportSchema */
@@ -644,6 +659,7 @@ export default {
     UserMenu,
     ItemCard,
     ReportDialog,
+    UsernameForm,
   },
   setup () {
     const store = useStore();
@@ -692,6 +708,7 @@ export default {
         sorted: false,
       },
       editDialog: false,
+      editUserDialog: false,
       edit: {
         selected: null,
         new: null,
@@ -1213,7 +1230,7 @@ userTable td {
 }
 .roles-tab {
   margin: 0 auto;
-  max-width: 800px;
+  max-width: 1200px;
   margin-top: 20px;
   padding: 10px;
   background-color: #f5f5f5;
