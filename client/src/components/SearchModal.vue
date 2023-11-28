@@ -7,15 +7,16 @@
         v-model="title"
         name="title"
         label="Title"
-        id="title" clearable
+        id="title"
+        clearable
       ></v-text-field>
-      <!-- <v-text-field
+      <v-text-field
         v-model="creator"
         name="creator"
         label="Creator"
         id="creator"
         clearable
-      ></v-text-field> -->
+      ></v-text-field>
       <v-text-field
         v-model="description"
         name="description"
@@ -47,7 +48,9 @@
         type="date"
         clearable
       ></v-text-field>
-      <v-btn type="submit" name="submit" value="Submit">Submit</v-btn>
+      <v-btn type="submit" name="submit" value="Submit">
+        Submit
+      </v-btn>
     </v-form>
   </CenterModal>
 </template>
@@ -55,6 +58,8 @@
 <script>
 import { useStore } from 'vuex';
 import CenterModal from './CenterModal.vue';
+
+/** @typedef {import('../App.vue').UploadSchema} UploadSchema */
 
 export default {
   name: 'SearchModal',
@@ -67,6 +72,11 @@ export default {
       default: false,
     },
   },
+  emits: ['close', 'filtered-files'],
+  setup () {
+    const store = useStore();
+    return { store };
+  },
   data () {
     return {
       title: '',
@@ -77,9 +87,20 @@ export default {
       dateTo: '',
     };
   },
-  setup () {
-    const store = useStore();
-    return { store };
+  computed: {
+    /** @returns {Map<number, UploadSchema>} */
+    files () {
+      return this.store.state.files;
+    },
+    tagList () {
+      const tags = new Set();
+      for (const file of this.files.values()) {
+        for (const tag of file.metadata.tags) {
+          tags.add(tag);
+        }
+      }
+      return [...tags];
+    },
   },
   methods: {
     close () {
@@ -90,18 +111,15 @@ export default {
      * @param {Event} e
      */
     async submit (e) {
-      const hitList = [];
       const fileList = [];
-      const fileIdList = [];
-      let maxHits = 0;
       for (const file of this.files.values()) {
         let hits = 0;
         if (this.title && file.metadata.title.includes(this.title)) {
           hits++;
         }
-        // if (this.creator && file.metadata.creator.includes(this.creator)) {
-        //   hits++;
-        // }
+        if (this.creator && file.metadata.creator.username.includes(this.creator)) {
+          hits++;
+        }
         if (this.description && file.metadata.description.includes(this.description)) {
           hits++;
         }
@@ -121,39 +139,11 @@ export default {
         if (hits == 0) {
           continue;
         }
-        if (hits > maxHits) {
-          maxHits = hits;
-        }
-        fileIdList.push(file._id);
-        fileList.push(file);
-        hitList.push(hits);
-      }
-      const filteredFiles = new Map();
-      for (let i = maxHits; i > 0; i--) {
-        console.log(i);
-        for (let j = 0; j < hitList.length; j++) {
-          if (hitList.at(j) == i) {
-            filteredFiles.set(fileIdList.at(j), fileList.at(j));
-          }
-        }
+        fileList.push({ hits, file });
       }
       e.target.reset();
-      this.$emit('filteredFiles', filteredFiles);
+      this.$emit('filtered-files', fileList.sort((a, b) => b.hits - a.hits).map((file) => file.file));
     }
-  },
-  computed: {
-    files () {
-      return this.store.state.files;
-    },
-    tagList () {
-      const tags = new Set();
-      for (const file of this.files.values()) {
-        for (const tag of file.metadata.tags) {
-          tags.add(tag);
-        }
-      }
-      return [...tags];
-    },
   },
 };
 </script>
