@@ -1,6 +1,9 @@
 <template>
-  <div class="home" style="height: 100%; width: 100%;
-    display: flex; flex-direction: column;">
+  <div
+    class="home"
+    style="height: 100%; width: 100%;
+    display: flex; flex-direction: column;"
+  >
     <v-toolbar fixed color="cyan" style="height: fit-content; width: 99%;" dark>
       <v-toolbar-items>
         <v-btn @click="showSearchModal = true" flat>
@@ -15,22 +18,28 @@
         <UserMenu />
       </v-toolbar-items>
     </v-toolbar>
-    <UsernameForm v-if="store.state.user && !store.state.user.username"/>
+    <UsernameForm v-if="store.state.user && !store.state.user.username" />
     <div v-if="showSearchModal || showUploadModal" class="overlay"></div>
     <SearchModal
       v-if="showSearchModal"
       :show="showSearchModal"
-      @close="showSearchModal = false">
+      @filtered-files="search"
+      @close="showSearchModal = false"
+    >
     </SearchModal>
     <UploadModal
       v-if="showUploadModal"
       :show="showUploadModal"
       @close="showUploadModal = false"
-      @upload="upload">
+      @upload="upload"
+    >
     </UploadModal>
     <LeafletMap
-      @openUploadModal="showUploadModal = true"
-      @closeUploadModal="showUploadModal = false"/>
+      :filtered-files="filteredFiles"
+      @clear-filter="filteredFiles = []"
+      @open-upload-modal="showUploadModal = true"
+      @close-upload-modal="showUploadModal = false"
+    />
   </div>
 </template>
 
@@ -69,24 +78,8 @@ export default {
       },
       valid: false,
       zoom: 2,
-      filteredFiles: new Map(),
+      filteredFiles: [],
     };
-  },
-  async beforeCreate () {
-    await Api().get('uploads/filedata/all').then((response) => {
-      const fileMap = new Map();
-      response.data.forEach((file) => {
-        fileMap.set(file._id, file);
-      });
-      this.store.dispatch('setFiles', fileMap);
-    });
-    if (!this.$store.state.user) {
-      Api().get('users/self').then((response) => {
-        this.$store.dispatch('setUser', response.data);
-      }).catch((error) => {
-        console.log(error);
-      });
-    }
   },
   methods: {
     /**
@@ -104,7 +97,27 @@ export default {
       form.reset();
       this.showUploadModal = false;
     },
-  }
+    async search (filteredFiles) {
+      this.filteredFiles = filteredFiles;
+      this.showSearchModal = false;
+    }
+  },
+  async beforeCreate () {
+    await Api().get('uploads/filedata/all').then((response) => {
+      const fileMap = new Map();
+      response.data.forEach((file) => {
+        fileMap.set(file._id, file);
+      });
+      this.store.dispatch('setFiles', fileMap);
+    });
+    if (!this.$store.state.user) {
+      Api().get('users/self').then((response) => {
+        this.$store.dispatch('setUser', response.data);
+      }).catch((error) => {
+        console.log(error);
+      });
+    }
+  },
 };
 </script>
 
