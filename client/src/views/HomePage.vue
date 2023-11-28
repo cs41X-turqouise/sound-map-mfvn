@@ -19,7 +19,7 @@
       </v-toolbar-items>
     </v-toolbar>
     <UsernameForm v-if="store.state.user && !store.state.user.username" />
-    <div v-if="showSearchModal || showUploadModal || showSearchResultsModal" class="overlay"></div>
+    <div v-if="showSearchModal || showUploadModal" class="overlay"></div>
     <SearchModal
       v-if="showSearchModal"
       :show="showSearchModal"
@@ -27,13 +27,6 @@
       @close="showSearchModal = false"
     >
     </SearchModal>
-    <SearchResultsModal
-      v-if="showSearchResultsModal"
-      :show="showSearchResultsModal"
-      :filtered-files="filteredFiles"
-      @close="showSearchResultsModal = false"
-    >
-    </SearchResultsModal>
     <UploadModal
       v-if="showUploadModal"
       :show="showUploadModal"
@@ -42,6 +35,8 @@
     >
     </UploadModal>
     <LeafletMap
+      :filtered-files="filteredFiles"
+      @clear-filter="filteredFiles = []"
       @open-upload-modal="showUploadModal = true"
       @close-upload-modal="showUploadModal = false"
     />
@@ -57,7 +52,6 @@ import UploadModal from '../components/UploadModal.vue';
 import UserMenu from '../components/UserMenu.vue';
 import UploadService from '../services/UploadService';
 import UsernameForm from '../components/UsernameForm.vue';
-import SearchResultsModal from '../components/SearchResultsModal.vue';
 
 export default {
   name: 'HomePage',
@@ -67,7 +61,6 @@ export default {
     SearchModal,
     UploadModal,
     UsernameForm,
-    SearchResultsModal
   },
   setup () {
     const store = useStore();
@@ -78,7 +71,6 @@ export default {
       user: null,
       showUserMenu: false,
       showSearchModal: false,
-      showSearchResultsModal: false,
       showUploadModal: false,
       dialog: true,
       uploadForm: {
@@ -86,24 +78,8 @@ export default {
       },
       valid: false,
       zoom: 2,
-      filteredFiles: new Map(),
+      filteredFiles: [],
     };
-  },
-  async beforeCreate () {
-    await Api().get('uploads/filedata/all').then((response) => {
-      const fileMap = new Map();
-      response.data.forEach((file) => {
-        fileMap.set(file._id, file);
-      });
-      this.store.dispatch('setFiles', fileMap);
-    });
-    if (!this.$store.state.user) {
-      Api().get('users/self').then((response) => {
-        this.$store.dispatch('setUser', response.data);
-      }).catch((error) => {
-        console.log(error);
-      });
-    }
   },
   methods: {
     /**
@@ -121,13 +97,27 @@ export default {
       form.reset();
       this.showUploadModal = false;
     },
-    // I need this to show filtered files from the search modal
     async search (filteredFiles) {
       this.filteredFiles = filteredFiles;
       this.showSearchModal = false;
-      this.showSearchResultsModal = true;
     }
-  }
+  },
+  async beforeCreate () {
+    await Api().get('uploads/filedata/all').then((response) => {
+      const fileMap = new Map();
+      response.data.forEach((file) => {
+        fileMap.set(file._id, file);
+      });
+      this.store.dispatch('setFiles', fileMap);
+    });
+    if (!this.$store.state.user) {
+      Api().get('users/self').then((response) => {
+        this.$store.dispatch('setUser', response.data);
+      }).catch((error) => {
+        console.log(error);
+      });
+    }
+  },
 };
 </script>
 
