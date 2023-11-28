@@ -1,7 +1,7 @@
 <!-- views/ProfilePage -->
 <template>
   <div>
-    <v-toolbar class="bg-orange">
+    <v-toolbar class="bg-orange-lighten-2">
       <v-spacer></v-spacer>
       <UserMenu />
     </v-toolbar>
@@ -121,7 +121,7 @@
                   <ItemCard
                     :item="upload"
                     :urls="urls"
-                    @addUrl="(el) => urls.set(el.id, el.objectUrl)"
+                    @add-url="(el) => urls.set(el.id, el.objectUrl)"
                   >
                     <template v-slot:actions>
                       <v-btn icon @click="playMedia(upload)">
@@ -148,6 +148,24 @@
                           {{ upload.visible ? 'Visible' : 'Hidden' }}
                         </v-tooltip>
                         <v-icon>{{ !!upload.visible ? 'mdi-eye' : 'mdi-eye-off' }}</v-icon>
+                      </v-btn>
+                    </template>
+                    <template #carousel-item="{ image }">
+                      <v-btn
+                        icon
+                        density="comfortable"
+                        size="small"
+                        style="position: absolute; top: 0; right: 0;"
+                        @click="deleteImage(image)"
+                      >
+                        <v-tooltip
+                          activator="parent"
+                          location="start"
+                          style="z-index: 9999;"
+                        >
+                          Delete Image
+                        </v-tooltip>
+                        <v-icon>mdi-delete</v-icon>
                       </v-btn>
                     </template>
                   </ItemCard>
@@ -319,7 +337,22 @@ export default {
           console.log(error);
         }
       }
-    }
+    },
+    /** @param {string} image */
+    async deleteImage (image) {
+      try {
+        const deleted = await Api().delete(`uploads/image/${image}`);
+        const upload = this.uploads.find((u) => u.images.includes(deleted.data._id));
+        if (upload) {
+          const index = upload.images.findIndex((i) => i === deleted.data._id);
+          if (index !== -1) {
+            upload.images.splice(index, 1);
+          }
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    },
   },
   /**
    * Lifecycle hook
