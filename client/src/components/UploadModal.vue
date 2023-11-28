@@ -10,7 +10,11 @@
         maxlength="60"
         clearable
       ></v-text-field>
-      <v-text-field name="description" label="Description" id="description" clearable
+      <v-text-field
+        name="description"
+        label="Description"
+        id="description"
+        clearable
       ></v-text-field>
       <!-- Hacky - Fixes order in which formdata elements are processed though -->
       <v-text-field name="creator" id="creator" style="display: none;"></v-text-field>
@@ -65,7 +69,9 @@
         multiple
         clearable
       ></v-file-input>
-      <v-btn type="submit" name="submit" value="Submit">Submit</v-btn>
+      <v-btn type="submit" name="submit" value="Submit">
+        Submit
+      </v-btn>
     </v-form>
   </CenterModal>
 </template>
@@ -84,6 +90,7 @@ export default {
       default: false,
     },
   },
+  emits: ['close', 'upload'],
   data () {
     return {
       soundRules: [

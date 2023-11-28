@@ -1,17 +1,38 @@
 <template>
   <div
-    v-if="clicked"
+    v-if="clicked || filteredFiles.length"
     id="sidebar"
     class="sidebar"
-    @click.stop>
+    @click.stop
+  >
     <ReportModal
       v-if="reportMarker"
       :marker="reportMarker"
       :show="!!reportMarker"
       @close="reportMarker = null"
-      @report="report">
+      @report="report"
+    >
     </ReportModal>
     <div id="popup-grid" class="popup-grid">
+      <v-btn
+        v-if="filteredFiles.length"
+        size="small"
+        density="comfortable"
+        flat
+        icon
+        @click="clearFilter"
+      >
+        <v-tooltip
+          activator="parent"
+          location="end"
+          style="z-index: 9999;"
+        >
+          Clear Filter
+        </v-tooltip>
+        <v-icon color="red">
+          mdi-filter-remove-outline
+        </v-icon>
+      </v-btn>
       <v-card v-for="(marker, index) in paginatedMarkers" :key="marker.data._id" elevation-19>
         <div class="file-info">
           <div>
@@ -21,7 +42,8 @@
                 flat
                 size="x-small"
                 icon="mdi-flag"
-                @click="reportMarker = marker.data">
+                @click="reportMarker = marker.data"
+              >
                 <v-tooltip
                   activator="parent"
                   location="end"
@@ -29,7 +51,9 @@
                 >
                   Report
                 </v-tooltip>
-                <v-icon color="red">mdi-flag</v-icon>
+                <v-icon color="red">
+                  mdi-flag
+                </v-icon>
               </v-btn>
               <b>{{ marker.data.metadata.title }}</b>
             </h2>
@@ -43,7 +67,7 @@
                   Lng: {{ Number(marker.data.metadata.longitude).toFixed(4) }}&deg;
                   <br>
                 </span>
-                <span class="distance">
+                <span v-if="clicked" class="distance">
                   Distance: {{ clicked.latlng.distanceTo(marker._latlng).toFixed(2) }} m
                 </span>
                 <br>
@@ -54,19 +78,21 @@
               <v-carousel
                 v-if="!!marker.data.images && marker.data.images.length"
                 show-arrows="hover"
-                :style="{ width: '200px', height: '100px' }">
+                :style="{ width: '200px', height: '100px' }"
+              >
                 <v-carousel-item
-                  v-for="(image, index) in marker.data.images"
-                  :key="index"
+                  v-for="(image, imgIdx) in marker.data.images"
+                  :key="imgIdx"
                   :src="urls.get(image) || fetchImage(image)"
-                  cover>
+                  cover
+                >
                 </v-carousel-item>
               </v-carousel>
             </div>
             <span class="description" v-if="marker.data.metadata.description">
               Description: <p>{{ marker.data.metadata.description }}</p>
             </span><br>
-            <v-chip v-for="(tag, index) of marker.data.metadata.tags" :key="index">
+            <v-chip v-for="(tag, tIdx) of marker.data.metadata.tags" :key="tIdx">
               {{ tag }}
             </v-chip>
           </div>
@@ -77,10 +103,13 @@
             class="audio"
             :ref="`audio-${marker.data._id}`"
             @playing="playing(marker)"
-            controls>
+            controls
+          >
             <source :src="urls.get(marker.data._id)" :type="`${marker.data.contentType}`">
           </audio>
-          <v-btn v-else @click="fetchAudio(marker.data)" flat>Play</v-btn>
+          <v-btn v-else @click="fetchAudio(marker.data)" flat>
+            Play
+          </v-btn>
         </div>
       </v-card>
     </div>
@@ -94,14 +123,21 @@ import { circle } from 'leaflet';
 import { useStore } from 'vuex';
 import ReportModal from './ReportModal.vue';
 
+/** @typedef {import('../App.vue').UploadSchema} UploadSchema */
+
 export default {
   name: 'SidePanel',
   components: {
     ReportModal,
   },
   props: {
-    /** @type {Array<import('leaflet').Marker & { data: import('../App.vue').UploadSchema }>} */
+    /** @type {Array<import('leaflet').Marker & { data: UploadSchema }>} */
     markers: {
+      type: Array,
+      default: () => [],
+    },
+    /** @type {Array<UploadSchema>} */
+    filteredFiles: {
       type: Array,
       default: () => [],
     },
@@ -111,8 +147,12 @@ export default {
       default: null,
     },
     /** @type {{ lat: number, lng: number }} */
-    clicked: null,
+    clicked: {
+      type: Object,
+      default: null
+    },
   },
+  emits: ['close', 'focus-marker', 'clear-filter'],
   setup () {
     const store = useStore();
     return { store };
@@ -132,6 +172,12 @@ export default {
   methods: {
     close () {
       this.$emit('close');
+    },
+    clearFilter () {
+      if (!this.clicked) {
+        this.close();
+      }
+      this.$emit('clear-filter');
     },
     updatePerPage () {
       this.perPage = Math.max(1, Math.floor(window.innerHeight / 400));
@@ -160,7 +206,7 @@ export default {
         this.currentAudio.pause();
       }
       this.currentAudio = newAudio;
-      this.$emit('focusMarker', marker);
+      this.$emit('focus-marker', marker);
     },
     report (marker, reason) {
       if (confirm('Are you sure you want to report this content?')) {
@@ -178,6 +224,11 @@ export default {
     paginatedMarkers () {
       const start = (this.currentPage - 1) * this.perPage;
       const end = start + this.perPage;
+      if (this.filteredFiles.length) {
+        return this.markers
+          .filter((m) => m.data.visible && this.filteredFiles.some((f) => f._id === m.data._id))
+          .slice(start, end);
+      }
       return this.markers.filter((m) => m.data.visible).toSorted((a, b) => {
         const distanceA = this.clicked.latlng.distanceTo(a._latlng);
         const distanceB = this.clicked.latlng.distanceTo(b._latlng);
@@ -186,6 +237,9 @@ export default {
     },
     /** @returns {number} */
     maxPage () {
+      if (this.filteredFiles.length) {
+        return Math.ceil(this.filteredFiles.filter((m) => m.visible).length / this.perPage);
+      }
       return Math.ceil(this.markers.filter((m) => m.data.visible).length / this.perPage);
     }
   },
@@ -211,9 +265,13 @@ export default {
         this.circles.set(marker, circleMarker);
       });
     },
+    filteredFiles () {
+      this.currentPage = 1;
+    },
   },
   mounted () {
     window.addEventListener('resize', this.updatePerPage);
+    console.log('filteredFiles', this.filteredFiles);
     for (const marker of this.markers) {
       marker.data = this.getFileData(marker.data._id);
     }

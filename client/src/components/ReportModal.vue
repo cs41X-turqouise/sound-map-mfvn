@@ -55,6 +55,7 @@ export default {
   components: {
     CenterModal,
   },
+  emits: ['close', 'report'],
   data () {
     return {
       dialog: false,

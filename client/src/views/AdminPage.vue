@@ -53,7 +53,9 @@
               Reset
             </v-btn>
             <v-spacer></v-spacer>
-            <v-btn color="red" @click="closeEdit">Cancel</v-btn>
+            <v-btn color="red" @click="closeEdit">
+              Cancel
+            </v-btn>
             <v-spacer></v-spacer>
             <v-btn
               type="submit"
@@ -89,7 +91,8 @@
         <v-tab value="pending">
           <v-badge
             location="top right"
-            floating color="primary"
+            floating
+            color="primary"
             :content="pendingUploads.length"
             style="padding-right: 10px;"
           >
@@ -122,7 +125,9 @@
           </template>
           <thead>
             <tr>
-              <th style="max-width: fit-content">Avatar</th>
+              <th style="max-width: fit-content">
+                Avatar
+              </th>
               <th>User ID</th>
               <th
                 v-for="(entry, index) in userTableHeaders"
@@ -151,7 +156,7 @@
               <td>
                 <button class="user-id-button" @click="showMenu(user)">
                   {{ user._id }}
-                </button >
+                </button>
               </td>
               <td>{{ user.fullname }}</td>
               <td>{{ user.username }}</td>
@@ -165,7 +170,8 @@
               class="pagination"
               v-model="userTable.current"
               :length="maxUserPage"
-              style="margin-top: auto;">
+              style="margin-top: auto;"
+            >
             </v-pagination>
           </template>
         </v-table>
@@ -205,7 +211,8 @@
               <ItemCard
                 :item="upload"
                 :urls="urls"
-                @addUrl="(el) => urls.set(el.id, el.objectUrl)">
+                @add-url="(el) => urls.set(el.id, el.objectUrl)"
+              >
                 <template v-slot:actions>
                   <v-btn icon @click="playMedia(upload)">
                     <v-tooltip activator="parent" location="top">
@@ -224,7 +231,7 @@
                       Delete
                     </v-tooltip>
                     <v-icon>mdi-delete</v-icon>
-                    <ReportDialog @submitReason="(reason) => deleteUpload(upload, reason)" />
+                    <ReportDialog @submit-reason="(reason) => deleteUpload(upload, reason)" />
                   </v-btn>
                   <v-btn icon @click="toggleVisibility(upload)">
                     <v-tooltip activator="parent" location="top">
@@ -279,7 +286,8 @@
                 <ItemCard
                   :item="upload"
                   :urls="urls"
-                  @addUrl="(el) => urls.set(el.id, el.objectUrl)">
+                  @add-url="(el) => urls.set(el.id, el.objectUrl)"
+                >
                   <template v-slot:actions>
                     <v-btn icon @click="playMedia(upload)">
                       <v-tooltip activator="parent" location="top">
@@ -298,7 +306,7 @@
                         Delete
                       </v-tooltip>
                       <v-icon>mdi-delete</v-icon>
-                      <ReportDialog @submitReason="(reason) => deleteUpload(upload, reason)" />
+                      <ReportDialog @submit-reason="(reason) => deleteUpload(upload, reason)" />
                     </v-btn>
                     <v-btn icon @click="toggleVisibility(upload)">
                       <v-tooltip activator="parent" location="top">
@@ -310,14 +318,18 @@
                       <v-tooltip activator="parent" location="top">
                         Disapprove
                       </v-tooltip>
-                      <v-icon color="red">mdi-close-thick</v-icon>
-                      <ReportDialog @submitReason="(reason) => dissaproveUpload(upload, reason)" />
+                      <v-icon color="red">
+                        mdi-close-thick
+                      </v-icon>
+                      <ReportDialog @submit-reason="(reason) => dissaproveUpload(upload, reason)" />
                     </v-btn>
                     <v-btn icon @click="approveUpload(upload)">
                       <v-tooltip activator="parent" location="top">
                         Approve
                       </v-tooltip>
-                      <v-icon color="green">mdi-check-bold</v-icon>
+                      <v-icon color="green">
+                        mdi-check-bold
+                      </v-icon>
                     </v-btn>
                   </template>
                 </ItemCard>
@@ -349,8 +361,12 @@
           <tbody>
             <tr v-for="(report, index) in paginatedReports" :key="index">
               <td>
-                <v-btn size="small" width="100px" @click="viewUpload(report)">View Upload</v-btn>
-                <v-btn size="small" width="100px" @click="deleteReport(report)">Delete</v-btn>
+                <v-btn size="small" width="100px" @click="viewUpload(report)">
+                  View Upload
+                </v-btn>
+                <v-btn size="small" width="100px" @click="deleteReport(report)">
+                  Delete
+                </v-btn>
               </td>
               <td><span>{{ report._id }}</span></td>
               <td><span>{{ users.find((u) => u._id === report.reporter)?.username }}</span></td>
@@ -365,11 +381,14 @@
               class="pagination"
               v-model="reportsTable.current"
               :length="maxReportsPage"
-              style="margin-top: auto;">
+              style="margin-top: auto;"
+            >
             </v-pagination>
           </template>
         </v-table>
-        <p v-else>No reports found.</p>
+        <p v-else>
+          No reports found.
+        </p>
       </div>
     </v-sheet>
 
@@ -424,9 +443,15 @@
           </template>
           <thead>
             <tr>
-              <th style="width: 50px">Actions</th>
-              <th style="width: 500px">Upload Data</th>
-              <th style="width: 200px;">Metadata</th>
+              <th style="width: 50px">
+                Actions
+              </th>
+              <th style="width: 500px">
+                Upload Data
+              </th>
+              <th style="width: 200px;">
+                Metadata
+              </th>
               <th>Image(s)</th>
               <th>Status</th>
             </tr>
@@ -441,7 +466,9 @@
               <td>
                 <v-row dense>
                   <v-col>
-                    <v-btn @click="playMedia(upload)">Play</v-btn>
+                    <v-btn @click="playMedia(upload)">
+                      Play
+                    </v-btn>
                   </v-col>
                   <v-col>
                     <v-btn @click="setEdit(upload)">
@@ -451,7 +478,7 @@
                   <v-col>
                     <v-btn>
                       Delete
-                      <ReportDialog @submitReason="(reason) => deleteUpload(upload, reason)" />
+                      <ReportDialog @submit-reason="(reason) => deleteUpload(upload, reason)" />
                     </v-btn>
                   </v-col>
                 </v-row>
@@ -468,7 +495,9 @@
                     </span>
                   </v-card-subtitle>
                   <v-card-subtitle>
-                    Description: <p class="wrap-text">{{ upload.metadata.description }}</p>
+                    Description: <p class="wrap-text">
+                      {{ upload.metadata.description }}
+                    </p>
                   </v-card-subtitle>
                   <v-card-subtitle>
                     Tags:
@@ -511,16 +540,19 @@
                 <v-carousel
                   :style="{ width: '200px', height: '150px' }"
                   hide-delimiters
-                  :show-arrows="upload.images.length > 1 ? 'hover' : false">
+                  :show-arrows="upload.images.length > 1 ? 'hover' : false"
+                >
                   <v-carousel-item
                     v-for="(image, imageIndex) in upload.images"
                     :key="imageIndex"
-                    :src="urls.get(image) || fetchImage(image)">
+                    :src="urls.get(image) || fetchImage(image)"
+                  >
                     <v-btn
                       icon
                       density="comfortable"
                       size="small"
-                      style="position: absolute; top: 0; right: 0;">
+                      style="position: absolute; top: 0; right: 0;"
+                    >
                       <v-tooltip
                         activator="parent"
                         location="start"
@@ -528,13 +560,15 @@
                       >
                         Delete Image
                       </v-tooltip>
-                      <ReportDialog @submitReason="(reason) => deleteImage(image, reason)" />
+                      <ReportDialog @submit-reason="(reason) => deleteImage(image, reason)" />
                       <v-icon>mdi-delete</v-icon>
                     </v-btn>
                   </v-carousel-item>
                 </v-carousel>
               </td>
-              <td v-else><span>None</span></td>
+              <td v-else>
+                <span>None</span>
+              </td>
               <td>
                 <v-chip
                   :color="upload.approvedBy ? 'green' : 'red'"
@@ -552,11 +586,14 @@
               class="pagination"
               v-model="uploadsTable.current"
               :length="maxUserUploadsPage"
-              style="margin-top: auto;">
+              style="margin-top: auto;"
+            >
             </v-pagination>
           </template>
         </v-table>
-        <p v-else>No uploads found.</p>
+        <p v-else>
+          No uploads found.
+        </p>
       </div>
 
       <v-card v-show="activeUserTab === 'roles'" class="roles-tab">
@@ -607,7 +644,7 @@
             variant="outlined"
           >
             Demote to User
-            <ReportDialog @submitReason="(reason) => changeUserRole(selectedUser, 'user', reason)" />
+            <ReportDialog @submit-reason="(reason) => changeUserRole(selectedUser, 'user', reason)" />
           </v-btn>
 
           <v-btn
@@ -615,7 +652,7 @@
             variant="outlined"
           >
             {{ !selectedUser.banned ? 'Ban' : 'Unban' }} User
-            <ReportDialog @submitReason="(reason) => toggleBan(selectedUser, !selectedUser.banned, reason)" />
+            <ReportDialog @submit-reason="(reason) => toggleBan(selectedUser, !selectedUser.banned, reason)" />
           </v-btn>
 
           <v-btn
@@ -634,7 +671,7 @@
             Change Username
             <UsernameForm
               v-if="editUserDialog"
-              :allowCancel="true"
+              :allow-cancel="true"
               :user-id="selectedUser._id"
               @close="editUserDialog = false"
             />

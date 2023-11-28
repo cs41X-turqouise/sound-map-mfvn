@@ -12,13 +12,18 @@
             clearable
             required
             :rules="formRules"
-            aria-describedby="usernameRules">
+            aria-describedby="usernameRules"
+          >
           </v-text-field>
-          <v-alert v-if="errorMessage" type="error">{{ errorMessage }}</v-alert>
+          <v-alert v-if="errorMessage" type="error">
+            {{ errorMessage }}
+          </v-alert>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn v-if="allowCancel" color="blue darken-1" flat @click="close">Close</v-btn>
+          <v-btn v-if="allowCancel" color="blue darken-1" flat @click="close">
+            Close
+          </v-btn>
           <v-btn
             color="blue darken-1"
             flat
@@ -47,8 +52,10 @@ export default {
     userId: {
       type: String,
       required: false,
+      default: '',
     },
   },
+  emits: ['close'],
   setup () {
     const store = useStore();
     const formRules = [

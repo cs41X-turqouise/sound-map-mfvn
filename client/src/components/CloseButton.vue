@@ -5,6 +5,7 @@
 <script>
 export default {
   name: 'CloseButton',
+  emits: ['close'],
   methods: {
     close () {
       this.$emit('close');

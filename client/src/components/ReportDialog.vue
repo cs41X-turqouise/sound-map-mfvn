@@ -20,7 +20,9 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
+        <v-btn color="blue darken-1" text @click="close">
+          Cancel
+        </v-btn>
         <v-btn
           color="blue darken-1"
           text
@@ -37,6 +39,7 @@
 <script>
 export default {
   name: 'ReportDialog',
+  emits: ['submit-reason'],
   data () {
     return {
       dialog: false,
@@ -49,7 +52,7 @@ export default {
       this.reason = '';
     },
     submitReason () {
-      this.$emit('submitReason', this.reason);
+      this.$emit('submit-reason', this.reason);
       this.close();
     },
   },

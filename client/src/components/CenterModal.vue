@@ -24,6 +24,7 @@ export default {
   components: {
     CloseButton,
   },
+  emits: ['close'],
   methods: {
     close () {
       this.$emit('close');
@@ -55,6 +56,7 @@ export default {
   border: 1px solid #888;
   width: 50vw;
   max-width: 600px;
+  max-height: 90vh;
 }
 
 @media screen and (max-width: 900px) {
