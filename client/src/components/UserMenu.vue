@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex justify-space-around">
+  <div class="d-flex justify-space-around mr-4">
     <v-btn
       v-if="!store.state.user"
       flat

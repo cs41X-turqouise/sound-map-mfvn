@@ -26,6 +26,7 @@ export const userSchema = {
     bookmarks: { type: 'array', items: { type: 'string', description: 'MongoDB ObjectId' } },
     role: { type: 'string', enum: ['user', 'moderator', 'admin'] },
     banned: { type: 'boolean' },
+    joined: { type: 'string', format: 'date-time' },
     inbox: {
       type: 'array',
       items: {

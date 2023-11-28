@@ -2,8 +2,19 @@
 <template>
   <div>
     <v-toolbar class="bg-orange-lighten-2">
+      <v-hover v-slot="{ isHovering, props }">
+        <v-img
+          v-bind="props"
+          id="logo"
+          class="ml-2"
+          cover
+          :src="isHovering ? '/soundmap_logo.gif' : '/soundmap_logo.png'"
+          style="max-width: 175px; cursor: pointer;"
+          @click="$router.push('/')"
+        />
+      </v-hover>
       <v-spacer></v-spacer>
-      <UserMenu />
+      <UserMenu class="mr-2" />
     </v-toolbar>
 
     <v-layout row justify-center>
@@ -79,22 +90,57 @@
 
     <v-container>
       <v-row>
-        <v-col cols="6">
+        <v-col cols="2" class="text-start" style="margin-left: 0;">
           <div id="profile">
             <div id="profile-header">
-              <img id="profile-avatar" :src="store.state.user.profilePhoto" alt="Profile Avatar">
+              <v-card class="mx-auto" variant="text">
+                <v-img
+                  id="profile-avatar"
+                  :src="store.state.user.profilePhoto"
+                  alt="Profile Avatar"
+                  height="200px"
+                  width="200px"
+                >
+                  <template v-slot:error>
+                    <v-img
+                      class="mx-auto"
+                      height="200"
+                      max-width="200"
+                      src="/default-avatar.png"
+                    ></v-img>
+                  </template>
+                </v-img>
+                <v-card-item>
+                  <v-card-title>
+                    {{ store.state.user.username }}
+                  </v-card-title>
+                  <v-card-subtitle>
+                    {{ store.state.user.email }}
+                  </v-card-subtitle>
+                  <v-card-subtitle>
+                    Created: {{ new Date(store.state.user.joined).toLocaleDateString() }}
+                  </v-card-subtitle>
+                  <v-card-subtitle>
+                    Uploads: {{ store.state.user.uploads.length }}
+                  </v-card-subtitle>
+                  <v-card-subtitle>
+                    Bookmarks: {{ store.state.user.bookmarks.length }}
+                  </v-card-subtitle>
+                </v-card-item>
+                <v-card-actions>
+                  <v-btn color="info" block variant="outlined" @click="editUserDialog = true">
+                    Edit
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
               <div>
                 <h2 id="profile-username">
-                  {{ store.state.user.username }}
                 </h2>
-                <v-btn color="info" @click="editUserDialog = true">
-                  Edit
-                </v-btn>
               </div>
             </div>
           </div>
         </v-col>
-        <v-col cols="6">
+        <v-col cols="10">
           <div class="profile-content">
             <h2>Uploaded Content</h2>
             <v-col cols="12" sm="6" md="6">
@@ -115,6 +161,7 @@
                   cols="12"
                   sm="6"
                   md="6"
+                  lg="4"
                   v-for="upload in paginatedUploads"
                   :key="upload._id"
                 >
@@ -386,28 +433,5 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: left;
-}
-
-.list-item-container {
-  position: relative;
-}
-
-.edit-button,
-.delete-button {
-  position: absolute;
-  top: 0;
-  z-index: 0;
-  /* Ensure the buttons are on top */
-}
-
-.edit-button {
-  left: 0;
-  color: blue;
-}
-
-.delete-button {
-  left: 65px;
-  /* Adjust as necessary */
-  color: red;
 }
 </style>

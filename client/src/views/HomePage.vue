@@ -4,9 +4,22 @@
     style="height: 100%; width: 100%;
     display: flex; flex-direction: column;"
   >
-    <v-toolbar fixed color="cyan" style="height: fit-content; width: 99%;" dark>
-      <v-toolbar-items>
-        <v-btn @click="showSearchModal = true" flat>
+    <v-toolbar fixed color="orange-lighten-2" style="height: fit-content; width: 100%;">
+      <v-hover v-slot="{ isHovering, props }">
+        <v-img
+          v-bind="props"
+          id="logo"
+          class="ml-2"
+          cover
+          :src="isHovering ? '/soundmap_logo.gif' : '/soundmap_logo.png'"
+          style="max-width: 175px;"
+        />
+      </v-hover>
+      <v-toolbar-items class="pl-10">
+        <v-btn @click="showSearchModal = true" icon flat>
+          <v-icon left>
+            mdi-magnify
+          </v-icon>
           Search
         </v-btn>
       </v-toolbar-items>
@@ -14,7 +27,7 @@
       <v-toolbar-title v-if="store.state.user">
         Welcome {{ store.state.user.username }}
       </v-toolbar-title>
-      <v-toolbar-items style="padding: 0 10px;">
+      <v-toolbar-items>
         <UserMenu />
       </v-toolbar-items>
     </v-toolbar>
