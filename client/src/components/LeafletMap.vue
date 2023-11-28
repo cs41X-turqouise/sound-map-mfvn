@@ -273,7 +273,6 @@ export default {
   },
   mounted () {
     this.initMap();
-    window.addEventListener('resize', this.handleResize);
   },
   unmounted () {
     if (this.mapInstance) {
