@@ -98,17 +98,12 @@
           </div>
         </div>
         <div class="sound-bar" :style="{ backgroundColor: colors[index] }">
-          <!--<audio
-            v-if="urls.has(marker.data._id)"
-            class="audio"
-            :ref="`audio-${marker.data._id}`"
-            @playing="playing(marker)"
-            controls
-          >
-            <source :src="urls.get(marker.data._id)" :type="`${marker.data.contentType}`">
-          </audio>-->
-          <v-btn v-if="playing && audioId == marker.data._id"  @click="pause();">Pause</v-btn>
-          <v-btn v-else @click="play(marker)">Play</v-btn>
+          <v-btn v-if="playing && audioId == marker.data._id" @click="pause();">
+            Pause
+          </v-btn>
+          <v-btn v-else @click="play(marker)">
+            Play
+          </v-btn>
         </div>
       </v-card>
     </div>
@@ -123,6 +118,7 @@ import { useStore } from 'vuex';
 import ReportModal from './ReportModal.vue';
 
 /** @typedef {import('../App.vue').UploadSchema} UploadSchema */
+/** @typedef {import('leaflet').Marker & { data: UploadSchema }} Marker */
 
 export default {
   name: 'SidePanel',
@@ -130,7 +126,7 @@ export default {
     ReportModal,
   },
   props: {
-    /** @type {Array<import('leaflet').Marker & { data: UploadSchema }>} */
+    /** @type {Array<Marker>} */
     markers: {
       type: Array,
       default: () => [],
@@ -158,75 +154,15 @@ export default {
   },
   data () {
     return {
-      // urls: new Map(),
       circles: new WeakMap(),
-      /** @type {HTMLAudioElement} */
-      currentAudio: null,
       currentPage: 1,
       perPage: Math.max(1, Math.floor(window.innerHeight / 400)),
       colors: ['red', 'green', 'blue', 'purple'],
       reportMarker: null,
     };
   },
-  setup () {
-    const store = useStore();
-    return { store };
-  },
-  methods: {
-    close () {
-      this.$emit('close');
-    },
-    clearFilter () {
-      if (!this.clicked) {
-        this.close();
-      }
-      this.$emit('clear-filter');
-    },
-    updatePerPage () {
-      this.perPage = Math.max(1, Math.floor(window.innerHeight / 400));
-      this.currentPage = 1;
-    },
-    async fetchAudio (marker) {
-      await Api().get(`uploads/${marker._id}`, { responseType: 'blob' }).then((response) => {
-        const objectUrl = URL.createObjectURL(response.data);
-        this.urls.set(marker._id, objectUrl);
-        this.$nextTick(() => {
-          this.$refs[`audio-${marker._id}`][0].play();
-        });
-      });
-    },
-    async fetchImage (id) {
-      await Api().get(`uploads/image/${id}`, { responseType: 'blob' }).then((response) => {
-        const objectUrl = URL.createObjectURL(response.data);
-        this.urls.set(id, objectUrl);
-        return objectUrl;
-      });
-    },
-    playing (marker) {
-      const newAudio = this.$refs[`audio-${marker.data._id}`][0];
-      if (this.currentAudio) {
-        if (this.currentAudio === newAudio) return;
-        this.currentAudio.pause();
-      }
-      this.currentAudio = newAudio;
-      this.$emit('focus-marker', marker);
-    },
-    report (marker, reason) {
-      if (confirm('Are you sure you want to report this content?')) {
-        Api().post(`reports/${marker._id}`, { reason, reporter: this.store.state.user._id }).then((response) => {
-          console.log(response);
-          this.reportMarker = null;
-        });
-      }
-    },
-    getFileData (id) {
-      return this.store.state.files.get(id);
-    },
-    pause () {
-      this.$store.dispatch('setPlaying', false);
-    }
-  },
   computed: {
+    /** @return {Array<Marker>} */
     paginatedMarkers () {
       const start = (this.currentPage - 1) * this.perPage;
       const end = start + this.perPage;
@@ -248,14 +184,76 @@ export default {
       }
       return Math.ceil(this.markers.filter((m) => m.data.visible).length / this.perPage);
     },
+    /** @returns {Map<string, string>} */
     urls () {
-      return this.$store.state.fileUrls;
+      return this.store.state.fileUrls;
     },
+    /** @returns {string} */
     audioId () {
-      return this.$store.state.fileId;
+      return this.store.state.fileId;
     },
+    /** @returns {boolean} */
     playing () {
-      return this.$store.state.playing;
+      return this.store.state.playing;
+    }
+  },
+  methods: {
+    close () {
+      this.$emit('close');
+    },
+    clearFilter () {
+      if (!this.clicked) {
+        this.close();
+      }
+      this.$emit('clear-filter');
+    },
+    updatePerPage () {
+      this.perPage = Math.max(1, Math.floor(window.innerHeight / 400));
+      this.currentPage = 1;
+    },
+    async fetchAudio (marker) {
+      if (this.audioId === marker._id) return;
+      if (this.urls.has(marker._id)) {
+        this.$store.dispatch('setFileId', marker._id);
+        return;
+      }
+      await Api().get(`uploads/${marker._id}`, { responseType: 'blob' }).then((response) => {
+        const objectUrl = URL.createObjectURL(response.data);
+        this.$store.dispatch('updateFileUrl', {
+          fileId: marker._id,
+          url: objectUrl
+        });
+        this.$store.dispatch('setFileId', marker._id);
+      });
+    },
+    async fetchImage (id) {
+      await Api().get(`uploads/image/${id}`, { responseType: 'blob' }).then((response) => {
+        const objectUrl = URL.createObjectURL(response.data);
+        this.$store.dispatch('updateFileUrl', {
+          fileId: id,
+          url: objectUrl
+        });
+        return objectUrl;
+      });
+    },
+    report (marker, reason) {
+      if (confirm('Are you sure you want to report this content?')) {
+        Api().post(`reports/${marker._id}`, { reason, reporter: this.store.state.user._id }).then((response) => {
+          console.log(response);
+          this.reportMarker = null;
+        });
+      }
+    },
+    getFileData (id) {
+      return this.store.state.files.get(id);
+    },
+    async play (marker) {
+      await this.fetchAudio(marker.data);
+      this.$store.dispatch('setPlaying', true);
+      this.$emit('focus-marker', marker);
+    },
+    pause () {
+      this.$store.dispatch('setPlaying', false);
     }
   },
   watch: {

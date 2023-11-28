@@ -1,6 +1,6 @@
 <script setup>
 import { useStore } from 'vuex';
-import { computed, onMounted, watch, ref } from 'vue';
+import { computed, onMounted, watch } from 'vue';
 import WaveSurfer from 'wavesurfer.js';
 
 const store = useStore();
@@ -18,6 +18,7 @@ const options = {
   barRadius: 5,
 };
 
+/** @type {WaveSurfer} */
 let wavesurfer = null;
 const playing = computed(() => store.state.playing);
 
@@ -35,19 +36,12 @@ watch(id, (newId, oldId) => {
 });
 
 watch(playing, (newPlaying, oldPlaying) => {
-  if (newPlaying) {
-    play();
-  } else {
-    pause();
-  }
+  newPlaying ? play() : pause();
 });
+
 /** */
 function toggle () {
-  if (playing.value) {
-    pause();
-  } else {
-    play();
-  }
+  playing.value ? pause() : play();
 }
 /** */
 function play () {
@@ -64,17 +58,21 @@ function pause () {
 </script>
 
 <template>
-    <v-footer>
-        <v-row>
-            <div id="waveform" class="flex-fill"></div>
-            <v-icon v-if="!playing"
-                icon="mdi-play-circle"
-                size="50px"
-                @click="toggle()"></v-icon>
-            <v-icon v-else
-                icon="mdi-pause-circle"
-                size="50px"
-                @click="toggle()"></v-icon>
-        </v-row>
-    </v-footer>
+  <v-footer>
+    <v-row>
+      <div id="waveform" class="flex-fill"></div>
+      <v-icon
+        v-if="!playing"
+        icon="mdi-play-circle"
+        size="50px"
+        @click="toggle()"
+      ></v-icon>
+      <v-icon
+        v-else
+        icon="mdi-pause-circle"
+        size="50px"
+        @click="toggle()"
+      ></v-icon>
+    </v-row>
+  </v-footer>
 </template>
