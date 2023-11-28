@@ -212,7 +212,14 @@ export default {
       this.currentPage = 1;
     },
     async fetchAudio (marker) {
-      if (this.audioId === marker._id) return;
+      if (this.audioId === marker._id) {
+        if (this.playing) {
+          this.$store.dispatch('setPlaying', false);
+        } else {
+          this.$store.dispatch('setPlaying', true);
+        }
+        return;
+      }
       if (this.urls.has(marker._id)) {
         this.$store.dispatch('setFileId', marker._id);
         return;
@@ -249,7 +256,6 @@ export default {
     },
     async play (marker) {
       await this.fetchAudio(marker.data);
-      this.$store.dispatch('setPlaying', true);
       this.$emit('focus-marker', marker);
     },
     pause () {
@@ -284,7 +290,6 @@ export default {
   },
   mounted () {
     window.addEventListener('resize', this.updatePerPage);
-    console.log('filteredFiles', this.filteredFiles);
     for (const marker of this.markers) {
       marker.data = this.getFileData(marker.data._id);
     }
