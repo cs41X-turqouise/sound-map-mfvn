@@ -1,6 +1,6 @@
 <template>
   <div class="modal" v-if="show">
-    <div class="modal-content">
+    <div class="modal-content" :style="modalStyle">
       <CloseButton @close="close" />
       <slot></slot>
     </div>
@@ -16,10 +16,15 @@ export default {
       type: Boolean,
       required: true,
     },
+    modalStyle: {
+      type: Object,
+      default: () => ({}),
+    },
   },
   components: {
     CloseButton,
   },
+  emits: ['close'],
   methods: {
     close () {
       this.$emit('close');
@@ -51,5 +56,12 @@ export default {
   border: 1px solid #888;
   width: 50vw;
   max-width: 600px;
+  max-height: 90vh;
+}
+
+@media screen and (max-width: 900px) {
+  .modal-content {
+    font-size: x-small;
+  }
 }
 </style>

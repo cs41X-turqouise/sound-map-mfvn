@@ -38,12 +38,15 @@ async function populateDB () {
     for (let i = 0; i < numUsers; i++) {
       // Create a new user
       const gid = faker.string.numeric({ length: { min: 10, max: 30 } });
-      const fullname = faker.person.fullName();
-      const email = faker.internet.email();
+      // const fullname = faker.person.fullName();
+      const firstName = faker.person.firstName();
+      const lastName = faker.person.lastName();
+      const username = faker.internet.userName({ firstName, lastName });
+      const email = faker.internet.email({ firstName, lastName });
       const user = new User({
         gid,
-        fullname,
-        username: fullname,
+        fullname: firstName + ' ' + lastName,
+        username: username,
         email,
         profilePhoto: faker.image.avatar(),
       });
@@ -59,6 +62,7 @@ async function populateDB () {
           .pipe(soundBucket.openUploadStream(`${faker.string.numeric({ length: { min: 5, max: 10 } })}_waves-crashing.wav`, {
             contentType: 'audio/wav',
             metadata: {
+              creator: user._id,
               title: faker.lorem.lines(1),
               description: faker.lorem.paragraph({ min: 1, max: 3 }),
               tags: faker.lorem.words({ min: 3, max: 5 }).split(' '),

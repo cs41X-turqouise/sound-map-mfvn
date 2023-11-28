@@ -3,17 +3,21 @@
     <SidePanel
       v-if="showPanel"
       :markers="markers"
+      :filtered-files="filteredFiles"
       :map="mapInstance"
       :clicked="clicked"
-      @focusMarker="focusMarker"
-      @close="showPanel = false">
+      @clear-filter="$emit('clear-filter')"
+      @focus-marker="focusMarker"
+      @close="showPanel = false"
+    >
     </SidePanel>
     <Transition name="fade">
       <div
         v-if="showModal"
         :class="{ 'click-modal': true, highlight: highlight }"
-        @click.stop>
-        <CloseButton @close="showModal = false"/>
+        @click.stop
+      >
+        <CloseButton @close="showModal = false" />
         <span>Latitude: {{ clicked.lat.toFixed(4) }}</span><br>
         <span>Longitude: {{ clicked.lng.toFixed(4) }}</span><br>
         <v-row style="justify-content: space-evenly; align-items: center;">
@@ -22,15 +26,17 @@
               color="info"
               size="small"
               density="comfortable"
-              @click.stop="togglePinPanel">
-              {{ showPanel ? 'Hide' : 'Show'}} Panel
+              @click.stop="togglePinPanel"
+            >
+              {{ showPanel ? 'Hide' : 'Show' }} Panel
             </v-btn>
             <v-btn
-              v-if="$store.state.user"
+              v-if="store.state.user && !store.state.user.banned"
               color="info"
               size="small"
               density="comfortable"
-              @click.stop="openUploadModal">
+              @click.stop="openUploadModal"
+            >
               Upload
             </v-btn>
           </v-col>
@@ -73,6 +79,17 @@ export default {
     CloseButton,
     MainPlayer
   },
+  props: {
+    filteredFiles: {
+      type: Array,
+      default: () => [],
+    },
+  },
+  emits: ['clear-filter', 'open-upload-modal', 'close-upload-modal'],
+  setup () {
+    const store = useStore();
+    return { store };
+  },
   data () {
     return {
       mapId: 'leaflet-map',
@@ -103,9 +120,10 @@ export default {
       highlight: false,
     };
   },
-  setup () {
-    const store = useStore();
-    return { store };
+  computed: {
+    userMenuClicked () {
+      return this.store.state.userMenuClicked;
+    }
   },
   methods: {
     initMap () {
@@ -201,12 +219,12 @@ export default {
     },
     openUploadModal () {
       this.showPanel = false;
-      this.$emit('openUploadModal');
+      this.$emit('open-upload-modal');
     },
     togglePinPanel () {
       this.showPanel = !this.showPanel;
       if (this.showPanel) {
-        this.$emit('closeUploadModal');
+        this.$emit('close-upload-modal');
       }
     },
     focusMarker (marker) {
@@ -228,6 +246,21 @@ export default {
       currentMarkerId.value = id;
     }
   },
+  watch: {
+    userMenuClicked (newValue, oldValue) {
+      if (newValue) {
+        this.showModal = false;
+      }
+    },
+    filteredFiles (newValue, oldValue) {
+      if (newValue.length) {
+        this.showPanel = true;
+      }
+    },
+  },
+  /**
+   * Lifcycle hooks
+   */
   created () {
     this.$watch(() => this.store.state.files, (newValue, oldValue) => {
       for (const file of newValue.values()) {

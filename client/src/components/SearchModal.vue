@@ -7,7 +7,8 @@
         v-model="title"
         name="title"
         label="Title"
-        id="title" clearable
+        id="title"
+        clearable
       ></v-text-field>
       <v-text-field
         v-model="creator"
@@ -47,7 +48,9 @@
         type="date"
         clearable
       ></v-text-field>
-      <v-btn type="submit" name="submit" value="Submit">Submit</v-btn>
+      <v-btn type="submit" name="submit" value="Submit">
+        Submit
+      </v-btn>
     </v-form>
   </CenterModal>
 </template>
@@ -55,6 +58,8 @@
 <script>
 import { useStore } from 'vuex';
 import CenterModal from './CenterModal.vue';
+
+/** @typedef {import('../App.vue').UploadSchema} UploadSchema */
 
 export default {
   name: 'SearchModal',
@@ -67,6 +72,11 @@ export default {
       default: false,
     },
   },
+  emits: ['close', 'filtered-files'],
+  setup () {
+    const store = useStore();
+    return { store };
+  },
   data () {
     return {
       title: '',
@@ -77,55 +87,8 @@ export default {
       dateTo: '',
     };
   },
-  setup () {
-    const store = useStore();
-    return { store };
-  },
-  methods: {
-    close () {
-      this.$emit('close');
-    },
-    /**
-     * @async
-     * @param {Event} e
-     */
-    async submit (e) {
-      const filteredFiles = new Map();
-      for (const file of this.files.values()) {
-        if (this.title && !file.metadata.title.includes(this.title)) {
-          continue;
-        }
-        if (this.creator && !file.metadata.creator.includes(this.creator)) {
-          continue;
-        }
-        if (this.description && !file.metadata.description.includes(this.description)) {
-          continue;
-        }
-        if (this.dateFrom && file.metadata.date < this.dateFrom) {
-          continue;
-        }
-        if (this.dateTo && file.metadata.date > this.dateTo) {
-          continue;
-        }
-        if (this.tags.length) {
-          let found = false;
-          for (const tag of this.tags) {
-            if (file.metadata.tags.includes(tag)) {
-              found = true;
-              break;
-            }
-          }
-          if (!found) {
-            continue;
-          }
-        }
-        filteredFiles.set(file._id, file);
-      }
-      e.target.reset();
-      this.$emit('filteredFiles', filteredFiles);
-    }
-  },
   computed: {
+    /** @returns {Map<number, UploadSchema>} */
     files () {
       return this.store.state.files;
     },
@@ -138,6 +101,49 @@ export default {
       }
       return [...tags];
     },
+  },
+  methods: {
+    close () {
+      this.$emit('close');
+    },
+    /**
+     * @async
+     * @param {Event} e
+     */
+    async submit (e) {
+      const fileList = [];
+      for (const file of this.files.values()) {
+        let hits = 0;
+        if (this.title && file.metadata.title.includes(this.title)) {
+          hits++;
+        }
+        if (this.creator && file.metadata.creator.username.includes(this.creator)) {
+          hits++;
+        }
+        if (this.description && file.metadata.description.includes(this.description)) {
+          hits++;
+        }
+        if (this.dateFrom && (new Date(file.uploadDate) >= new Date(this.dateFrom))) {
+          hits++;
+        }
+        if (this.dateTo && (new Date(file.uploadDate) <= new Date(this.dateTo))) {
+          hits++;
+        }
+        if (this.tags.length) {
+          for (const tag of this.tags) {
+            if (file.metadata.tags.includes(tag)) {
+              hits++;
+            }
+          }
+        }
+        if (hits == 0) {
+          continue;
+        }
+        fileList.push({ hits, file });
+      }
+      e.target.reset();
+      this.$emit('filtered-files', fileList.sort((a, b) => b.hits - a.hits).map((file) => file.file));
+    }
   },
 };
 </script>

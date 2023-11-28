@@ -1,64 +1,57 @@
 <template>
-  <div class="home" style="height: 100%; width: 100%;
-    display: flex; flex-direction: column;">
-    <v-toolbar fixed color="cyan" style="height: fit-content;" dark>
+  <div
+    class="home"
+    style="height: 100%; width: 100%;
+    display: flex; flex-direction: column;"
+  >
+    <v-toolbar fixed color="cyan" style="height: fit-content; width: 99%;" dark>
       <v-toolbar-items>
         <v-btn @click="showSearchModal = true" flat>
           Search
         </v-btn>
       </v-toolbar-items>
       <v-spacer></v-spacer>
-      <v-toolbar-title v-if="$store.state.user">
-        Welcome {{ $store.state.user.username }}
+      <v-toolbar-title v-if="store.state.user">
+        Welcome {{ store.state.user.username }}
       </v-toolbar-title>
       <v-toolbar-items style="padding: 0 10px;">
-        <v-btn
-          v-if="!$store.state.user"
-          flat
-          @click="loginWithGoogle">
-          Sign in with Google
-        </v-btn>
-        <v-btn
-          v-if="$store.state.user"
-          flat
-          @click="logout">
-          Log Out
-        </v-btn>
-        <!-- Figure out why v-avatar and v-img cause this to break -->
-        <!-- <img id="user-avatar"
-          src="../assets/default-avatar.png"
-          alt="User Avatar"
-          @click="showUserMenu = !showUserMenu"
-        /> -->
+        <UserMenu />
       </v-toolbar-items>
     </v-toolbar>
+    <UsernameForm v-if="store.state.user && !store.state.user.username" />
     <div v-if="showSearchModal || showUploadModal" class="overlay"></div>
     <SearchModal
       v-if="showSearchModal"
       :show="showSearchModal"
-      @close="showSearchModal = false">
+      @filtered-files="search"
+      @close="showSearchModal = false"
+    >
     </SearchModal>
     <UploadModal
       v-if="showUploadModal"
       :show="showUploadModal"
       @close="showUploadModal = false"
-      @upload="upload">
+      @upload="upload"
+    >
     </UploadModal>
-    <UserMenu :user="user" :show="showUserMenu" />
     <LeafletMap
-        @openUploadModal="showUploadModal = true"
-        @closeUploadModal="showUploadModal = false"/>
+      :filtered-files="filteredFiles"
+      @clear-filter="filteredFiles = []"
+      @open-upload-modal="showUploadModal = true"
+      @close-upload-modal="showUploadModal = false"
+    />
   </div>
 </template>
 
 <script>
 import { useStore } from 'vuex';
+import Api from '../services/Api';
 import LeafletMap from '../components/LeafletMap.vue';
 import SearchModal from '../components/SearchModal.vue';
 import UploadModal from '../components/UploadModal.vue';
 import UserMenu from '../components/UserMenu.vue';
 import UploadService from '../services/UploadService';
-import Api from '../services/Api';
+import UsernameForm from '../components/UsernameForm.vue';
 
 export default {
   name: 'HomePage',
@@ -67,6 +60,7 @@ export default {
     UserMenu,
     SearchModal,
     UploadModal,
+    UsernameForm,
   },
   setup () {
     const store = useStore();
@@ -78,44 +72,16 @@ export default {
       showUserMenu: false,
       showSearchModal: false,
       showUploadModal: false,
+      dialog: true,
       uploadForm: {
         valid: false
       },
       valid: false,
       zoom: 2,
-      filteredFiles: new Map(),
+      filteredFiles: [],
     };
   },
-  beforeCreate () {
-    Api().get('uploads/filedata/all').then((response) => {
-      const fileMap = new Map();
-      response.data.forEach((file) => {
-        fileMap.set(file._id, file);
-      });
-      this.store.dispatch('setFiles', fileMap);
-    });
-    if (!this.$store.state.user) {
-      Api().get('users/self').then((response) => {
-        this.$store.dispatch('setUser', response.data);
-      }).catch((error) => {
-        console.log(error);
-      });
-    }
-  },
   methods: {
-    loginWithGoogle () {
-      window.location.href = 'http://localhost:3000/auth/google';
-    },
-    logout () {
-      this.$store.dispatch('setToken', null);
-      this.$store.dispatch('setUser', null);
-      Api().post('auth/logout').catch((error) => {
-        if (error.message == 'User not logged in') {
-          return;
-        }
-        console.log(error);
-      });
-    },
     /**
      * @async
      * @param {EventTarget} form
@@ -131,7 +97,27 @@ export default {
       form.reset();
       this.showUploadModal = false;
     },
-  }
+    async search (filteredFiles) {
+      this.filteredFiles = filteredFiles;
+      this.showSearchModal = false;
+    }
+  },
+  async beforeCreate () {
+    await Api().get('uploads/filedata/all').then((response) => {
+      const fileMap = new Map();
+      response.data.forEach((file) => {
+        fileMap.set(file._id, file);
+      });
+      this.store.dispatch('setFiles', fileMap);
+    });
+    if (!this.$store.state.user) {
+      Api().get('users/self').then((response) => {
+        this.$store.dispatch('setUser', response.data);
+      }).catch((error) => {
+        console.log(error);
+      });
+    }
+  },
 };
 </script>
 
@@ -147,15 +133,6 @@ export default {
 .no-spinner input[type=number] {
   -moz-appearance: textfield;
   appearance: none;
-}
-
-#user-avatar {
-  position: absolute;
-  bottom: 0;
-  right: 1%;
-  width: 50px;
-  height: 50px;
-  cursor: pointer;
 }
 
 .overlay {

@@ -37,6 +37,29 @@ export default async function (fastify, options) {
       req.end();
     });
   };
+
+  fastify.get('/refresh', {
+    onRequest: fastify.csrfCheck,
+  }, async function (request, reply) {
+    await request.session.regenerate();
+    await reply.generateCsrf({ userInfo: request.session.user.fullname + request.session.user._id });
+
+    reply.setCookie('xsrf-t', request.session._csrf, {
+      secure: fastify.config.NODE_ENV === 'production',
+      httpOnly: true,
+      sameSite: true,
+      signed: true,
+      path: '/',
+    });
+    return { message: 'Refreshed' };
+  });
+
+  fastify.post('/test', {
+    onRequest: fastify.csrfCheck,
+  }, async function (request, reply) {
+    return reply.send('Hello world');
+  });
+
   fastify.get('/google/callback', {
     schema: {
       tags: ['auth'],
@@ -44,22 +67,41 @@ export default async function (fastify, options) {
     async handler (request, reply) {
       try {
         const token = await fastify.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
+        /**
+         * @type {{ id: string, name: string, email: string, picture: string }}
+         */
         const userInfo = await getUserInfo(token.token.access_token);
-        let user = await User.findOne({ gid: userInfo.id });
+        let user = await User.findOne({ gid: userInfo.id })
+          .populate('inbox.sender', 'username email')
+          .exec();
 
         if (!user) {
           user = new User({
             gid: userInfo.id,
-            username: userInfo.name,
             fullname: userInfo.name,
             email: userInfo.email,
             profilePhoto: userInfo.picture,
+            role: fastify.config.SUPERADMIN === userInfo.email
+              ? 'superadmin'
+              : fastify.config.ADMINS.includes(userInfo.email)
+                ? 'admin'
+                : 'user',
           });
           await user.save();
         }
 
         request.session.user = user;
-        reply.redirect('http://localhost:5173/');
+        await reply.generateCsrf({ userInfo: user.fullname.replace(/\s/g, '') + user._id.toString() });
+
+        reply.setCookie('xsrf-t', request.session._csrf, {
+          secure: fastify.config.NODE_ENV === 'production',
+          httpOnly: true,
+          sameSite: true,
+          signed: true,
+          path: '/',
+        });
+
+        return reply.redirect('http://localhost:5173/');
       } catch (err) {
         fastify.log.error(err);
         throw new Error('Internal Server Error');
@@ -68,6 +110,7 @@ export default async function (fastify, options) {
   });
 
   fastify.post('/logout', {
+    onRequest: fastify.csrfCheck,
     schema: {
       tags: ['auth'],
       response: {
@@ -79,8 +122,12 @@ export default async function (fastify, options) {
     },
     async handler (request, reply) {
       try {
-        request.session.destroy();
-        reply.send('Logged out');
+        await request.session.destroy();
+        reply.clearCookie('sid');
+        reply.clearCookie('xsrf-t');
+        reply.clearCookie('oauth2-redirect-state');
+
+        return reply.send('Logged out');
       } catch (err) {
         fastify.log.error(err);
         throw new Error('Internal Server Error');

@@ -1,8 +1,9 @@
 import User from '../../models/User.js';
 import Sound from '../../models/Sound.js';
 import Image from '../../models/Image.js';
+import Reports from '../../models/Reports.js';
 import { uploadSchema } from './schemas.js';
-import { userSchema } from '../users/schemas.js';
+import { verifyLoggedIn, verifyNotBanned, checkUserRole } from '../../utils/utils.js';
 
 /**
  * Routes for handling CRUD (Create, Read, Update, and Delete) operations on uploads
@@ -16,13 +17,8 @@ export default async function (fastify, options) {
   fastify.post('/single',
     {
       preHandler: [
-        function (request, reply, done) {
-          if (!request.session.user) {
-            done(new Error('User not logged in'));
-          } else {
-            done();
-          }
-        },
+        verifyLoggedIn,
+        verifyNotBanned,
         fastify.upload.fields([
           { name: 'sound', maxCount: 1 },
           { name: 'images', maxCount: 12 },
@@ -73,39 +69,18 @@ export default async function (fastify, options) {
           user: userId,
           _id: fastify.toObjectId(sound.id),
         });
-        request.session.user.uploads.push(upload._id);
+        const user = await User.findById(userId).exec();
+        user.uploads.push(upload._id);
 
-        await request.session.user.save();
+        await user.save();
         await upload.save();
         sound.images = images;
         sound._id = upload._id;
 
-        reply.code(201).send(sound);
+        return reply.code(201).send(sound);
       }
     }
   );
-  
-  /**
-   * Does not work
-   * Allows users to upload an array of files
-   * @todo We should be able to upload multiple sound files and corresponding images if any
-   */
-  fastify.post('/bulk', {
-    schema: {
-      tags: ['uploads'],
-      response: {
-        501: {
-          type: 'object',
-          properties: {
-            error: { type: 'string' }
-          }
-        },
-      },
-    },
-    async handler (request, reply) {
-      reply.code(501).send({ error: 'Not Implemented' });
-    }
-  });
 
   /**
    * Get all uploads
@@ -218,39 +193,26 @@ export default async function (fastify, options) {
       const data = [];
       const uploads = await Sound.find({});
       for (const upload of uploads) {
-        const file = await upload.getFile(fastify);
-        file.images = upload.images || [];
-        data.push(file);
+        try {
+          const file = await upload.getFile(fastify);
+          file.images = upload.images || [];
+          file.visible = upload.visible;
+          file.approvedBy = upload.approvedBy;
+
+          if (file.metadata.creator) {
+            const creator = fastify.toObjectId(file.metadata.creator);
+            file.metadata.creator = await User.findById(creator, 'username').exec();
+          } else {
+            file.metadata.creator = { username: 'Unknown' };
+          }
+          data.push(file);
+        } catch (err) {
+          // should we remove the file if its not found in the bucket?
+          fastify.log.error(err);
+          fastify.log.error(upload);
+        }
       }
       return reply.send(data);
-    },
-  });
-
-  /**
-   * Find user who uploaded a file
-   */
-  fastify.get('/:uid/:fid', {
-    schema: {
-      tags: ['uploads'],
-      params: {
-        type: 'object',
-        properties: {
-          fid: { type: 'string', description: 'MongoDB ObjectId of the file' },
-          uid: { type: 'string', description: 'MongoDB ObjectId of the user' },
-        },
-      },
-      response: {
-        200: userSchema,
-      },
-    },
-    async handler (request, reply) {
-      const fid = fastify.toObjectId(request.params.fid);
-      const uid = fastify.toObjectId(request.params.uid);
-      if (!fid || !uid) return reply.code(400).send(new Error('Invalid ID'));
-      const user = await Sound.findById(request.params.fileId)
-        .populate('users')
-        .findById(request.params.userId);
-      return user;
     },
   });
 
@@ -258,6 +220,7 @@ export default async function (fastify, options) {
    * Delete a sound file - should be Admin only or limited to the user themselves
    */
   fastify.delete('/sound/:id', {
+    preHandler: checkUserRole('moderator', true),
     schema: {
       tags: ['uploads'],
       params: {
@@ -290,6 +253,10 @@ export default async function (fastify, options) {
           user.uploads.pull(file._id);
           await user.save();
         }
+
+        // Delete any reports associated with the file - todo: notify the reporter that the file has been deleted
+        await Reports.deleteMany({ fileId: file._id });
+
         return file;
       } catch (err) {
         fastify.log.error(err);
@@ -302,6 +269,7 @@ export default async function (fastify, options) {
    * Delete a image file - should be Admin only or limited to the user themselves
    */
   fastify.delete('/image/:id', {
+    preHandler: checkUserRole('moderator', true),
     schema: {
       tags: ['uploads'],
       params: {
@@ -337,6 +305,7 @@ export default async function (fastify, options) {
    * Rename a file - should be Admin only or limited to the user themselves
    */
   fastify.patch('/filename/:id', {
+    preHandler: checkUserRole('moderator', true),
     schema: {
       tags: ['uploads'],
       params: {
@@ -376,6 +345,7 @@ export default async function (fastify, options) {
    * Update metadata of a file - should be Admin only or limited to the user themselves
    */
   fastify.patch('/metadata/:id', {
+    preHandler: checkUserRole('moderator', true),
     schema: {
       tags: ['uploads'],
       params: {
@@ -393,6 +363,7 @@ export default async function (fastify, options) {
           latitude: { type: 'number', description: 'New latitude value' },
           longitude: { type: 'number', description: 'New longitude value' },
         },
+        additionalProperties: false,
       },
       response: {
         200: uploadSchema,
@@ -418,9 +389,83 @@ export default async function (fastify, options) {
               metadata: metadata,
             },
           },
-          { returnOriginal: false }
+          { returnDocument: 'after', returnNewDocument: true }
         );
+        fastify.log.info(file);
 
+        return file.value;
+      } catch (err) {
+        fastify.log.error(err);
+        throw new Error('Internal Server Error');
+      }
+    },
+  });
+
+  /**
+   * Approve a file
+   */
+  fastify.patch('/approve/:id', {
+    preHandler: checkUserRole('moderator', true),
+    schema: {
+      tags: ['uploads'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'MongoDB ObjectId' },
+        },
+      },
+      response: {
+        200: uploadSchema,
+      },
+    },
+    async handler (request, reply) {
+      try {
+        const _id = fastify.toObjectId(request.params.id);
+        if (!_id) return reply.code(400).send(new Error('Invalid ID'));
+
+        const file = await Sound.findByIdAndUpdate(_id, {
+          visible: true,
+          approvedBy: request.session.user._id
+        }, { new: true });
+        return file;
+      } catch (err) {
+        fastify.log.error(err);
+        throw new Error('Internal Server Error');
+      }
+    },
+  });
+
+  /**
+   * Change visibility of a file
+   */
+  fastify.patch('/visibility/:id', {
+    preHandler: checkUserRole('moderator', true),
+    schema: {
+      tags: ['uploads'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'MongoDB ObjectId' },
+        },
+      },
+      body: {
+        type: 'object',
+        properties: {
+          visible: { type: 'boolean', description: 'New visibility value' },
+        },
+      },
+      response: {
+        200: uploadSchema,
+      },
+    },
+    async handler (request, reply) {
+      try {
+        const _id = fastify.toObjectId(request.params.id);
+        if (!_id) return reply.code(400).send(new Error('Invalid ID'));
+
+        const file = await Sound.findByIdAndUpdate(_id, {
+          visible: request.body.visible,
+        }, { new: true });
         return file;
       } catch (err) {
         fastify.log.error(err);

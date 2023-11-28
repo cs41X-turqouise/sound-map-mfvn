@@ -18,4 +18,7 @@ export default fp(async function (fastify, options) {
     startRedirectPath: '/auth/google', // Path to redirect user for authentication.
     callbackUri: 'http://localhost:3000/auth/google/callback' // The callback URL Google will redirect to after authentication.
   });
-}, { name: 'oauth' });
+}, {
+  name: 'oauth',
+  dependencies: ['session']
+});
