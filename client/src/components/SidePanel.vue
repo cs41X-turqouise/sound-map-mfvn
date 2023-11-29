@@ -37,24 +37,61 @@
         <div class="file-info">
           <div>
             <h2 class="title">
-              <v-btn
-                v-if="store.state.user && !store.state.user.banned"
-                flat
-                size="x-small"
-                icon="mdi-flag"
-                @click="reportMarker = marker.data"
-              >
-                <v-tooltip
-                  activator="parent"
-                  location="end"
-                  style="z-index: 9999;"
+              <div v-if="store.state.user">
+                <v-btn
+                  v-if="!store.state.user.banned"
+                  flat
+                  size="x-small"
+                  icon="mdi-flag"
+                  @click="reportMarker = marker.data"
                 >
-                  Report
-                </v-tooltip>
-                <v-icon color="red">
-                  mdi-flag
-                </v-icon>
-              </v-btn>
+                  <v-tooltip
+                    activator="parent"
+                    location="end"
+                    style="z-index: 9999;"
+                  >
+                    Report
+                  </v-tooltip>
+                  <v-icon color="red">
+                    mdi-flag
+                  </v-icon>
+                </v-btn>
+
+                <v-btn
+                  v-if="store.state.user.bookmarks.includes(marker.data._id)"
+                  flat
+                  size="x-small"
+                  icon="mdi-bookmark"
+                >
+                  <v-tooltip
+                    activator="parent"
+                    location="end"
+                    style="z-index: 9999;"
+                  >
+                    Remove Bookmark
+                  </v-tooltip>
+                  <v-icon color="blue">
+                    mdi-bookmark
+                  </v-icon>
+                </v-btn>
+                <v-btn
+                  v-else
+                  flat
+                  size="x-small"
+                  icon="mdi-bookmark"
+                >
+                  <v-tooltip
+                    activator="parent"
+                    location="end"
+                    style="z-index: 9999;"
+                  >
+                    Bookmark
+                  </v-tooltip>
+                  <v-icon color="blue">
+                    mdi-bookmark-outline
+                  </v-icon>
+                </v-btn>
+              </div>
               <b>{{ marker.data.metadata.title }}</b>
             </h2>
             <div v-if="marker.data.metadata.geodata">
