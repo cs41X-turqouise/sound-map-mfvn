@@ -133,49 +133,84 @@
                   </v-btn>
                 </v-card-actions>
               </v-card>
-              <div>
-                <h2 id="profile-username">
-                </h2>
-              </div>
             </div>
+            <audio class="audio mt-2" controls :key="activeMedia.url" ref="audio-player">
+              <source :src="activeMedia.url" :type="activeMedia.type">
+            </audio>
           </div>
         </v-col>
         <v-col cols="10">
+          <v-tabs
+            v-model="activeMainTab"
+            color="primary"
+            dark
+            grow
+            slider-color="primary"
+            height="52px"
+          >
+            <v-tab value="uploads">
+              <v-icon>mdi-upload</v-icon>
+              Uploads
+            </v-tab>
+            <v-tab value="bookmarks">
+              <v-icon>mdi-bookmark</v-icon>
+              Bookmarks
+            </v-tab>
+          </v-tabs>
+
           <div class="profile-content">
-            <h2>Uploaded Content</h2>
-            <v-col cols="12" sm="6" md="6">
-              <audio class="audio" controls :key="activeMedia.url" ref="audio-player">
-                <source :src="activeMedia.url" :type="activeMedia.type">
-              </audio>
-            </v-col>
-            <v-container>
+            <v-container v-if="activeMainTab === 'uploads'">
               <v-row>
                 <v-col cols="12">
                   <v-text-field v-model="search" label="Search by Title" single-line hide-details full-width>
                   </v-text-field>
-                  <div>Number of Matches: {{ filteredUploads.length }}</div>
+                  <div v-if="search">
+                    Number of Matches: {{ filteredUploads.length }}
+                  </div>
                 </v-col>
               </v-row>
               <v-row>
                 <v-col
-                  cols="12"
-                  sm="6"
-                  md="6"
-                  lg="4"
+                  cols="auto"
                   v-for="upload in paginatedUploads"
                   :key="upload._id"
                 >
                   <ItemCard
                     :item="upload"
                     :urls="urls"
+                    max-width="380px"
                     @add-url="(el) => urls.set(el.id, el.objectUrl)"
                   >
+                    <template #carousel-item="{ image }">
+                      <v-btn
+                        icon
+                        density="comfortable"
+                        size="small"
+                        style="position: absolute; top: 0; right: 0;"
+                        @click="deleteImage(image)"
+                      >
+                        <v-tooltip
+                          activator="parent"
+                          location="start"
+                          style="z-index: 9999;"
+                        >
+                          Delete Image
+                        </v-tooltip>
+                        <v-icon>mdi-delete</v-icon>
+                      </v-btn>
+                    </template>
                     <template v-slot:actions>
-                      <v-btn icon @click="playMedia(upload)">
+                      <v-btn v-if="activeMedia.id !== upload._id" icon @click="playMedia(upload)">
                         <v-tooltip activator="parent" location="top">
                           Play
                         </v-tooltip>
                         <v-icon>mdi-play</v-icon>
+                      </v-btn>
+                      <v-btn v-else icon @click="stopMedia">
+                        <v-tooltip activator="parent" location="top">
+                          Stop
+                        </v-tooltip>
+                        <v-icon>mdi-stop</v-icon>
                       </v-btn>
                       <v-btn icon @click="setEdit(upload)">
                         <v-tooltip activator="parent" location="top">
@@ -196,24 +231,6 @@
                         <v-icon>{{ !!upload.visible ? 'mdi-eye' : 'mdi-eye-off' }}</v-icon>
                       </v-btn>
                     </template>
-                    <template #carousel-item="{ image }">
-                      <v-btn
-                        icon
-                        density="comfortable"
-                        size="small"
-                        style="position: absolute; top: 0; right: 0;"
-                        @click="deleteImage(image)"
-                      >
-                        <v-tooltip
-                          activator="parent"
-                          location="start"
-                          style="z-index: 9999;"
-                        >
-                          Delete Image
-                        </v-tooltip>
-                        <v-icon>mdi-delete</v-icon>
-                      </v-btn>
-                    </template>
                   </ItemCard>
                 </v-col>
               </v-row>
@@ -221,6 +238,29 @@
                 v-model="uploadsTable.current"
                 :length="maxUploadsPage"
               ></v-pagination>
+            </v-container>
+
+            <v-container v-if="activeMainTab === 'bookmarks'">
+              <div v-if="bookmarks.length">
+                <v-row>
+                  <v-col cols="12">
+                    <v-text-field v-model="search" label="Search by Title" single-line hide-details full-width>
+                    </v-text-field>
+                    <div v-if="search">
+                      Number of Matches: 0
+                    </div>
+                  </v-col>
+                </v-row>
+              </div>
+              <div v-else>
+                <v-row>
+                  <v-col cols="12">
+                    <v-alert type="info" elevation="2" icon="mdi-information">
+                      You have no bookmarks.
+                    </v-alert>
+                  </v-col>
+                </v-row>
+              </div>
             </v-container>
           </div>
         </v-col>
@@ -263,8 +303,11 @@ export default {
       urls: new Map(),
       /** @type { UploadSchema[] } */
       uploads: [],
-      uploadsTable: paginationSetup(2),
+      /** @type { UploadSchema[] } */
+      bookmarks: [],
+      uploadsTable: paginationSetup(4),
       activeMedia: {
+        id: null,
         type: null,
         url: null,
       },
@@ -277,6 +320,7 @@ export default {
       },
       username: '',
       search: '',
+      activeMainTab: 'uploads',
     };
   },
   computed: {
@@ -334,6 +378,7 @@ export default {
     /** @param {UploadSchema} upload */
     async playMedia (upload) {
       this.activeMedia.type = upload.contentType;
+      this.activeMedia.id = upload._id;
       if (this.urls.has(upload._id)) {
         this.activeMedia.url = this.urls.get(upload._id);
       } else {
@@ -350,6 +395,15 @@ export default {
       this.$nextTick(() => {
         const audioPlayer = this.$refs['audio-player'];
         audioPlayer.play();
+      });
+    },
+    async stopMedia () {
+      this.activeMedia.id = null;
+      this.activeMedia.type = null;
+      this.activeMedia.url = null;
+      this.$nextTick(() => {
+        const audioPlayer = this.$refs['audio-player'];
+        audioPlayer.pause();
       });
     },
     async saveEdit () {
