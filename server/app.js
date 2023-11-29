@@ -84,10 +84,6 @@ export default async function (fastify, opts) {
     }
   });
 
-  fastify.io.on('connection', (socket) => {
-    fastify.log.info(`Socket connected ${socket.id}`);
-  });
-
   // ~~~ Do not touch the following lines ~~~ //
   // loads all plugins defined in plugins
   fastify.register(AutoLoad, {

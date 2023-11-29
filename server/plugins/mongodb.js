@@ -27,6 +27,24 @@ export default fp(async function (fastify, options) {
     useNewUrlParser: true, useUnifiedTopology: true
   });
 
+  fastify.io.on('connection', (socket) => {
+    fastify.log.info(`Socket connected ${socket.id}`);
+
+    // Getting error - MongoServerError: The $changeStream stage is only supported on replica sets
+    // const collections = ['users', 'uploads', 'reports'];
+    // collections.forEach((collection) => {
+    //   const changeStream = mongoose.connection.collection(collection).watch();
+    //   changeStream.on('change', () => {
+    //     fastify.log.info(`${collection} changed`);
+    //     fastify.io.emit(`${collection}Changed`);
+    //   });
+
+    //   socket.on('disconnect', () => {
+    //     changeStream.close();
+    //   });
+    // });
+  });
+
   // Decorate the Fastify instance with the Mongoose client
   fastify.decorate('mongoose', mongoose);
 });
