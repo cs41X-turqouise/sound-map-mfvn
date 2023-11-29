@@ -188,9 +188,8 @@
                           Delete
                         </v-tooltip>
                         <v-icon>mdi-delete</v-icon>
-                        <!-- <ReportDialog @submitReason="(reason) => deleteUpload(upload, reason)" /> -->
                       </v-btn>
-                      <v-btn icon @click="toggleVisibility(upload)">
+                      <v-btn v-if="upload.approvedBy" icon @click="toggleVisibility(upload)">
                         <v-tooltip activator="parent" location="top">
                           {{ upload.visible ? 'Visible' : 'Hidden' }}
                         </v-tooltip>
@@ -412,7 +411,7 @@ export default {
         });
       }
       const uploads = await Api().get(`users/${this.store.state.user._id}/uploads`);
-      this.uploads = uploads.data;
+      this.uploads = uploads.data.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
       console.log(this.uploads);
     } catch (err) {
       console.log(err);
