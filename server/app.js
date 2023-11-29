@@ -1,7 +1,6 @@
 import path from 'path';
 import AutoLoad from '@fastify/autoload';
 import FastifyEnv from '@fastify/env';
-import fastifySocketIO from 'fastify-socket.io';
 import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -76,17 +75,6 @@ export default async function (fastify, opts) {
   
   // convert ADMINS to array
   fastify.config.ADMINS = fastify.config.ADMINS.split(',').map((admin) => admin.trim());
-
-  await fastify.register(fastifySocketIO, {
-    cors: {
-      origin: 'http://localhost:5173',
-      methods: ['GET', 'POST']
-    }
-  });
-
-  fastify.io.on('connection', (socket) => {
-    fastify.log.info(`Socket connected ${socket.id}`);
-  });
 
   // ~~~ Do not touch the following lines ~~~ //
   // loads all plugins defined in plugins
