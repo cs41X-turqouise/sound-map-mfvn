@@ -532,11 +532,9 @@ export default {
    */
   async beforeCreate () {
     try {
-      if (!this.store.state.user) {
-        await Api().get('users/self').then((response) => {
-          this.store.dispatch('setUser', response.data);
-        });
-      }
+      await Api().get('users/self').then((response) => {
+        this.store.dispatch('setUser', response.data);
+      });
       const uploads = await Api().get(`users/${this.store.state.user._id}/uploads`);
       this.uploads = uploads.data.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
       console.log(this.uploads);
