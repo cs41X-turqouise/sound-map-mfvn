@@ -160,84 +160,95 @@
 
           <div class="profile-content">
             <v-container v-if="activeMainTab === 'uploads'">
-              <v-row>
-                <v-col cols="12">
-                  <v-text-field v-model="search" label="Search by Title" single-line hide-details full-width>
-                  </v-text-field>
-                  <div v-if="search">
-                    Number of Matches: {{ filteredUploads.length }}
-                  </div>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col
-                  cols="auto"
-                  v-for="upload in paginatedUploads"
-                  :key="upload._id"
-                >
-                  <ItemCard
-                    :item="upload"
-                    :urls="urls"
-                    max-width="380px"
-                    @add-url="(el) => urls.set(el.id, el.objectUrl)"
+              <div v-if="uploads.length">
+                <v-row>
+                  <v-col cols="12">
+                    <v-text-field v-model="search" label="Search by Title" single-line hide-details full-width>
+                    </v-text-field>
+                    <div v-if="search">
+                      Number of Matches: {{ filteredUploads.length }}
+                    </div>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col
+                    cols="auto"
+                    v-for="upload in paginatedUploads"
+                    :key="upload._id"
                   >
-                    <template #carousel-item="{ image }">
-                      <v-btn
-                        icon
-                        density="comfortable"
-                        size="small"
-                        style="position: absolute; top: 0; right: 0;"
-                        @click="deleteImage(image)"
-                      >
-                        <v-tooltip
-                          activator="parent"
-                          location="start"
-                          style="z-index: 9999;"
+                    <ItemCard
+                      :item="upload"
+                      :urls="urls"
+                      max-width="380px"
+                      @add-url="(el) => urls.set(el.id, el.objectUrl)"
+                    >
+                      <template #carousel-item="{ image }">
+                        <v-btn
+                          icon
+                          density="comfortable"
+                          size="small"
+                          style="position: absolute; top: 0; right: 0;"
+                          @click="deleteImage(image)"
                         >
-                          Delete Image
-                        </v-tooltip>
-                        <v-icon>mdi-delete</v-icon>
-                      </v-btn>
-                    </template>
-                    <template v-slot:actions>
-                      <v-btn v-if="activeMedia.id !== upload._id" icon @click="playMedia(upload)">
-                        <v-tooltip activator="parent" location="top">
-                          Play
-                        </v-tooltip>
-                        <v-icon>mdi-play</v-icon>
-                      </v-btn>
-                      <v-btn v-else icon @click="stopMedia">
-                        <v-tooltip activator="parent" location="top">
-                          Stop
-                        </v-tooltip>
-                        <v-icon>mdi-stop</v-icon>
-                      </v-btn>
-                      <v-btn icon @click="setEdit(upload)">
-                        <v-tooltip activator="parent" location="top">
-                          Edit
-                        </v-tooltip>
-                        <v-icon>mdi-pencil</v-icon>
-                      </v-btn>
-                      <v-btn icon @click="deleteUpload(upload)">
-                        <v-tooltip activator="parent" location="top">
-                          Delete
-                        </v-tooltip>
-                        <v-icon>mdi-delete</v-icon>
-                      </v-btn>
-                      <v-btn v-if="upload.approvedBy" icon @click="toggleVisibility(upload)">
-                        <v-tooltip activator="parent" location="top">
-                          {{ upload.visible ? 'Visible' : 'Hidden' }}
-                        </v-tooltip>
-                        <v-icon>{{ !!upload.visible ? 'mdi-eye' : 'mdi-eye-off' }}</v-icon>
-                      </v-btn>
-                    </template>
-                  </ItemCard>
-                </v-col>
-              </v-row>
-              <v-pagination
-                v-model="uploadsTable.current"
-                :length="maxUploadsPage"
-              ></v-pagination>
+                          <v-tooltip
+                            activator="parent"
+                            location="start"
+                            style="z-index: 9999;"
+                          >
+                            Delete Image
+                          </v-tooltip>
+                          <v-icon>mdi-delete</v-icon>
+                        </v-btn>
+                      </template>
+                      <template v-slot:actions>
+                        <v-btn v-if="activeMedia.id !== upload._id" icon @click="playMedia(upload)">
+                          <v-tooltip activator="parent" location="top">
+                            Play
+                          </v-tooltip>
+                          <v-icon>mdi-play</v-icon>
+                        </v-btn>
+                        <v-btn v-else icon @click="stopMedia">
+                          <v-tooltip activator="parent" location="top">
+                            Stop
+                          </v-tooltip>
+                          <v-icon>mdi-stop</v-icon>
+                        </v-btn>
+                        <v-btn icon @click="setEdit(upload)">
+                          <v-tooltip activator="parent" location="top">
+                            Edit
+                          </v-tooltip>
+                          <v-icon>mdi-pencil</v-icon>
+                        </v-btn>
+                        <v-btn icon @click="deleteUpload(upload)">
+                          <v-tooltip activator="parent" location="top">
+                            Delete
+                          </v-tooltip>
+                          <v-icon>mdi-delete</v-icon>
+                        </v-btn>
+                        <v-btn v-if="upload.approvedBy" icon @click="toggleVisibility(upload)">
+                          <v-tooltip activator="parent" location="top">
+                            {{ upload.visible ? 'Visible' : 'Hidden' }}
+                          </v-tooltip>
+                          <v-icon>{{ !!upload.visible ? 'mdi-eye' : 'mdi-eye-off' }}</v-icon>
+                        </v-btn>
+                      </template>
+                    </ItemCard>
+                  </v-col>
+                </v-row>
+                <v-pagination
+                  v-model="uploadsTable.current"
+                  :length="maxUploadsPage"
+                ></v-pagination>
+              </div>
+              <div v-else>
+                <v-row>
+                  <v-col cols="12">
+                    <v-alert type="info" elevation="2" icon="mdi-information">
+                      You have no uploads.
+                    </v-alert>
+                  </v-col>
+                </v-row>
+              </div>
             </v-container>
 
             <v-container v-if="activeMainTab === 'bookmarks'">
