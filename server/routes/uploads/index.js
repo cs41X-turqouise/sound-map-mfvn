@@ -246,11 +246,17 @@ export default async function (fastify, options) {
             await Image.findByIdAndDelete(image);
           }
         }
-        const users = await User.find({ uploads: file._id });
+        const users = await User.find({
+          $or: [
+            { uploads: file._id },
+            { bookmarks: file._id }
+          ]
+        });
 
         // Remove the file ID from every user's uploads array
         for (const user of users) {
           user.uploads.pull(file._id);
+          user.bookmarks.pull(file._id);
           await user.save();
         }
 

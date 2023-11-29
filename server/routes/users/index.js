@@ -1,6 +1,5 @@
 import User from '../../models/User.js';
 import Sound from '../../models/Sound.js';
-import Image from '../../models/Image.js';
 import { userSchema } from './schemas.js';
 import { uploadSchema } from '../uploads/schemas.js';
 import { checkUserRole, roles, verifyLoggedIn } from '../../utils/utils.js';
@@ -107,14 +106,14 @@ export default async function (fastify, options) {
   /**
    * Get all files uploaded by a specific user
    */
-  fastify.get('/:userId/uploads', {
-    preHandler: checkUserRole('moderator'),
+  fastify.get('/:id/uploads', {
+    preHandler: checkUserRole('moderator', true),
     schema: {
       tags: ['uploads'],
       params: {
         type: 'object',
         properties: {
-          userId: { type: 'string', description: 'MongoDB ObjectId of the user' },
+          id: { type: 'string', description: 'MongoDB ObjectId of the user' },
         },
       },
       response: {
@@ -136,7 +135,7 @@ export default async function (fastify, options) {
     async handler (request, reply) {
       try {
         const data = [];
-        const userId = request.params.userId;
+        const userId = request.params.id;
         const userObjectId = fastify.toObjectId(userId);
         if (!userObjectId) return reply.code(400).send(new Error('Invalid ID'));
 
@@ -167,7 +166,7 @@ export default async function (fastify, options) {
    * Get all bookmarks for a specific user
    * Limited to the user themselves
    */
-  fastify.get('/:userId/bookmarks', {
+  fastify.get('/:id/bookmarks', {
     preHandler: verifyLoggedIn,
     schema: {
       tags: ['bookmarks'],
@@ -196,7 +195,7 @@ export default async function (fastify, options) {
     async handler (request, reply) {
       try {
         const data = [];
-        const userId = request.params.userId;
+        const userId = request.params.id;
         const userObjectId = fastify.toObjectId(userId);
         if (!userObjectId) return reply.code(400).send(new Error('Invalid ID'));
 
@@ -303,15 +302,17 @@ export default async function (fastify, options) {
       if (deletedUser.$isDeleted()) {
         // gotta delete all their uploads too
         for (const upload of deletedUser.uploads) {
-          await fastify.gridfsSounds.delete(upload);
-          const file = await Sound.findByIdAndDelete(upload);
-
-          if (file.images) {
-            // delete all associated images
-            for (const image of file.images) {
-              await fastify.gridfsImages.delete(image);
-              await Image.findByIdAndDelete(image);
-            }
+          try {
+            await fastify.inject({
+              method: 'DELETE',
+              url: `/uploads/sound/${upload}`,
+              headers: request.headers,
+              query: request.query,
+              params: request.params,
+              body: request.body
+            });
+          } catch (error) {
+            fastify.log.error(error);
           }
         }
       }
