@@ -62,6 +62,7 @@
                   flat
                   size="x-small"
                   icon="mdi-bookmark"
+                  @click="removeBookmark(marker)"
                 >
                   <v-tooltip
                     activator="parent"
@@ -79,13 +80,14 @@
                   flat
                   size="x-small"
                   icon="mdi-bookmark"
+                  @click="bookmark(marker)"
                 >
                   <v-tooltip
                     activator="parent"
                     location="end"
                     style="z-index: 9999;"
                   >
-                    Bookmark
+                    Add Bookmark
                   </v-tooltip>
                   <v-icon color="blue">
                     mdi-bookmark-outline
@@ -251,6 +253,28 @@ export default {
           console.log(response);
           this.reportMarker = null;
         });
+      }
+    },
+    async bookmark (marker) {
+      try {
+        await Api().patch(`users/${this.store.state.user._id}/bookmarks`, {
+          id: marker.data._id,
+          bookmark: true,
+        });
+        this.store.commit('addBookmark', marker.data._id);
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    async removeBookmark (marker) {
+      try {
+        await Api().patch(`users/${this.store.state.user._id}/bookmarks`, {
+          id: marker.data._id,
+          bookmark: false,
+        });
+        this.store.commit('removeBookmark', marker.data._id);
+      } catch (error) {
+        console.error(error);
       }
     },
     getFileData (id) {

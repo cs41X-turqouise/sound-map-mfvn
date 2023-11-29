@@ -76,6 +76,15 @@ export default createStore({
       }
       state.files = newFiles;
     },
+    addBookmark (state, fileId) {
+      state.user.bookmarks.push(fileId);
+    },
+    removeBookmark (state, fileId) {
+      const index = state.user.bookmarks.indexOf(fileId);
+      if (index > -1) {
+        state.user.bookmarks.splice(index, 1);
+      }
+    },
     userMenuClicked (state, clicked) {
       state.userMenuClicked = clicked;
     },
@@ -111,6 +120,12 @@ export default createStore({
     },
     deleteFile ({ commit }, file) {
       commit('deleteFile', file);
+    },
+    addBookmark ({ commit }, fileId) {
+      commit('addBookmark', fileId);
+    },
+    removeBookmark ({ commit }, fileId) {
+      commit('removeBookmark', fileId);
     },
     userMenuClicked ({ commit }, clicked) {
       commit('userMenuClicked', clicked);

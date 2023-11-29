@@ -218,7 +218,7 @@
                         </v-tooltip>
                         <v-icon>mdi-pencil</v-icon>
                       </v-btn>
-                      <v-btn icon>
+                      <v-btn icon @click="deleteUpload(upload)">
                         <v-tooltip activator="parent" location="top">
                           Delete
                         </v-tooltip>
@@ -251,6 +251,45 @@
                     </div>
                   </v-col>
                 </v-row>
+                <v-row>
+                  <v-col
+                    cols="auto"
+                    v-for="upload in paginatedBookmarks"
+                    :key="upload._id"
+                  >
+                    <ItemCard
+                      :item="upload"
+                      :urls="urls"
+                      max-width="380px"
+                      @add-url="(el) => urls.set(el.id, el.objectUrl)"
+                    >
+                      <template v-slot:actions>
+                        <v-btn v-if="activeMedia.id !== upload._id" icon @click="playMedia(upload)">
+                          <v-tooltip activator="parent" location="top">
+                            Play
+                          </v-tooltip>
+                          <v-icon>mdi-play</v-icon>
+                        </v-btn>
+                        <v-btn v-else icon @click="stopMedia">
+                          <v-tooltip activator="parent" location="top">
+                            Stop
+                          </v-tooltip>
+                          <v-icon>mdi-stop</v-icon>
+                        </v-btn>
+                        <v-btn icon @click="deleteBookmark(upload)">
+                          <v-tooltip activator="parent" location="top">
+                            Remove Bookmark
+                          </v-tooltip>
+                          <v-icon>mdi-bookmark-off</v-icon>
+                        </v-btn>
+                      </template>
+                    </ItemCard>
+                  </v-col>
+                </v-row>
+                <v-pagination
+                  v-model="bookMarksTable.current"
+                  :length="maxBookmarksPage"
+                ></v-pagination>
               </div>
               <div v-else>
                 <v-row>
@@ -306,6 +345,7 @@ export default {
       /** @type { UploadSchema[] } */
       bookmarks: [],
       uploadsTable: paginationSetup(4),
+      bookMarksTable: paginationSetup(4),
       activeMedia: {
         id: null,
         type: null,
@@ -341,6 +381,24 @@ export default {
       const start = (this.uploadsTable.current - 1) * this.uploadsTable.perPage;
       const end = start + this.uploadsTable.perPage;
       return this.filteredUploads.slice(start, end);
+    },
+    filteredBookmarks () {
+      if (!this.search) return this.bookmarks;
+      return this.bookmarks.filter((upload) =>
+        upload.metadata.title.toLowerCase().includes(this.search.toLowerCase())
+        || upload.metadata.description.toLowerCase().includes(this.search.toLowerCase())
+        || upload.metadata.tags.some((tag) => tag.toLowerCase().includes(this.search.toLowerCase()))
+        || upload.filename.toLowerCase().includes(this.search.toLowerCase())
+        || upload.contentType.toLowerCase().includes(this.search.toLowerCase())
+      );
+    },
+    maxBookmarksPage () {
+      return Math.ceil(this.filteredBookmarks.length / this.bookMarksTable.perPage);
+    },
+    paginatedBookmarks () {
+      const start = (this.bookMarksTable.current - 1) * this.bookMarksTable.perPage;
+      const end = start + this.bookMarksTable.perPage;
+      return this.filteredBookmarks.slice(start, end);
     },
   },
   methods: {
@@ -453,6 +511,21 @@ export default {
         console.error(error);
       }
     },
+    /** @param {UploadSchema} upload */
+    async deleteBookmark (upload) {
+      if (confirm('Are you sure you want to delete this bookmark?')) {
+        try {
+          await Api().patch(`users/${this.store.state.user._id}/bookmarks`, {
+            id: upload._id,
+            bookmark: false,
+          });
+          this.bookmarks = this.bookmarks.filter((item) => item._id !== upload._id);
+          this.store.commit('removeBookmark', upload._id);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    }
   },
   /**
    * Lifecycle hook
@@ -467,6 +540,10 @@ export default {
       const uploads = await Api().get(`users/${this.store.state.user._id}/uploads`);
       this.uploads = uploads.data.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
       console.log(this.uploads);
+
+      const bookmarks = await Api().get(`users/${this.store.state.user._id}/bookmarks`);
+      this.bookmarks = bookmarks.data.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
+      console.log(this.bookmarks);
     } catch (err) {
       console.log(err);
       if (!this.store.state.user) {
