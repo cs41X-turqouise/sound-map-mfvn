@@ -45,7 +45,9 @@
     "fastify-cli": "^5.8.0",
     "fastify-multer": "^2.0.3",
     "fastify-plugin": "^4.5.1",
-    "mongoose": "^7.6.3"
+    "fastify-socket.io": "^5.0.0",
+    "mongoose": "^7.6.3",
+    "socket.io": "^4.7.2"
   },
   "devDependencies": {
     "@faker-js/faker": "^8.2.0",
