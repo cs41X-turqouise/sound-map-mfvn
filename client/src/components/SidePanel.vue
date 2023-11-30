@@ -113,6 +113,9 @@
                 <span class="date">
                   Date: {{ new Date(marker.data.uploadDate).toLocaleDateString() }}
                 </span><br>
+                <span v-if="marker.data.metadata.creator">
+                  Creator: {{ marker.data.metadata.creator.username }}
+                </span><br>
               </div>
               <v-carousel
                 v-if="!!marker.data.images && marker.data.images.length"
