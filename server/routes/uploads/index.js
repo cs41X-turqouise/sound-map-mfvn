@@ -3,7 +3,7 @@ import Sound from '../../models/Sound.js';
 import Image from '../../models/Image.js';
 import Reports from '../../models/Reports.js';
 import { uploadSchema } from './schemas.js';
-import { verifyLoggedIn, verifyNotBanned, checkUserRole } from '../../utils/utils.js';
+import { verifyLoggedIn, verifyNotBanned, checkUserRole, roles } from '../../utils/utils.js';
 
 /**
  * Routes for handling CRUD (Create, Read, Update, and Delete) operations on uploads
@@ -72,10 +72,19 @@ export default async function (fastify, options) {
         const user = await User.findById(userId).exec();
         user.uploads.push(upload._id);
 
+        // todo: set a daily limit and check if the user has reached their upload limit
+        // auto-approve if the user is a moderator or above
+        if (roles[user.role] >= roles.moderator) {
+          upload.visible = true;
+          upload.approvedBy = user._id;
+        }
+
         await user.save();
         await upload.save();
         sound.images = images;
         sound._id = upload._id;
+        sound.visible = upload.visible;
+        sound.approvedBy = upload.approvedBy;
 
         return reply.code(201).send(sound);
       }
