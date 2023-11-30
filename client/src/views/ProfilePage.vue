@@ -134,9 +134,6 @@
                 </v-card-actions>
               </v-card>
             </div>
-            <audio class="audio mt-2" controls :key="activeMedia.url" ref="audio-player">
-              <source :src="activeMedia.url" :type="activeMedia.type">
-            </audio>
           </div>
         </v-col>
         <v-col cols="10">
@@ -162,12 +159,26 @@
             <v-container v-if="activeMainTab === 'uploads'">
               <div v-if="uploads.length">
                 <v-row>
-                  <v-col cols="12">
-                    <v-text-field v-model="search" label="Search by Title" single-line hide-details full-width>
+                  <v-col cols="12" sm="6" md="6">
+                    <v-text-field
+                      v-model="search"
+                      label="Search by Title, Address, Tags, Creator, or Description"
+                      append-icon="mdi-magnify"
+                      variant="outlined"
+                      single-line
+                      hide-details
+                      full-width
+                      rounded
+                    >
                     </v-text-field>
                     <div v-if="search">
                       Number of Matches: {{ filteredUploads.length }}
                     </div>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="6">
+                    <audio class="audio mt-2" controls :key="activeMedia.url" ref="audio-player">
+                      <source :src="activeMedia.url" :type="activeMedia.type">
+                    </audio>
                   </v-col>
                 </v-row>
                 <v-row>
@@ -254,12 +265,25 @@
             <v-container v-if="activeMainTab === 'bookmarks'">
               <div v-if="bookmarks.length">
                 <v-row>
-                  <v-col cols="12">
-                    <v-text-field v-model="search" label="Search by Title" single-line hide-details full-width>
+                  <v-col cols="12" sm="6" md="6">
+                    <v-text-field
+                      v-model="search"
+                      label="Search by Title, Address, Tags, Creator, or Description"
+                      append-icon="mdi-magnify"
+                      variant="outlined"
+                      single-line
+                      hide-details
+                      full-width
+                    >
                     </v-text-field>
                     <div v-if="search">
-                      Number of Matches: 0
+                      Number of Matches: {{ filteredBookmarks.length }}
                     </div>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="6">
+                    <audio class="audio mt-2" controls :key="activeMedia.url" ref="audio-player">
+                      <source :src="activeMedia.url" :type="activeMedia.type">
+                    </audio>
                   </v-col>
                 </v-row>
                 <v-row>
