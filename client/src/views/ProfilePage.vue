@@ -1,7 +1,7 @@
 <!-- views/ProfilePage -->
 <template>
   <div>
-    <v-toolbar class="bg-orange-lighten-2">
+    <v-toolbar class="bg-deep-orange-accent-1">
       <v-hover v-slot="{ isHovering, props }">
         <v-img
           v-bind="props"
@@ -88,9 +88,9 @@
       @close="editUserDialog = false"
     />
 
-    <v-container>
+    <v-container class="mx-auto" style="max-width: 98vw;" justify-space-between>
       <v-row>
-        <v-col cols="2" class="text-start" style="margin-left: 0;">
+        <v-col cols="2" class="text-start">
           <div id="profile">
             <div id="profile-header">
               <v-card class="mx-auto" variant="text">
@@ -157,7 +157,7 @@
 
           <div class="profile-content">
             <v-container v-if="activeMainTab === 'uploads'">
-              <div v-if="uploads.length">
+              <v-sheet v-if="uploads.length" align-center>
                 <v-row>
                   <v-col cols="12" sm="6" md="6">
                     <v-text-field
@@ -176,7 +176,13 @@
                     </div>
                   </v-col>
                   <v-col cols="12" sm="6" md="6">
-                    <audio class="audio mt-2" controls :key="activeMedia.url" ref="audio-player">
+                    <audio
+                      class="audio mt-2"
+                      controls
+                      controlslist="nodownload"
+                      :key="activeMedia.url"
+                      ref="audio-player"
+                    >
                       <source :src="activeMedia.url" :type="activeMedia.type">
                     </audio>
                   </v-col>
@@ -184,6 +190,7 @@
                 <v-row>
                   <v-col
                     cols="auto"
+                    class="mx-auto mb"
                     v-for="upload in paginatedUploads"
                     :key="upload._id"
                   >
@@ -250,7 +257,7 @@
                   v-model="uploadsTable.current"
                   :length="maxUploadsPage"
                 ></v-pagination>
-              </div>
+              </v-sheet>
               <div v-else>
                 <v-row>
                   <v-col cols="12">
@@ -263,7 +270,7 @@
             </v-container>
 
             <v-container v-if="activeMainTab === 'bookmarks'">
-              <div v-if="bookmarks.length">
+              <v-sheet v-if="bookmarks.length">
                 <v-row>
                   <v-col cols="12" sm="6" md="6">
                     <v-text-field
@@ -271,6 +278,7 @@
                       label="Search by Title, Address, Tags, Creator, or Description"
                       append-icon="mdi-magnify"
                       variant="outlined"
+                      rounded
                       single-line
                       hide-details
                       full-width
@@ -289,6 +297,7 @@
                 <v-row>
                   <v-col
                     cols="auto"
+                    class="mx-auto mb"
                     v-for="upload in paginatedBookmarks"
                     :key="upload._id"
                   >
@@ -325,7 +334,7 @@
                   v-model="bookMarksTable.current"
                   :length="maxBookmarksPage"
                 ></v-pagination>
-              </div>
+              </v-sheet>
               <div v-else>
                 <v-row>
                   <v-col cols="12">
@@ -592,9 +601,15 @@ export default {
 
 <style scoped>
 .profile-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: left;
+  /* display: flex; */
+  /* flex-direction: column; */
+  /* align-items: center; */
+  /* justify-content: left; */
+}
+
+@media (max-width: 1200px) {
+  audio {
+    width: 100%;
+  }
 }
 </style>

@@ -4,7 +4,7 @@
     style="height: 100%; width: 100%;
     display: flex; flex-direction: column;"
   >
-    <v-toolbar fixed color="orange-lighten-2" style="height: fit-content; width: 100%;">
+    <v-toolbar fixed color="deep-orange-accent-1" style="height: fit-content; width: 100%;">
       <v-hover v-slot="{ isHovering, props }">
         <v-img
           v-bind="props"

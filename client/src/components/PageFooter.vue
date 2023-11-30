@@ -1,5 +1,5 @@
 <template>
-  <v-footer app class="bg-orange-lighten-2">
+  <v-footer app class="bg-deep-orange-accent-1">
     <v-spacer></v-spacer>
     <div>
       <p>

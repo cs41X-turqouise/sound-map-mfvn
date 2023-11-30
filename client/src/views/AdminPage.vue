@@ -1,7 +1,16 @@
 <template>
   <div v-if="store.state.user" class="AdminPage">
-    <v-toolbar>
-      <!-- <v-img src="/soundmap_main.gif" alt="Logo" class="mr-auto" /> -->
+    <v-toolbar class="" color="deep-orange-accent-1">
+      <v-hover v-slot="{ isHovering, props }">
+        <v-img
+          v-bind="props"
+          id="logo"
+          class="ml-2"
+          cover
+          :src="isHovering ? '/soundmap_logo.gif' : '/soundmap_logo.png'"
+          style="max-width: 175px;"
+        />
+      </v-hover>
       <v-spacer></v-spacer>
       <UserMenu></UserMenu>
     </v-toolbar>
@@ -1208,7 +1217,7 @@ export default {
 
 <style scoped>
 .AdminPage {
-  padding: 20px;
+  /* padding: 20px; */
   width: 99%;
 }
 .v-sheet {
