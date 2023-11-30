@@ -119,7 +119,8 @@
               </div>
               <v-carousel
                 v-if="!!marker.data.images && marker.data.images.length"
-                show-arrows="hover"
+                :hide-delimiters="marker.data.images.length > 1 ? false : true"
+                :show-arrows="marker.data.images.length > 1 ? 'hover' : false"
                 :style="{ width: '200px', height: '100px' }"
               >
                 <v-carousel-item
