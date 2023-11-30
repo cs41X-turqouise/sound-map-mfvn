@@ -144,6 +144,7 @@
           <audio
             v-if="urls.has(marker.data._id)"
             class="audio"
+            controlslist="nodownload"
             :ref="`audio-${marker.data._id}`"
             @playing="playing(marker)"
             controls
@@ -336,7 +337,6 @@ export default {
   },
   mounted () {
     window.addEventListener('resize', this.updatePerPage);
-    console.log('filteredFiles', this.filteredFiles);
     for (const marker of this.markers) {
       marker.data = this.getFileData(marker.data._id);
     }
@@ -382,6 +382,21 @@ export default {
   transition: height 0.5s ease;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.25);
   /* padding: 1em; */
+}
+
+audio {
+  height: 40px;
+}
+
+@media (max-width: 1200px) {
+  .sidebar {
+    top: auto;
+    width: 355px;
+    height: 400px;
+  }
+  audio {
+    height: 35px;
+  }
 }
 
 #heading {
