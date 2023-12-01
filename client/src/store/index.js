@@ -29,6 +29,9 @@ export default createStore({
     /** @type {Map<number, FileData>} */
     files: new Map(),
     userMenuClicked: false,
+    fileId: null,
+    fileUrls: new Map(),
+    playing: false
   },
   mutations: {
     setToken (state, token) {
@@ -73,6 +76,35 @@ export default createStore({
     userMenuClicked (state, clicked) {
       state.userMenuClicked = clicked;
     },
+    setFileId (state, id) {
+      state.fileId = id;
+    },
+    setFileUrls (state, fileUrls) {
+      state.fileUrls = fileUrls;
+    },
+    addFileUrl (state, payload) {
+      const fileId = payload.fileId;
+      const url = payload.url;
+      const newFileUrls = new Map(state.fileUrls.entries());
+      newFileUrls.set(fileId, url);
+      state.fileUrls = payload.newFileUrls;
+    },
+    updateFileUrl (state, payload) {
+      const fileId = payload.fileId;
+      const url = payload.url;
+      const newFileUrls = new Map(state.fileUrls.entries());
+      newFileUrls.set(fileId, url);
+      state.fileUrls = newFileUrls;
+    },
+    removeFileUrl (state, payload) {
+      const fileId = payload.fileId;
+      const newFileUrls = new Map(state.fileUrls.entries());
+      newFileUrls.delete(fileId);
+      state.fileUrls = newFileUrls;
+    },
+    setPlaying (state, playing) {
+      state.playing = playing;
+    }
   },
   actions: {
     setToken ({ commit }, token) {
@@ -109,5 +141,23 @@ export default createStore({
     userMenuClicked ({ commit }, clicked) {
       commit('userMenuClicked', clicked);
     },
+    setFileId ({ commit }, id) {
+      commit('setFileId', id);
+    },
+    setFileUrls ({ commit }, fileUrls) {
+      commit('setFileUrls', fileUrls);
+    },
+    addFileUrl ({ commit }, fileId, url) {
+      commit('addFileUrl', fileId, url);
+    },
+    updateFileUrl ({ commit }, fileId, url) {
+      commit('updateFileUrl', fileId, url);
+    },
+    removeFileUrl ({ commit }, fileId) {
+      commit('removeFileUrl', fileId);
+    },
+    setPlaying ({ commit }, playing) {
+      commit('setPlaying', playing);
+    }
   }
 });
