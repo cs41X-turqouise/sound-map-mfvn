@@ -135,7 +135,7 @@
             <span class="description" v-if="marker.data.metadata.description">
               Description: <p>{{ marker.data.metadata.description }}</p>
             </span><br>
-            <v-chip v-for="(tag, tIdx) of marker.data.metadata.tags" :key="tIdx">
+            <v-chip v-for="(tag, tIdx) of marker.data.metadata.tags" :key="tIdx" density="comfortable">
               {{ tag }}
             </v-chip>
           </div>
