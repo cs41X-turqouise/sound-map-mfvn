@@ -33,7 +33,7 @@ export async function inboxRoutes (fastify, options) {
   fastify.post('/:id/inbox', {
     preHandler: checkUserRole('moderator'),
     schema: {
-      tags: ['users'],
+      tags: ['inbox'],
       params: {
         type: 'object',
         properties: {
@@ -81,7 +81,7 @@ export async function inboxRoutes (fastify, options) {
   fastify.delete('/:id/inbox/:mid', {
     preHandler: verifyLoggedIn,
     schema: {
-      tags: ['users'],
+      tags: ['inbox'],
       params: {
         type: 'object',
         properties: {
@@ -129,7 +129,7 @@ export async function inboxRoutes (fastify, options) {
   fastify.delete('/:id/inbox', {
     preHandler: verifyLoggedIn,
     schema: {
-      tags: ['users'],
+      tags: ['inbox'],
       params: {
         type: 'object',
         properties: {
@@ -183,7 +183,7 @@ export async function inboxRoutes (fastify, options) {
   fastify.patch('/:id/inbox/:mid', {
     preHandler: verifyLoggedIn,
     schema: {
-      tags: ['users'],
+      tags: ['inbox'],
       params: {
         type: 'object',
         properties: {
@@ -238,7 +238,7 @@ export async function inboxRoutes (fastify, options) {
   fastify.patch('/:id/inbox/toggleAll', {
     preHandler: verifyLoggedIn,
     schema: {
-      tags: ['users'],
+      tags: ['inbox'],
       params: {
         type: 'object',
         properties: {

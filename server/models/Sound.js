@@ -5,6 +5,8 @@ import mongoose from 'mongoose';
  *
  * @typedef {import("mongoose").Model} Sounds
  * @property {mongoose.Schema.Types.ObjectId} _id - The ID of the file uploaded to the GridFS bucket.
+ * @property {boolean} visible - Whether or not the sound is visible to the public.
+ * @property {mongoose.Schema.Types.ObjectId} approvedBy - The ID of the user who approved the sound.
  * @property {mongoose.Schema.Types.ObjectId} user - The ID of the user who uploaded the file.
  * @property {mongoose.Schema.Types.ObjectId} images - The ID(s) of the images uploaded to the GridFS bucket.
  */
