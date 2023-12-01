@@ -15,6 +15,7 @@
         <v-btn
           color="Black"
           v-bind="props"
+          prepend-icon="mdi-menu"
           text
           @click="menuClicked"
         >
