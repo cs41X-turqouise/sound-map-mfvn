@@ -489,7 +489,7 @@ export default async function (fastify, options) {
 
       const roleChangeType = roles[newRole] < roles[user.role] ? 'demoted' : 'promoted';
       const notification = new InboxMessage(
-        `[Role Change] You have been ${roleChangeType}`,
+        `[Role Change] You have been ${roleChangeType} to ${newRole}`,
         request.body.reason,
         Date.now(),
         self._id
