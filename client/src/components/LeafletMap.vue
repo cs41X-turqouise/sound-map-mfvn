@@ -213,6 +213,7 @@ export default {
       if (this.store.state.files.size) {
         for (const file of this.store.state.files.values()) {
           try {
+            if (!file.visible) continue;
             const marker = this.createMarker(file);
             this.markers.push(marker);
           } catch (error) {
@@ -270,6 +271,7 @@ export default {
           if (this.markers.some((marker) => marker.data._id === file._id)) {
             continue;
           }
+          if (!file.visible) continue;
           const marker = this.createMarker(file);
           this.markers.push(marker);
         } catch (error) {
