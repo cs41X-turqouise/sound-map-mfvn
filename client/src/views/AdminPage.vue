@@ -8,7 +8,8 @@
           class="ml-2"
           cover
           :src="isHovering ? '/soundmap_logo.gif' : '/soundmap_logo.png'"
-          style="max-width: 175px;"
+          style="max-width: 175px; cursor: pointer;"
+          @click="$router.push('/')"
         />
       </v-hover>
       <v-spacer></v-spacer>
