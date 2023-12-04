@@ -348,7 +348,7 @@
           </v-container>
 
           <v-pagination
-            v-model="uploadsTable.current"
+            v-model="pendingTable.current"
             :length="maxPendingUploadsPage"
           ></v-pagination>
         </div>
@@ -644,6 +644,7 @@
             v-for="button in promoteRoleButtons"
             :key="button.text"
             variant="outlined"
+            class="text-button"
             @click="button.click"
           >
             {{ button.text }}
@@ -758,7 +759,8 @@ export default {
       reports: [],
       viewReports: false,
       userTable: paginationSetup(10),
-      uploadsTable: paginationSetup(10),
+      pendingTable: paginationSetup(10),
+      uploadsTable: paginationSetup(5),
       reportsTable: paginationSetup(3),
       usersSortBy: {
         key: '',
@@ -833,11 +835,11 @@ export default {
       return this.uploads.filter((upload) => !upload.approvedBy);
     },
     maxPendingUploadsPage () {
-      return Math.ceil(this.pendingUploads.length / this.uploadsTable.perPage);
+      return Math.ceil(this.pendingUploads.length / this.pendingTable.perPage);
     },
     paginatedPendingUploads () {
-      const start = (this.uploadsTable.current - 1) * this.uploadsTable.perPage;
-      const end = start + this.uploadsTable.perPage;
+      const start = (this.pendingTable.current - 1) * this.pendingTable.perPage;
+      const end = start + this.pendingTable.perPage;
       return this.pendingUploads.slice(start, end);
     },
     maxReportsPage () {
