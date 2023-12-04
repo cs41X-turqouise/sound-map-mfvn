@@ -335,6 +335,6 @@ tr:hover {
 
 .unread {
   background-color: #f2f2f2;
-  /* box-shadow: 0 0 10px rgba(0,0,0,0.2); */
+  font-weight: bold;
 }
 </style>

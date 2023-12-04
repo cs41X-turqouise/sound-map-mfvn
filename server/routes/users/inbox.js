@@ -274,8 +274,17 @@ export async function inboxRoutes (fastify, options) {
         }
 
         const messages = (request.body.messages || []).map((id) => fastify.toObjectId(id));
-        for (const message of user.inbox) {
-          if (!messages.length || messages.includes(message._id)) {
+        if (messages.length) {
+          for (const mid of messages) {
+            const message = user.inbox.id(mid);
+            if (!message) {
+              fastify.log.info(`Message ${mid} not found`);
+              continue;
+            }
+            message.read = request.body.read;
+          }
+        } else {
+          for (const message of user.inbox) {
             message.read = request.body.read;
           }
         }
