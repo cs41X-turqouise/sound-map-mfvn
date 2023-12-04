@@ -231,7 +231,7 @@
                           </v-tooltip>
                           <v-icon>mdi-stop</v-icon>
                         </v-btn>
-                        <v-btn icon @click="setEdit(upload)">
+                        <v-btn v-if="!store.state.user.banned" icon @click="setEdit(upload)">
                           <v-tooltip activator="parent" location="top">
                             Edit
                           </v-tooltip>
@@ -600,13 +600,6 @@ export default {
 </script>
 
 <style scoped>
-.profile-content {
-  /* display: flex; */
-  /* flex-direction: column; */
-  /* align-items: center; */
-  /* justify-content: left; */
-}
-
 @media (max-width: 1200px) {
   audio {
     width: 100%;

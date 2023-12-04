@@ -40,7 +40,7 @@
         </v-list-item>
 
         <v-list-item
-          v-if="roles[store.state.user.role] > roles['user'] && $route.path !== '/admin'"
+          v-if="!store.state.user.banned && roles[store.state.user.role] > roles['user'] && $route.path !== '/admin'"
           @click="nav('/admin')"
         >
           <template v-slot:prepend>
