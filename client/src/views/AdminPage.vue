@@ -476,17 +476,17 @@
               <td>
                 <v-row dense>
                   <v-col>
-                    <v-btn @click="playMedia(upload)">
+                    <v-btn class="text-button" @click="playMedia(upload)">
                       Play
                     </v-btn>
                   </v-col>
                   <v-col>
-                    <v-btn @click="setEdit(upload)">
+                    <v-btn class="text-button" @click="setEdit(upload)">
                       Edit{{ edit.selected?._id === upload._id ? 'ing' : '' }}
                     </v-btn>
                   </v-col>
                   <v-col>
-                    <v-btn>
+                    <v-btn class="text-button">
                       Delete
                       <ReportDialog @submit-reason="(reason) => deleteUpload(upload, reason)" />
                     </v-btn>
@@ -651,8 +651,18 @@
           </v-btn>
 
           <v-btn
+            v-if="selectedUser.role === 'admin' && store.state.user.role === 'superadmin'"
+            class="text-button"
+            variant="outlined"
+          >
+            Demote to Mod
+            <ReportDialog @submit-reason="(reason) => changeUserRole(selectedUser, 'moderator', reason)" />
+          </v-btn>
+
+          <v-btn
             v-if="selectedUser.role !== 'user' && roles[selectedUser.role] < roles[store.state.user.role]"
             variant="outlined"
+            class="text-button"
           >
             Demote to User
             <ReportDialog @submit-reason="(reason) => changeUserRole(selectedUser, 'user', reason)" />
@@ -661,22 +671,16 @@
           <v-btn
             v-if="roles[selectedUser.role] < roles[store.state.user.role]"
             variant="outlined"
+            class="text-button"
           >
             {{ !selectedUser.banned ? 'Ban' : 'Unban' }} User
             <ReportDialog @submit-reason="(reason) => toggleBan(selectedUser, !selectedUser.banned, reason)" />
           </v-btn>
 
           <v-btn
-            v-if="roles[selectedUser.role] < roles[store.state.user.role]"
-            variant="outlined"
-            @click="deleteUser(selectedUser)"
-          >
-            Delete User
-          </v-btn>
-
-          <v-btn
             v-if="roles[selectedUser.role] < roles[store.state.user.role] || selectedUser._id === store.state.user._id"
             variant="outlined"
+            class="text-button"
             @click="editUserDialog = true"
           >
             Change Username
@@ -686,6 +690,15 @@
               :user-id="selectedUser._id"
               @close="editUserDialog = false"
             />
+          </v-btn>
+
+          <v-btn
+            v-if="roles[selectedUser.role] < roles[store.state.user.role]"
+            variant="outlined"
+            class="text-button"
+            @click="deleteUser(selectedUser)"
+          >
+            Delete User
           </v-btn>
         </v-card-actions>
       </v-card>
