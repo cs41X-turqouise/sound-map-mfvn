@@ -64,15 +64,15 @@ npm run dev
 If you find a bug please open a issue first and for major changes please open a discussion. Otherwise Feel free to send pull request with new features, and/or documentation improvements!
 
 ## Contributors
-| | |
-| --- | --- |
-| <img src="https://avatars.githubusercontent.com/u/60308670?s=64&v=4" alt="github-avatar" width="50" height="50" /> | [theBGuy](https://github.com/theBGuy) |
-| <img src="https://avatars.githubusercontent.com/u/87440608?s=64&v=4" alt="github-avatar" width="50" height="50" /> | [MeagherPatrick](https://github.com/MeagherPatrick) |
-| <img src="https://avatars.githubusercontent.com/u/104028649?s=64&v=4" alt="github-avatar" width="50" height="50" /> | [PrestinB12](https://github.com/PrestinB12) |
-| <img src="https://avatars.githubusercontent.com/u/109049594?s=64&v=4" alt="github-avatar" width="50" height="50" /> | [zeroday-zaddy](https://github.com/zeroday-zaddy) |
-| <img src="https://avatars.githubusercontent.com/u/84207119?s=64&v=4" alt="github-avatar" width="50" height="50" /> | [tr29038](https://github.com/tr29038) |
-| <img src="https://avatars.githubusercontent.com/u/98424636?s=64&v=4" alt="github-avatar" width="50" height="50" /> | [Cwoody240](https://github.com/Cwoody240) |
-| <img src="https://avatars.githubusercontent.com/u/123480563?s=64&v=4" alt="github-avatar" width="50" height="50" /> | [bjohn108-ODU](https://github.com/bjohn108-ODU) |
+| | | |
+| --- | --- | --- |
+| <img src="https://avatars.githubusercontent.com/u/60308670?s=64&v=4" alt="github-avatar" width="50" height="50" /> | [theBGuy](https://github.com/theBGuy) | egold001@odu.edu
+| <img src="https://avatars.githubusercontent.com/u/87440608?s=64&v=4" alt="github-avatar" width="50" height="50" /> | [MeagherPatrick](https://github.com/MeagherPatrick) | pmeag001@odu.edu
+| <img src="https://avatars.githubusercontent.com/u/104028649?s=64&v=4" alt="github-avatar" width="50" height="50" /> | [PrestinB12](https://github.com/PrestinB12) | pbell003@odu.edu
+| <img src="https://avatars.githubusercontent.com/u/109049594?s=64&v=4" alt="github-avatar" width="50" height="50" /> | [zeroday-zaddy](https://github.com/zeroday-zaddy) | kfogl001@odu.edu
+| <img src="https://avatars.githubusercontent.com/u/84207119?s=64&v=4" alt="github-avatar" width="50" height="50" /> | [tr29038](https://github.com/tr29038) | treyn008@odu.edu
+| <img src="https://avatars.githubusercontent.com/u/98424636?s=64&v=4" alt="github-avatar" width="50" height="50" /> | [Cwoody240](https://github.com/Cwoody240) | cwood012@odu.edu
+| <img src="https://avatars.githubusercontent.com/u/123480563?s=64&v=4" alt="github-avatar" width="50" height="50" /> | [bjohn108-ODU](https://github.com/bjohn108-ODU) | bjohn108@odu.edu
 
 ## What is the purpose  
 
