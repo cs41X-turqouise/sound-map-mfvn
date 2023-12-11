@@ -1,5 +1,17 @@
 <template>
-  <v-footer app>
+  <v-footer app class="bg-deep-orange-accent-1">
+    <div v-if="store.state.user && store.state.user.role !== 'user'">
+      <v-tooltip
+        activator="parent"
+        location="start"
+        style="z-index: 9999;"
+      >
+        {{ store.state.user.role }}
+      </v-tooltip>
+      <v-icon>
+        {{ roleIcon }}
+      </v-icon>
+    </div>
     <v-spacer></v-spacer>
     <div>
       <p>
@@ -25,8 +37,14 @@
 </template>
 
 <script>
+import { useStore } from 'vuex';
+
 export default {
   name: 'PageFooter',
+  setup () {
+    const store = useStore();
+    return { store };
+  },
   methods: {
     nav: function () {
       const currentRouteName = this.$route.name;
@@ -38,7 +56,21 @@ export default {
     openGithub: function () {
       window.open('https://github.com/cs41X-turqouise/sound-map-mfvn/tree/master', '_blank');
     },
-  }
+  },
+  computed: {
+    roleIcon () {
+      switch (this.store.state.user.role) {
+      case 'moderator':
+        return 'mdi-account-star';
+      case 'admin':
+        return 'mdi-shield-account';
+      case 'superadmin':
+        return 'mdi-shield-crown';
+      default:
+        return 'mdi-account';
+      }
+    }
+  },
 };
 </script>
 

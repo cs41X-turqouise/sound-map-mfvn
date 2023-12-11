@@ -1,3 +1,4 @@
+// store/index.js
 import { createStore, createLogger } from 'vuex';
 import Api from '../services/Api';
 // import createPersistedState from 'vuex-persistedstate'
@@ -58,6 +59,7 @@ export default createStore({
       // ugh, this is a hack to get around the fact that Vue can't detect changes to Maps
       const newFiles = new Map(state.files.entries());
       newFiles.set(file._id, file);
+      state.user.uploads.push(file._id);
       state.files = newFiles;
     },
     updateFile (state, file) {
@@ -65,10 +67,23 @@ export default createStore({
       newFiles.set(file._id, file);
       state.files = newFiles;
     },
-    removeFile (state, file) {
+    deleteFile (state, fileId) {
       const newFiles = new Map(state.files.entries());
-      newFiles.delete(file._id);
+      newFiles.delete(fileId);
+      const index = state.user.uploads.indexOf(fileId);
+      if (index > -1) {
+        state.user.uploads.splice(index, 1);
+      }
       state.files = newFiles;
+    },
+    addBookmark (state, fileId) {
+      state.user.bookmarks.push(fileId);
+    },
+    removeBookmark (state, fileId) {
+      const index = state.user.bookmarks.indexOf(fileId);
+      if (index > -1) {
+        state.user.bookmarks.splice(index, 1);
+      }
     },
     userMenuClicked (state, clicked) {
       state.userMenuClicked = clicked;
@@ -103,8 +118,14 @@ export default createStore({
     updateFile ({ commit }, file) {
       commit('updateFile', file);
     },
-    removeFile ({ commit }, file) {
-      commit('removeFile', file);
+    deleteFile ({ commit }, file) {
+      commit('deleteFile', file);
+    },
+    addBookmark ({ commit }, fileId) {
+      commit('addBookmark', fileId);
+    },
+    removeBookmark ({ commit }, fileId) {
+      commit('removeBookmark', fileId);
     },
     userMenuClicked ({ commit }, clicked) {
       commit('userMenuClicked', clicked);

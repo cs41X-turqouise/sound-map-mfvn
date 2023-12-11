@@ -38,6 +38,7 @@
           :src="urls.get(image) || fetchImage(image)"
           cover
         >
+          <slot name="carousel-item" :image="image"></slot>
         </v-carousel-item>
       </v-carousel>
     </v-card-item>

@@ -3,7 +3,7 @@ import Sound from '../../models/Sound.js';
 import Image from '../../models/Image.js';
 import Reports from '../../models/Reports.js';
 import { uploadSchema } from './schemas.js';
-import { verifyLoggedIn, verifyNotBanned, checkUserRole } from '../../utils/utils.js';
+import { verifyLoggedIn, verifyNotBanned, checkUserRole, roles } from '../../utils/utils.js';
 
 /**
  * Routes for handling CRUD (Create, Read, Update, and Delete) operations on uploads
@@ -72,10 +72,19 @@ export default async function (fastify, options) {
         const user = await User.findById(userId).exec();
         user.uploads.push(upload._id);
 
+        // todo: set a daily limit and check if the user has reached their upload limit
+        // auto-approve if the user is a moderator or above
+        if (roles[user.role] >= roles.moderator) {
+          upload.visible = true;
+          upload.approvedBy = user._id;
+        }
+
         await user.save();
         await upload.save();
         sound.images = images;
         sound._id = upload._id;
+        sound.visible = upload.visible;
+        sound.approvedBy = upload.approvedBy;
 
         return reply.code(201).send(sound);
       }
@@ -246,11 +255,17 @@ export default async function (fastify, options) {
             await Image.findByIdAndDelete(image);
           }
         }
-        const users = await User.find({ uploads: file._id });
+        const users = await User.find({
+          $or: [
+            { uploads: file._id },
+            { bookmarks: file._id }
+          ]
+        });
 
         // Remove the file ID from every user's uploads array
         for (const user of users) {
           user.uploads.pull(file._id);
+          user.bookmarks.pull(file._id);
           await user.save();
         }
 

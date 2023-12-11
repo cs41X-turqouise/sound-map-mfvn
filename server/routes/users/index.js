@@ -1,6 +1,5 @@
 import User from '../../models/User.js';
 import Sound from '../../models/Sound.js';
-import Image from '../../models/Image.js';
 import { userSchema } from './schemas.js';
 import { uploadSchema } from '../uploads/schemas.js';
 import { checkUserRole, roles, verifyLoggedIn } from '../../utils/utils.js';
@@ -72,7 +71,16 @@ export default async function (fastify, options) {
     }
   }, async function (request, reply) {
     const self = request.session.get('user');
-    return reply.send(self);
+    const newSelf = await User.findById(self._id)
+      .populate('inbox.sender', 'username email')
+      .exec();
+    if (!newSelf) {
+      await fastify.inject({ method: 'POST', url: '/auth/logout' });
+      return reply.code(404).send({ error: 'User not found' });
+    }
+
+    request.session.set('user', newSelf);
+    return reply.send(newSelf);
   });
 
   /**
@@ -98,10 +106,70 @@ export default async function (fastify, options) {
   /**
    * Get all files uploaded by a specific user
    */
-  fastify.get('/:userId/uploads', {
-    preHandler: checkUserRole('moderator'),
+  fastify.get('/:id/uploads', {
+    preHandler: checkUserRole('moderator', true),
     schema: {
       tags: ['uploads'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'MongoDB ObjectId of the user' },
+        },
+      },
+      response: {
+        200: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              ...uploadSchema.properties,
+              images: {
+                type: 'array',
+                items: { type: 'string', description: 'MongoDB ObjectId' }
+              },
+            },
+          },
+        },
+      },
+    },
+    async handler (request, reply) {
+      try {
+        const data = [];
+        const userId = request.params.id;
+        const userObjectId = fastify.toObjectId(userId);
+        if (!userObjectId) return reply.code(400).send(new Error('Invalid ID'));
+
+        const uploads = await Sound.find({ user: userObjectId });
+        for (const upload of uploads) {
+          const file = await upload.getFile(fastify);
+          file.images = upload.images || [];
+          file.visible = upload.visible;
+          file.approvedBy = upload.approvedBy;
+
+          if (file.metadata.creator) {
+            const creator = fastify.toObjectId(file.metadata.creator);
+            file.metadata.creator = await User.findById(creator, 'username').exec();
+          } else {
+            file.metadata.creator = { username: 'Unknown' };
+          }
+          data.push(file);
+        }
+        return reply.send(data);
+      } catch (error) {
+        fastify.log.error(error);
+        reply.code(500).send('Internal Server Error');
+      }
+    },
+  });
+
+  /**
+   * Get all bookmarks for a specific user
+   * Limited to the user themselves
+   */
+  fastify.get('/:id/bookmarks', {
+    preHandler: verifyLoggedIn,
+    schema: {
+      tags: ['bookmarks'],
       params: {
         type: 'object',
         properties: {
@@ -127,12 +195,21 @@ export default async function (fastify, options) {
     async handler (request, reply) {
       try {
         const data = [];
-        const userId = request.params.userId;
+        const userId = request.params.id;
         const userObjectId = fastify.toObjectId(userId);
         if (!userObjectId) return reply.code(400).send(new Error('Invalid ID'));
 
-        const uploads = await Sound.find({ user: userObjectId });
-        for (const upload of uploads) {
+        if (userObjectId.toString() !== request.session.get('user')._id.toString()) {
+          return reply.code(403).send({ error: 'Forbidden' });
+        }
+
+        const user = await User.findById(userObjectId);
+        if (!user) return reply.code(404).send({ error: 'User not found' });
+
+        for (const bookmark of user.bookmarks) {
+          const upload = await Sound.findById(bookmark);
+          if (!upload || !upload.visible) continue;
+
           const file = await upload.getFile(fastify);
           file.images = upload.images || [];
           file.visible = upload.visible;
@@ -225,15 +302,17 @@ export default async function (fastify, options) {
       if (deletedUser.$isDeleted()) {
         // gotta delete all their uploads too
         for (const upload of deletedUser.uploads) {
-          await fastify.gridfsSounds.delete(upload);
-          const file = await Sound.findByIdAndDelete(upload);
-
-          if (file.images) {
-            // delete all associated images
-            for (const image of file.images) {
-              await fastify.gridfsImages.delete(image);
-              await Image.findByIdAndDelete(image);
-            }
+          try {
+            await fastify.inject({
+              method: 'DELETE',
+              url: `/uploads/sound/${upload}`,
+              headers: request.headers,
+              query: request.query,
+              params: request.params,
+              body: request.body
+            });
+          } catch (error) {
+            fastify.log.error(error);
           }
         }
       }
@@ -282,6 +361,71 @@ export default async function (fastify, options) {
         return reply.code(400).send({ error: 'Already in use' });
       }
       return reply.internalServerError();
+    }
+  });
+
+  /**
+   * Add/Remove a bookmarked sound from a user's bookmarks
+   */
+  fastify.patch('/:id/bookmarks', {
+    preHandler: verifyLoggedIn,
+    schema: {
+      tags: ['bookmarks'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'MongoDB ObjectId of the user' },
+        },
+      },
+      body: {
+        type: 'object',
+        required: ['bookmark', 'id'],
+        properties: {
+          id: { type: 'string', description: 'MongoDB ObjectId of the sound' },
+          bookmark: { type: 'boolean', description: 'true to add, false to remove' },
+        },
+      },
+      response: {
+        200: userSchema
+      }
+    }
+  }, async function (request, reply) {
+    try {
+      const soundId = fastify.toObjectId(request.body.id);
+      if (!soundId) return reply.code(400).send(new Error('Invalid ID'));
+
+      /** @type {User} */
+      const self = request.session.get('user');
+      const userId = fastify.toObjectId(request.params.id);
+      if (!userId) return reply.code(400).send(new Error('Invalid ID'));
+
+      // cannot add or remove bookmarks for other users
+      if (userId.toString() !== self._id.toString()) {
+        fastify.log.error(`
+          Cannot add or remove bookmarks for other users
+          User ID: ${userId} !== ${self._id}
+        `);
+        return reply.code(403).send({ error: 'Forbidden' });
+      }
+
+      const user = await User.findById(self._id);
+      if (!user) return reply.code(404).send({ error: 'User not found' });
+
+      if (user.bookmarks.includes(soundId) && request.body.bookmark) {
+        return reply.code(409).send({ error: 'Already bookmarked' });
+      }
+      // add or remove the bookmark
+      if (!user.bookmarks.includes(soundId) && request.body.bookmark) {
+        user.bookmarks.push(soundId);
+      } else if (user.bookmarks.includes(soundId) && !request.body.bookmark) {
+        user.bookmarks.pull(soundId);
+      }
+
+      await user.save();
+      return reply.send(user);
+    } catch (error) {
+      fastify.log.error(error);
+      reply.code(500).send('Internal Server Error');
     }
   });
 
@@ -345,7 +489,7 @@ export default async function (fastify, options) {
 
       const roleChangeType = roles[newRole] < roles[user.role] ? 'demoted' : 'promoted';
       const notification = new InboxMessage(
-        `[Role Change] You have been ${roleChangeType}`,
+        `[Role Change] You have been ${roleChangeType} to ${newRole}`,
         request.body.reason,
         Date.now(),
         self._id

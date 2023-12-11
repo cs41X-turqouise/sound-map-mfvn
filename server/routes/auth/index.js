@@ -90,6 +90,8 @@ export default async function (fastify, options) {
           await user.save();
         }
 
+        fastify.log.info(`User ${user.email} logged in`);
+
         request.session.user = user;
         await reply.generateCsrf({ userInfo: user.fullname.replace(/\s/g, '') + user._id.toString() });
 

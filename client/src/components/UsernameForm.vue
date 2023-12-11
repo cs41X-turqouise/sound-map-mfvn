@@ -95,7 +95,7 @@ export default {
           username: this.username,
         });
         if (response.status === 200) {
-          if (this.userId === this.store.state.user._id) {
+          if (!this.userId || this.userId === this.store.state.user._id) {
             this.store.commit('setUser', response.data);
           }
           this.close();

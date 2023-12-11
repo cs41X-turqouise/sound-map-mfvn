@@ -106,6 +106,7 @@ export default {
         layers: [],
       },
       markers: [],
+      /** @type {import('leaflet').Map} */
       mapInstance: null,
       layerControlInstance: null,
       coordinatesControl: null,
@@ -120,7 +121,7 @@ export default {
   computed: {
     userMenuClicked () {
       return this.store.state.userMenuClicked;
-    }
+    },
   },
   methods: {
     initMap () {
@@ -176,15 +177,22 @@ export default {
 
       // Add event listeners
       leafletMap.on('move', () => {
-        const center = leafletMap.getCenter();
-        this.centerMarker.setLatLng(center);
-        this.coordinatesControl.getContainer().innerHTML = `Center: ${center.lat.toFixed(4)}, ${center.lng.toFixed(4)} | Zoom: ${leafletMap.getZoom()}`;
+        try {
+          const center = leafletMap.getCenter();
+          this.centerMarker.setLatLng(center);
+          this.coordinatesControl.getContainer().innerHTML = `
+            Center: ${center.lat.toFixed(4)}, ${center.lng.toFixed(4)} | Zoom: ${leafletMap.getZoom()}
+          `;
+        } catch (error) {
+          console.error(error);
+        }
       });
       leafletMap.on('zoomstart', () => {
-        if (this.currentPopup) {
-          this.currentPopup.remove();
+        try {
+          this.mapInstance.closePopup();
+        } catch (e) {
+          console.error(e);
         }
-        this.currentPopup = null;
       });
       leafletMap.on('click', (event) => {
         const lat = event.latlng.lat;
@@ -205,6 +213,7 @@ export default {
       if (this.store.state.files.size) {
         for (const file of this.store.state.files.values()) {
           try {
+            if (!file.visible) continue;
             const marker = this.createMarker(file);
             this.markers.push(marker);
           } catch (error) {
@@ -262,6 +271,7 @@ export default {
           if (this.markers.some((marker) => marker.data._id === file._id)) {
             continue;
           }
+          if (!file.visible) continue;
           const marker = this.createMarker(file);
           this.markers.push(marker);
         } catch (error) {

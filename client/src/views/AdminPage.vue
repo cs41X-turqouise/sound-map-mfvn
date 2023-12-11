@@ -1,7 +1,17 @@
 <template>
   <div v-if="store.state.user" class="AdminPage">
-    <v-toolbar>
-      <!-- <v-img src="/soundmap_main.gif" alt="Logo" class="mr-auto" /> -->
+    <v-toolbar class="" color="deep-orange-accent-1">
+      <v-hover v-slot="{ isHovering, props }">
+        <v-img
+          v-bind="props"
+          id="logo"
+          class="ml-2"
+          cover
+          :src="isHovering ? '/soundmap_logo.gif' : '/soundmap_logo.png'"
+          style="max-width: 175px; cursor: pointer;"
+          @click="$router.push('/')"
+        />
+      </v-hover>
       <v-spacer></v-spacer>
       <UserMenu></UserMenu>
     </v-toolbar>
@@ -338,7 +348,7 @@
           </v-container>
 
           <v-pagination
-            v-model="uploadsTable.current"
+            v-model="pendingTable.current"
             :length="maxPendingUploadsPage"
           ></v-pagination>
         </div>
@@ -634,6 +644,7 @@
             v-for="button in promoteRoleButtons"
             :key="button.text"
             variant="outlined"
+            class="text-button"
             @click="button.click"
           >
             {{ button.text }}
@@ -748,7 +759,8 @@ export default {
       reports: [],
       viewReports: false,
       userTable: paginationSetup(10),
-      uploadsTable: paginationSetup(10),
+      pendingTable: paginationSetup(10),
+      uploadsTable: paginationSetup(5),
       reportsTable: paginationSetup(3),
       usersSortBy: {
         key: '',
@@ -823,11 +835,11 @@ export default {
       return this.uploads.filter((upload) => !upload.approvedBy);
     },
     maxPendingUploadsPage () {
-      return Math.ceil(this.pendingUploads.length / this.uploadsTable.perPage);
+      return Math.ceil(this.pendingUploads.length / this.pendingTable.perPage);
     },
     paginatedPendingUploads () {
-      const start = (this.uploadsTable.current - 1) * this.uploadsTable.perPage;
-      const end = start + this.uploadsTable.perPage;
+      const start = (this.pendingTable.current - 1) * this.pendingTable.perPage;
+      const end = start + this.pendingTable.perPage;
       return this.pendingUploads.slice(start, end);
     },
     maxReportsPage () {
@@ -1208,7 +1220,7 @@ export default {
 
 <style scoped>
 .AdminPage {
-  padding: 20px;
+  /* padding: 20px; */
   width: 99%;
 }
 .v-sheet {

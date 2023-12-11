@@ -37,24 +37,63 @@
         <div class="file-info">
           <div>
             <h2 class="title">
-              <v-btn
-                v-if="store.state.user && !store.state.user.banned"
-                flat
-                size="x-small"
-                icon="mdi-flag"
-                @click="reportMarker = marker.data"
-              >
-                <v-tooltip
-                  activator="parent"
-                  location="end"
-                  style="z-index: 9999;"
+              <div v-if="store.state.user">
+                <v-btn
+                  v-if="!store.state.user.banned"
+                  flat
+                  size="x-small"
+                  icon="mdi-flag"
+                  @click="reportMarker = marker.data"
                 >
-                  Report
-                </v-tooltip>
-                <v-icon color="red">
-                  mdi-flag
-                </v-icon>
-              </v-btn>
+                  <v-tooltip
+                    activator="parent"
+                    location="end"
+                    style="z-index: 9999;"
+                  >
+                    Report
+                  </v-tooltip>
+                  <v-icon color="red">
+                    mdi-flag
+                  </v-icon>
+                </v-btn>
+
+                <v-btn
+                  v-if="store.state.user.bookmarks.includes(marker.data._id)"
+                  flat
+                  size="x-small"
+                  icon="mdi-bookmark"
+                  @click="removeBookmark(marker)"
+                >
+                  <v-tooltip
+                    activator="parent"
+                    location="end"
+                    style="z-index: 9999;"
+                  >
+                    Remove Bookmark
+                  </v-tooltip>
+                  <v-icon color="blue">
+                    mdi-bookmark
+                  </v-icon>
+                </v-btn>
+                <v-btn
+                  v-else
+                  flat
+                  size="x-small"
+                  icon="mdi-bookmark"
+                  @click="bookmark(marker)"
+                >
+                  <v-tooltip
+                    activator="parent"
+                    location="end"
+                    style="z-index: 9999;"
+                  >
+                    Add Bookmark
+                  </v-tooltip>
+                  <v-icon color="blue">
+                    mdi-bookmark-outline
+                  </v-icon>
+                </v-btn>
+              </div>
               <b>{{ marker.data.metadata.title }}</b>
             </h2>
             <div v-if="marker.data.metadata.geodata">
@@ -74,10 +113,14 @@
                 <span class="date">
                   Date: {{ new Date(marker.data.uploadDate).toLocaleDateString() }}
                 </span><br>
+                <span v-if="marker.data.metadata.creator">
+                  Creator: {{ marker.data.metadata.creator.username }}
+                </span><br>
               </div>
               <v-carousel
                 v-if="!!marker.data.images && marker.data.images.length"
-                show-arrows="hover"
+                :hide-delimiters="marker.data.images.length > 1 ? false : true"
+                :show-arrows="marker.data.images.length > 1 ? 'hover' : false"
                 :style="{ width: '200px', height: '100px' }"
               >
                 <v-carousel-item
@@ -92,7 +135,7 @@
             <span class="description" v-if="marker.data.metadata.description">
               Description: <p>{{ marker.data.metadata.description }}</p>
             </span><br>
-            <v-chip v-for="(tag, tIdx) of marker.data.metadata.tags" :key="tIdx">
+            <v-chip v-for="(tag, tIdx) of marker.data.metadata.tags" :key="tIdx" density="comfortable">
               {{ tag }}
             </v-chip>
           </div>
@@ -101,6 +144,7 @@
           <audio
             v-if="urls.has(marker.data._id)"
             class="audio"
+            controlslist="nodownload"
             :ref="`audio-${marker.data._id}`"
             @playing="playing(marker)"
             controls
@@ -216,6 +260,28 @@ export default {
         });
       }
     },
+    async bookmark (marker) {
+      try {
+        await Api().patch(`users/${this.store.state.user._id}/bookmarks`, {
+          id: marker.data._id,
+          bookmark: true,
+        });
+        this.store.commit('addBookmark', marker.data._id);
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    async removeBookmark (marker) {
+      try {
+        await Api().patch(`users/${this.store.state.user._id}/bookmarks`, {
+          id: marker.data._id,
+          bookmark: false,
+        });
+        this.store.commit('removeBookmark', marker.data._id);
+      } catch (error) {
+        console.error(error);
+      }
+    },
     getFileData (id) {
       return this.store.state.files.get(id);
     },
@@ -271,7 +337,6 @@ export default {
   },
   mounted () {
     window.addEventListener('resize', this.updatePerPage);
-    console.log('filteredFiles', this.filteredFiles);
     for (const marker of this.markers) {
       marker.data = this.getFileData(marker.data._id);
     }
@@ -317,6 +382,21 @@ export default {
   transition: height 0.5s ease;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.25);
   /* padding: 1em; */
+}
+
+audio {
+  height: 40px;
+}
+
+@media (max-width: 1200px) {
+  .sidebar {
+    top: auto;
+    width: 355px;
+    height: 400px;
+  }
+  audio {
+    height: 35px;
+  }
 }
 
 #heading {

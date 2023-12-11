@@ -85,7 +85,8 @@ export default {
 .v-container {
   /* background-color: cyan; */
   /* background-color: lightblue; */
-  background-color: lightsteelblue;
+  /* background-color: lightsteelblue; */
+  background-color: #f2efe9;
 }
 </style>
 <style scoped>
