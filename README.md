@@ -71,7 +71,7 @@ If you find a bug please open a issue first and for major changes please open a 
 | <img src="https://avatars.githubusercontent.com/u/104028649?s=64&v=4" alt="github-avatar" width="50" height="50" /> | [PrestinB12](https://github.com/PrestinB12) |
 | <img src="https://avatars.githubusercontent.com/u/109049594?s=64&v=4" alt="github-avatar" width="50" height="50" /> | [zeroday-zaddy](https://github.com/zeroday-zaddy) |
 | <img src="https://avatars.githubusercontent.com/u/84207119?s=64&v=4" alt="github-avatar" width="50" height="50" /> | [tr29038](https://github.com/tr29038) |
-| <img src="https://avatars.githubusercontent.com/u/98424636?s=64&v=4" alt="github-avatar" width="50" height="50" /> | [Cwoody240](https://github.com/Cwoody240) |
+| <img src="https://avatars.githubusercontent.com/u/98424636?s=64&v=4" alt="github-avatar" width="50" height="50" /> | [Cwoody240](https://github.com/Cwoody240) | cwood012@odu.edu | Christian Woodington
 | <img src="https://avatars.githubusercontent.com/u/123480563?s=64&v=4" alt="github-avatar" width="50" height="50" /> | [bjohn108-ODU](https://github.com/bjohn108-ODU) |
 
 ## What is the purpose  
