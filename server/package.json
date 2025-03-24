@@ -33,7 +33,7 @@
     "@fastify/env": "^4.2.0",
     "@fastify/error": "^3.4.0",
     "@fastify/helmet": "^11.1.1",
-    "@fastify/jwt": "^7.2.2",
+    "@fastify/jwt": "^9.1.0",
     "@fastify/oauth2": "^7.5.0",
     "@fastify/sensible": "^5.5.0",
     "@fastify/session": "^10.9.0",
